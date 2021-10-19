@@ -1,0 +1,11 @@
+# The OWNERS file is used by prow to automatically merge approved PRs.
+
+approvers:
+- technical-oversight-committee
+- knative-release-leads
+- client-writers
+- kn-plugin-operator-approvers
+
+reviewers:
+- client-writers
+- kn-plugin-operator-approvers

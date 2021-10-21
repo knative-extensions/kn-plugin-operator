@@ -16,13 +16,14 @@ package install
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
 	"k8s.io/client-go/tools/clientcmd"
 	"knative.dev/kn-plugin-operator/pkg"
-	"os"
 )
 
 type installCmdFlags struct {
@@ -34,7 +35,7 @@ type installCmdFlags struct {
 }
 
 var (
-	installFlags   installCmdFlags
+	installFlags installCmdFlags
 )
 
 // installCmd represents the install commands for the operation

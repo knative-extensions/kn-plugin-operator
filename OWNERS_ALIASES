@@ -121,13 +121,6 @@ aliases:
   kn-plugin-migration-approvers:
   - maximilien
   - zhangtbj
-  kn-plugin-operator-approvers:
-  - houshengbo
-  - maximilien
-  - csantanapr
-  - omerbensaadon
-  - rhuss
-  - dsimansk
   kn-plugin-quickstart-approvers:
   - csantanapr
   - omerbensaadon

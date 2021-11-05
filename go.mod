@@ -1,6 +1,6 @@
 module knative.dev/kn-plugin-operator
 
-go 1.16
+go 1.17
 
 require (
 	github.com/spf13/cobra v1.1.3

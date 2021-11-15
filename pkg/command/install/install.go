@@ -17,13 +17,16 @@ package install
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/mod/semver"
 	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
 	"k8s.io/client-go/tools/clientcmd"
 	"knative.dev/kn-plugin-operator/pkg"
+	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
 type installCmdFlags struct {
@@ -80,4 +83,24 @@ func getClients(kubeConfig, namespace string) (*kubernetes.Clientset, error) {
 		return nil, err
 	}
 	return clientSet, nil
+}
+
+func getOperatorURL(version string) (string, error) {
+	versionSanitized := strings.ToLower(version)
+	URL := "https://github.com/knative/operator/releases/latest/download/operator.yaml"
+	if version != "latest" {
+		if !strings.HasPrefix(version, "v") {
+			versionSanitized = fmt.Sprintf("v%s", versionSanitized)
+		}
+		validity, major := common.GetMajor(versionSanitized)
+		if !validity {
+			return "", fmt.Errorf("%v is not a semantic version", version)
+		}
+		prefix := ""
+		if semver.Compare(major, "v0") == 1 {
+			prefix = "knative-"
+		}
+		URL = fmt.Sprintf("https://github.com/knative/operator/releases/download/%s%s/operator.yaml", prefix, versionSanitized)
+	}
+	return URL, nil
 }

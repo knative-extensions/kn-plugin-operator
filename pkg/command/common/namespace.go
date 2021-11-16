@@ -28,22 +28,22 @@ import (
 
 // Namespace is used to access the namespace resource in the Kubernetes cluster.
 type Namespace struct {
-	client    kubernetes.Interface
-	component string
+	Client    kubernetes.Interface
+	Component string
 }
 
 // CreateNamespace creates the namespace if it is not available in the Kubernetes cluster
 func (ns *Namespace) CreateNamespace(namespace string) error {
 	if namespace != "default" {
 		// Create the namespace if it is not available
-		_, err := ns.client.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
+		_, err := ns.Client.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			nspace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}
-			if strings.EqualFold(ns.component, "serving") {
+			if strings.EqualFold(ns.Component, "serving") {
 				nspace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace,
 					Labels: map[string]string{"istio-injection": "enabled"}}}
 			}
-			ns.client.CoreV1().Namespaces().Create(context.TODO(), nspace, metav1.CreateOptions{})
+			ns.Client.CoreV1().Namespaces().Create(context.TODO(), nspace, metav1.CreateOptions{})
 		} else if err != nil {
 			return err
 		}

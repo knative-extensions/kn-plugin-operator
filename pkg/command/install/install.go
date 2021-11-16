@@ -21,10 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
-	"k8s.io/client-go/kubernetes"
-	clientset "k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
-	"k8s.io/client-go/tools/clientcmd"
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
@@ -51,16 +48,60 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
   kn operation install -c serving --namespace knative-serving`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, err := p.NewKubeClient()
+			client, err := p.NewKubeClient()
 			if err != nil {
 				return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
 			}
 
-			_, err = os.Getwd()
+			rootPath, err := os.Getwd()
 			if err != nil {
 				return err
 			}
 
+			URL, err := getOperatorURL(installFlags.Version)
+			if err != nil {
+				return err
+			}
+
+			ns := common.Namespace{
+				Client:    client,
+				Component: installFlags.Component,
+			}
+			if err = ns.CreateNamespace(installFlags.Namespace); err != nil {
+				return err
+			}
+
+			yamlTemplateString, err := common.DownloadFile(URL)
+			if err != nil {
+				return err
+			}
+
+			operatorOverlay := rootPath + "/overlay/operator.yaml"
+			overlayContent, err := common.ReadFile(operatorOverlay)
+			if err != nil {
+				return err
+			}
+			yamlValuesContent := fmt.Sprintf("#@data/values\n---\nnamespace: %s", installFlags.Namespace)
+
+			yttp := common.YttProcessor{
+				BaseData:    []byte(yamlTemplateString),
+				OverlayData: []byte(overlayContent),
+				ValuesData:  []byte(yamlValuesContent),
+			}
+
+			restConfig, err := p.RestConfig()
+			if err != nil {
+				return err
+			}
+
+			manifest := common.Manifest{
+				YttPro:     &yttp,
+				RestConfig: restConfig,
+			}
+			if err = manifest.Apply(); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "Knative operator of the '%s' version was created in the namespace '%s'.\n", installFlags.Version, installFlags.Namespace)
 			return nil
 		},
 	}
@@ -71,18 +112,6 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	installCmd.Flags().StringVar(&installFlags.IstioNamespace, "istio-namespace", "", "The namespace of istio")
 
 	return installCmd
-}
-
-func getClients(kubeConfig, namespace string) (*kubernetes.Clientset, error) {
-	cfg, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
-	if err != nil {
-		return nil, err
-	}
-	clientSet, err := clientset.NewForConfig(cfg)
-	if err != nil {
-		return nil, err
-	}
-	return clientSet, nil
 }
 
 func getOperatorURL(version string) (string, error) {

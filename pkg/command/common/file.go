@@ -17,7 +17,9 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 )
 
@@ -55,4 +57,22 @@ func DeleteFile(path string) error {
 	}
 
 	return nil
+}
+
+// DownloadFile reads an online file into a string
+func DownloadFile(url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+		return string(bodyBytes), nil
+	}
+
+	return "", fmt.Errorf("http status code is %d, not 200", resp.StatusCode)
 }

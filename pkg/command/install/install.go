@@ -34,6 +34,26 @@ type installCmdFlags struct {
 	Version        string
 }
 
+func (flags *installCmdFlags) fill_defaults() {
+	if flags.Version == "" {
+		flags.Version = "latest"
+	}
+
+	if flags.IstioNamespace == "" && strings.EqualFold(flags.Component, "serving") {
+		flags.IstioNamespace = common.DefaultIstioNamespace
+	}
+
+	if flags.Namespace == "" {
+		if strings.EqualFold(flags.Component, "serving") {
+			flags.Namespace = common.DefaultKnativeServingNamespace
+		} else if strings.EqualFold(flags.Component, "eventing") {
+			flags.Namespace = common.DefaultKnativeEventingNamespace
+		} else if flags.Component == "" {
+			flags.Namespace = common.DefaultNamespace
+		}
+	}
+}
+
 var (
 	installFlags installCmdFlags
 )
@@ -48,6 +68,8 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
   kn operation install -c serving --namespace knative-serving`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Fill in the default values for the empty fields
+			installFlags.fill_defaults()
 			client, err := p.NewKubeClient()
 			if err != nil {
 				return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")

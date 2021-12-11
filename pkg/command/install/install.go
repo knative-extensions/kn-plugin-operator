@@ -70,6 +70,7 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Fill in the default values for the empty fields
 			installFlags.fill_defaults()
+			p.KubeCfgPath = installFlags.KubeConfig
 			client, err := p.NewKubeClient()
 			if err != nil {
 				return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
@@ -128,6 +129,7 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 		},
 	}
 
+	installCmd.Flags().StringVar(&installFlags.KubeConfig, "kubeconfig", "", "The kubeconfig of the Knative resources (default is KUBECONFIG from environment variable)")
 	installCmd.Flags().StringVarP(&installFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
 	installCmd.Flags().StringVarP(&installFlags.Component, "component", "c", "", "The name of the Knative Component to install")
 	installCmd.Flags().StringVarP(&installFlags.Version, "version", "v", "latest", "The version of the the Knative Operator or the Knative component")

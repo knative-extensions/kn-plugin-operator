@@ -22,19 +22,24 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"knative.dev/operator/pkg/client/clientset/versioned"
 )
 
 // OperatorParams stores the configs for interacting with kube api
 type OperatorParams struct {
-	KubeCfgPath   string
-	ClientConfig  clientcmd.ClientConfig
-	NewKubeClient func() (kubernetes.Interface, error)
+	KubeCfgPath       string
+	ClientConfig      clientcmd.ClientConfig
+	NewKubeClient     func() (kubernetes.Interface, error)
+	NewOperatorClient func() (*versioned.Clientset, error)
 }
 
 // Initialize generate the clientset for params
 func (params *OperatorParams) Initialize() error {
 	if params.NewKubeClient == nil {
 		params.NewKubeClient = params.newKubeClient
+	}
+	if params.NewOperatorClient == nil {
+		params.NewOperatorClient = params.newOperatorClient
 	}
 	return nil
 }
@@ -81,6 +86,16 @@ func (params *OperatorParams) GetClientConfig() (clientcmd.ClientConfig, error) 
 			"Please use the env var KUBECONFIG if you want to check for multiple configuration files", params.KubeCfgPath)
 	}
 	return nil, fmt.Errorf("Config file '%s' can not be found", params.KubeCfgPath)
+}
+
+// newOperatorClient creates an operator clientset from kubenetes config
+func (params *OperatorParams) newOperatorClient() (*versioned.Clientset, error) {
+	restConfig, err := params.RestConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	return versioned.NewForConfig(restConfig)
 }
 
 // newKubeClient creates a kubenetes clientset from kubenetes config

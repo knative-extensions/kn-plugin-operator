@@ -71,59 +71,26 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 			// Fill in the default values for the empty fields
 			installFlags.fill_defaults()
 			p.KubeCfgPath = installFlags.KubeConfig
-			client, err := p.NewKubeClient()
-			if err != nil {
-				return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
-			}
 
 			rootPath, err := os.Getwd()
 			if err != nil {
 				return err
 			}
 
-			URL, err := getOperatorURL(installFlags.Version)
-			if err != nil {
-				return err
+			if installFlags.Component != "" {
+				// Install serving or eventing
+				err = installKnativeComponent(installFlags, rootPath, p)
+				if err != nil {
+					return err
+				}
+			} else {
+				// Install the Knative Operator
+				err = installOperator(installFlags, rootPath, p)
+				if err != nil {
+					return err
+				}
 			}
 
-			ns := common.Namespace{
-				Client:    client,
-				Component: installFlags.Component,
-			}
-			if err = ns.CreateNamespace(installFlags.Namespace); err != nil {
-				return err
-			}
-
-			yamlTemplateString, err := common.DownloadFile(URL)
-			if err != nil {
-				return err
-			}
-
-			operatorOverlay := rootPath + "/overlay/operator.yaml"
-			overlayContent, err := common.ReadFile(operatorOverlay)
-			if err != nil {
-				return err
-			}
-			yamlValuesContent := fmt.Sprintf("#@data/values\n---\nnamespace: %s", installFlags.Namespace)
-
-			yttp := common.YttProcessor{
-				BaseData:    []byte(yamlTemplateString),
-				OverlayData: []byte(overlayContent),
-				ValuesData:  []byte(yamlValuesContent),
-			}
-
-			restConfig, err := p.RestConfig()
-			if err != nil {
-				return err
-			}
-
-			manifest := common.Manifest{
-				YttPro:     &yttp,
-				RestConfig: restConfig,
-			}
-			if err = manifest.Apply(); err != nil {
-				return err
-			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Knative operator of the '%s' version was created in the namespace '%s'.\n", installFlags.Version, installFlags.Namespace)
 			return nil
 		},
@@ -156,4 +123,163 @@ func getOperatorURL(version string) (string, error) {
 		URL = fmt.Sprintf("https://github.com/knative/operator/releases/download/%s%s/operator.yaml", prefix, versionSanitized)
 	}
 	return URL, nil
+}
+
+func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string {
+	path := ""
+	if strings.EqualFold(installFlags.Component, "serving") {
+		path = rootPath + "/overlay/ks.yaml"
+		if installFlags.IstioNamespace != common.DefaultIstioNamespace {
+			path = rootPath + "/overlay/ks_istio_ns.yaml"
+		}
+	} else if strings.EqualFold(installFlags.Component, "eventing") {
+		path = rootPath + "/overlay/ke.yaml"
+	} else if installFlags.Component == "" {
+		path = rootPath + "/overlay/operator.yaml"
+	}
+
+	if path == "" {
+		return ""
+	}
+	overlayContent, _ := common.ReadFile(path)
+	return overlayContent
+}
+
+func getYamlValuesContent(installFlags installCmdFlags) string {
+	content := ""
+	if strings.EqualFold(installFlags.Component, "serving") {
+		content = fmt.Sprintf("#@data/values\n---\nname: %s\nnamespace: %s\nversion: '%s'",
+			common.DefaultKnativeServingNamespace, installFlags.Namespace, installFlags.Version)
+		if installFlags.IstioNamespace != common.DefaultIstioNamespace {
+			myslice := []string{content, fmt.Sprintf("local_gateway_value: knative-local-gateway.%s.svc.cluster.local", installFlags.IstioNamespace)}
+			content = strings.Join(myslice, "\n")
+		}
+	} else if strings.EqualFold(installFlags.Component, "eventing") {
+		content = fmt.Sprintf("#@data/values\n---\nname: %s\nnamespace: %s\nversion: '%s'",
+			common.DefaultKnativeEventingNamespace, installFlags.Namespace, installFlags.Version)
+	} else if installFlags.Component == "" {
+		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s", installFlags.Namespace)
+	}
+	return content
+}
+
+func installKnativeComponent(installFlags installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+	client, err := p.NewKubeClient()
+	if err != nil {
+		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+
+	deploy := common.Deployment{
+		Client: client,
+	}
+
+	// Check if the knative operator is installed
+	if exists, err := deploy.CheckIfOperatorInstalled(); err != nil {
+		return err
+	} else if !exists {
+		operatorInstallFlags := installCmdFlags{
+			Namespace: "default",
+			Version:   "latest",
+		}
+		installOperator(operatorInstallFlags, rootPath, p)
+	}
+
+	err = createNamspaceIfNecessary(installFlags.Namespace, p)
+	if err != nil {
+		return err
+	}
+
+	operatorClient, err := p.NewOperatorClient()
+	if err != nil {
+		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+
+	ksCR := common.KnativeOperatorCR{
+		KnativeOperatorClient: operatorClient,
+	}
+
+	kCR, err := ksCR.GetCRInterface(installFlags.Component, installFlags.Namespace)
+	if err != nil {
+		return err
+	}
+
+	yamlGenerator := common.YamlGenarator{
+		Input: kCR,
+	}
+
+	// Generate the CR template
+	yamlTemplateString, err := yamlGenerator.GenerateYamlOutput()
+	if err != nil {
+		return err
+	}
+
+	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)
+}
+
+func installOperator(installFlags installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+	err := createNamspaceIfNecessary(installFlags.Namespace, p)
+	if err != nil {
+		return err
+	}
+
+	URL, err := getOperatorURL(installFlags.Version)
+	if err != nil {
+		return err
+	}
+
+	// Generate the CR template by downloading the operator yaml
+	yamlTemplateString, err := common.DownloadFile(URL)
+	if err != nil {
+		return err
+	}
+
+	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)
+}
+
+func createNamspaceIfNecessary(namespace string, p *pkg.OperatorParams) error {
+	client, err := p.NewKubeClient()
+	if err != nil {
+		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+
+	ns := common.Namespace{
+		Client:    client,
+		Component: namespace,
+	}
+	if err = ns.CreateNamespace(namespace); err != nil {
+		return err
+	}
+	return nil
+}
+
+func applyOverlayValuesOnTemplate(yamlTemplateString string, installFlags installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+	overlayContent := getOverlayYamlContent(installFlags, rootPath)
+	yamlValuesContent := getYamlValuesContent(installFlags)
+
+	if err := applyManifests(yamlTemplateString, overlayContent, yamlValuesContent, p); err != nil {
+		return err
+	}
+	return nil
+}
+
+func applyManifests(yamlTemplateString, overlayContent, yamlValuesContent string, p *pkg.OperatorParams) error {
+	restConfig, err := p.RestConfig()
+	if err != nil {
+		return err
+	}
+
+	yttp := common.YttProcessor{
+		BaseData:    []byte(yamlTemplateString),
+		OverlayData: []byte(overlayContent),
+		ValuesData:  []byte(yamlValuesContent),
+	}
+
+	manifest := common.Manifest{
+		YttPro:     &yttp,
+		RestConfig: restConfig,
+	}
+	if err := manifest.Apply(); err != nil {
+		return err
+	}
+	return nil
 }

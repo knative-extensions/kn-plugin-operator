@@ -117,3 +117,162 @@ func TestFillDefaultsForInstallCmdFlags(t *testing.T) {
 		})
 	}
 }
+
+func TestGetOverlayYamlContent(t *testing.T) {
+	for _, tt := range []struct {
+		name         string
+		installFlags installCmdFlags
+		expectedFile string
+	}{{
+		name: "Knative Serving",
+		installFlags: installCmdFlags{
+			Component: "serving",
+		},
+		expectedFile: "testdata/overlay/ks.yaml",
+	}, {
+		name: "Knative Serving with istio namespace",
+		installFlags: installCmdFlags{
+			Component:      "serving",
+			IstioNamespace: "test",
+		},
+		expectedFile: "testdata/overlay/ks_istio_ns.yaml",
+	}, {
+		name: "Knative Eventing",
+		installFlags: installCmdFlags{
+			Component: "eventing",
+		},
+		expectedFile: "testdata/overlay/ke.yaml",
+	}, {
+		name:         "Knative Operator",
+		installFlags: installCmdFlags{},
+		expectedFile: "testdata/overlay/operator.yaml",
+	}} {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.installFlags.fill_defaults()
+			rootPath := "testdata"
+			result := getOverlayYamlContent(tt.installFlags, rootPath)
+			expectedResult, err := common.ReadFile(tt.expectedFile)
+			testingUtil.AssertEqual(t, err == nil, true)
+			testingUtil.AssertEqual(t, result, expectedResult)
+		})
+	}
+}
+
+func TestGetYamlValuesContent(t *testing.T) {
+	for _, tt := range []struct {
+		name           string
+		installFlags   installCmdFlags
+		expectedResult string
+	}{{
+		name: "Knative Serving with all parameters",
+		installFlags: installCmdFlags{
+			Namespace:      "test-serving",
+			Component:      "serving",
+			Version:        "1.0",
+			IstioNamespace: "istio-namespace",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: test-serving
+version: '1.0'
+local_gateway_value: knative-local-gateway.istio-namespace.svc.cluster.local`,
+	}, {
+		name: "Knative Serving with namespace and version",
+		installFlags: installCmdFlags{
+			Namespace: "test-serving-1",
+			Component: "serving",
+			Version:   "1.0.0",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: test-serving-1
+version: '1.0.0'`,
+	}, {
+		name: "Knative Serving with namespace only",
+		installFlags: installCmdFlags{
+			Namespace: "test-serving-1",
+			Component: "serving",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: test-serving-1
+version: 'latest'`,
+	}, {
+		name: "Knative Serving with version only",
+		installFlags: installCmdFlags{
+			Version:   "1.0",
+			Component: "serving",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: knative-serving
+version: '1.0'`,
+	}, {
+		name: "Knative Eventing with namespace and version",
+		installFlags: installCmdFlags{
+			Namespace: "test-eventing",
+			Component: "eventing",
+			Version:   "1.0.0",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-eventing
+namespace: test-eventing
+version: '1.0.0'`,
+	}, {
+		name: "Knative Eventing with namespace only",
+		installFlags: installCmdFlags{
+			Namespace: "test-eventing-1",
+			Component: "eventing",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-eventing
+namespace: test-eventing-1
+version: 'latest'`,
+	}, {
+		name: "Knative Eventing with version only",
+		installFlags: installCmdFlags{
+			Version:   "1.0",
+			Component: "eventing",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-eventing
+namespace: knative-eventing
+version: '1.0'`,
+	}, {
+		name: "Knative unknown component",
+		installFlags: installCmdFlags{
+			Namespace: "1.0",
+			Component: "unknown",
+		},
+		expectedResult: "",
+	}, {
+		name: "Knative Operator",
+		installFlags: installCmdFlags{
+			Version: "1.0",
+		},
+		expectedResult: `#@data/values
+---
+namespace: default`,
+	}, {
+		name: "Knative Operator with a namespace",
+		installFlags: installCmdFlags{
+			Namespace: "test",
+		},
+		expectedResult: `#@data/values
+---
+namespace: test`,
+	}} {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.installFlags.fill_defaults()
+			result := getYamlValuesContent(tt.installFlags)
+			testingUtil.AssertEqual(t, result, tt.expectedResult)
+		})
+	}
+}

@@ -393,7 +393,7 @@ k8s.io/kube-openapi/pkg/util/proto
 k8s.io/utils/buffer
 k8s.io/utils/integer
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20211210083629-92d8a0a00cb6
+# knative.dev/hack v0.0.0-20211203062838-e11ac125e707
 ## explicit
 knative.dev/hack
 # knative.dev/operator v0.27.1-0.20211210172029-2f2c8b8fc83f

@@ -1,0 +1,22 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  #@overlay/match missing_ok=True
+  name: #@ data.values.name
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.namespace
+#@overlay/match missing_ok=True
+spec:
+  #@overlay/match missing_ok=True
+  version: #@ data.values.version
+  #@overlay/match missing_ok=True
+  config:
+    #@overlay/match missing_ok=True
+    istio:
+      #@overlay/match missing_ok=True
+      local-gateway.<local_gateway_namespace>.knative-local-gateway: #@ data.values.local_gateway_value

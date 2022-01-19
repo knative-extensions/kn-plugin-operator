@@ -1,0 +1,16 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"kind": "KnativeEventing"}),expects=1
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  #@overlay/match missing_ok=True
+  name: #@ data.values.name
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.namespace
+#@overlay/match missing_ok=True
+spec:
+  #@overlay/match missing_ok=True
+  version: #@ data.values.version

@@ -18,6 +18,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,13 +33,24 @@ type Deployment struct {
 }
 
 // CheckIfOperatorInstalled checks if Knative Operator exists
-func (d *Deployment) CheckIfOperatorInstalled(namespace string) (bool, error) {
-	// Create if the Knative Operator deployment exists
-	_, err := d.Client.AppsV1().Deployments(namespace).Get(context.TODO(), KnativeOperatorName, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		return false, nil
-	} else if err != nil {
-		return false, err
+func (d *Deployment) CheckIfOperatorInstalled() (bool, error) {
+	namespaces, err := d.Client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return false, fmt.Errorf("failed to receive a namespace list: %s", err)
 	}
-	return true, nil
+
+	found := false
+	for _, ns := range namespaces.Items {
+		// Create if the Knative Operator deployment exists
+		_, err := d.Client.AppsV1().Deployments(ns.ObjectMeta.Name).Get(context.TODO(), KnativeOperatorName, metav1.GetOptions{})
+		if apierrors.IsNotFound(err) {
+			continue
+		} else if err != nil {
+			return false, err
+		}
+		found = true
+		break
+	}
+
+	return found, nil
 }

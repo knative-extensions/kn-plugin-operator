@@ -15,23 +15,23 @@
 package uninstall
 
 import (
+	"context"
 	"fmt"
-	"os"
+	"strings"
+
+	"knative.dev/kn-plugin-operator/pkg/command/common"
 
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/kubernetes"
-	clientset "k8s.io/client-go/kubernetes"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
-	"k8s.io/client-go/tools/clientcmd"
 	"knative.dev/kn-plugin-operator/pkg"
 )
 
 type uninstallCmdFlags struct {
-	Component      string
-	IstioNamespace string
-	Namespace      string
-	KubeConfig     string
-	Version        string
+	Component  string
+	Namespace  string
+	KubeConfig string
+	Version    string
 }
 
 var (
@@ -48,14 +48,26 @@ func NewUninstallCommand(p *pkg.OperatorParams) *cobra.Command {
   kn operation uninstall -c serving --namespace knative-serving`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_, err := p.NewKubeClient()
-			if err != nil {
-				return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
-			}
-
-			_, err = os.Getwd()
-			if err != nil {
-				return err
+			if strings.ToLower(uninstallFlags.Component) == "serving" {
+				// Uninstall the serving
+				if err := uninstallKnativeServing(uninstallFlags, p); err != nil {
+					return err
+				}
+				fmt.Fprintf(cmd.OutOrStdout(), "Knative Serving of the '%s' version was removed in the namespace '%s'.\n", uninstallFlags.Version, uninstallFlags.Namespace)
+			} else if strings.ToLower(uninstallFlags.Component) == "eventing" {
+				// Uninstall the eventing
+				if err := uninstallKnativeEventing(uninstallFlags, p); err != nil {
+					return err
+				}
+				fmt.Fprintf(cmd.OutOrStdout(), "Knative Eventing of the '%s' version was removed in the namespace '%s'.\n", uninstallFlags.Version, uninstallFlags.Namespace)
+			} else if uninstallFlags.Component != "" {
+				return fmt.Errorf("Unknown component name: you need to set component name to serving or eventing.")
+			} else {
+				// Uninstall the Knative Operator
+				if err := uninstallOperator(uninstallFlags, p); err != nil {
+					return err
+				}
+				fmt.Fprintf(cmd.OutOrStdout(), "Knative operator of the '%s' version was removed in the namespace '%s'.\n", uninstallFlags.Version, uninstallFlags.Namespace)
 			}
 
 			return nil
@@ -68,14 +80,61 @@ func NewUninstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	return uninstallCmd
 }
 
-func getClients(kubeConfig, namespace string) (*kubernetes.Clientset, error) {
-	cfg, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
+func uninstallKnativeServing(uninstallFlags uninstallCmdFlags, p *pkg.OperatorParams) error {
+	operatorClient, err := p.NewOperatorClient()
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
 	}
-	clientSet, err := clientset.NewForConfig(cfg)
+
+	list, err := operatorClient.OperatorV1alpha1().KnativeServings(uninstallFlags.Namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return clientSet, nil
+
+	var errstrings []string
+	for _, ks := range list.Items {
+		if err = operatorClient.OperatorV1alpha1().KnativeServings(uninstallFlags.Namespace).Delete(context.TODO(),
+			ks.Name, metav1.DeleteOptions{}); err != nil {
+			errstrings = append(errstrings, err.Error())
+		}
+	}
+
+	if len(errstrings) != 0 {
+		return fmt.Errorf(strings.Join(errstrings, "\n"))
+	}
+	return nil
+}
+
+func uninstallKnativeEventing(uninstallFlags uninstallCmdFlags, p *pkg.OperatorParams) error {
+	operatorClient, err := p.NewOperatorClient()
+	if err != nil {
+		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+
+	list, err := operatorClient.OperatorV1alpha1().KnativeEventings(uninstallFlags.Namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	var errstrings []string
+	for _, ke := range list.Items {
+		if err = operatorClient.OperatorV1alpha1().KnativeEventings(uninstallFlags.Namespace).Delete(context.TODO(),
+			ke.Name, metav1.DeleteOptions{}); err != nil {
+			errstrings = append(errstrings, err.Error())
+		}
+	}
+
+	if len(errstrings) != 0 {
+		return fmt.Errorf(strings.Join(errstrings, "\n"))
+	}
+	return nil
+}
+
+func uninstallOperator(uninstallFlags uninstallCmdFlags, p *pkg.OperatorParams) error {
+	client, err := p.NewKubeClient()
+	if err != nil {
+		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+
+	return client.AppsV1().Deployments(uninstallFlags.Namespace).Delete(context.TODO(), common.KnativeOperatorName, metav1.DeleteOptions{})
 }

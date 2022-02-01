@@ -39,14 +39,14 @@ func (flags *installCmdFlags) fill_defaults() {
 		flags.Version = "latest"
 	}
 
-	if flags.IstioNamespace == "" && strings.EqualFold(flags.Component, "serving") {
+	if flags.IstioNamespace == "" && strings.EqualFold(flags.Component, common.ServingComponent) {
 		flags.IstioNamespace = common.DefaultIstioNamespace
 	}
 
 	if flags.Namespace == "" {
-		if strings.EqualFold(flags.Component, "serving") {
+		if strings.EqualFold(flags.Component, common.ServingComponent) {
 			flags.Namespace = common.DefaultKnativeServingNamespace
-		} else if strings.EqualFold(flags.Component, "eventing") {
+		} else if strings.EqualFold(flags.Component, common.EventingComponent) {
 			flags.Namespace = common.DefaultKnativeEventingNamespace
 		} else if flags.Component == "" {
 			flags.Namespace = common.DefaultNamespace
@@ -127,12 +127,12 @@ func getOperatorURL(version string) (string, error) {
 
 func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string {
 	path := ""
-	if strings.EqualFold(installFlags.Component, "serving") {
+	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
 		path = rootPath + "/overlay/ks.yaml"
 		if installFlags.IstioNamespace != common.DefaultIstioNamespace {
 			path = rootPath + "/overlay/ks_istio_ns.yaml"
 		}
-	} else if strings.EqualFold(installFlags.Component, "eventing") {
+	} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke.yaml"
 	} else if installFlags.Component == "" {
 		path = rootPath + "/overlay/operator.yaml"
@@ -147,14 +147,14 @@ func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string
 
 func getYamlValuesContent(installFlags installCmdFlags) string {
 	content := ""
-	if strings.EqualFold(installFlags.Component, "serving") {
+	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
 		content = fmt.Sprintf("#@data/values\n---\nname: %s\nnamespace: %s\nversion: '%s'",
 			common.DefaultKnativeServingNamespace, installFlags.Namespace, installFlags.Version)
 		if installFlags.IstioNamespace != common.DefaultIstioNamespace {
 			myslice := []string{content, fmt.Sprintf("local_gateway_value: knative-local-gateway.%s.svc.cluster.local", installFlags.IstioNamespace)}
 			content = strings.Join(myslice, "\n")
 		}
-	} else if strings.EqualFold(installFlags.Component, "eventing") {
+	} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
 		content = fmt.Sprintf("#@data/values\n---\nname: %s\nnamespace: %s\nversion: '%s'",
 			common.DefaultKnativeEventingNamespace, installFlags.Namespace, installFlags.Version)
 	} else if installFlags.Component == "" {
@@ -189,26 +189,8 @@ func installKnativeComponent(installFlags installCmdFlags, rootPath string, p *p
 		return err
 	}
 
-	operatorClient, err := p.NewOperatorClient()
-	if err != nil {
-		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
-	}
-
-	ksCR := common.KnativeOperatorCR{
-		KnativeOperatorClient: operatorClient,
-	}
-
-	kCR, err := ksCR.GetCRInterface(installFlags.Component, installFlags.Namespace)
-	if err != nil {
-		return err
-	}
-
-	yamlGenerator := common.YamlGenarator{
-		Input: kCR,
-	}
-
 	// Generate the CR template
-	yamlTemplateString, err := yamlGenerator.GenerateYamlOutput()
+	yamlTemplateString, err := common.GenerateOperatorCRString(installFlags.Component, installFlags.Namespace, p)
 	if err != nil {
 		return err
 	}
@@ -256,29 +238,7 @@ func applyOverlayValuesOnTemplate(yamlTemplateString string, installFlags instal
 	overlayContent := getOverlayYamlContent(installFlags, rootPath)
 	yamlValuesContent := getYamlValuesContent(installFlags)
 
-	if err := applyManifests(yamlTemplateString, overlayContent, yamlValuesContent, p); err != nil {
-		return err
-	}
-	return nil
-}
-
-func applyManifests(yamlTemplateString, overlayContent, yamlValuesContent string, p *pkg.OperatorParams) error {
-	restConfig, err := p.RestConfig()
-	if err != nil {
-		return err
-	}
-
-	yttp := common.YttProcessor{
-		BaseData:    []byte(yamlTemplateString),
-		OverlayData: []byte(overlayContent),
-		ValuesData:  []byte(yamlValuesContent),
-	}
-
-	manifest := common.Manifest{
-		YttPro:     &yttp,
-		RestConfig: restConfig,
-	}
-	if err := manifest.Apply(); err != nil {
+	if err := common.ApplyManifests(yamlTemplateString, overlayContent, yamlValuesContent, p); err != nil {
 		return err
 	}
 	return nil

@@ -39,7 +39,7 @@ func (ns *Namespace) CreateNamespace(namespace string) error {
 		_, err := ns.Client.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			nspace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}
-			if strings.EqualFold(ns.Component, "serving") {
+			if strings.EqualFold(ns.Component, ServingComponent) {
 				nspace = &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace,
 					Labels: map[string]string{"istio-injection": "enabled"}}}
 			}

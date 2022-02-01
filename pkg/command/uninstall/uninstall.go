@@ -48,13 +48,13 @@ func NewUninstallCommand(p *pkg.OperatorParams) *cobra.Command {
   kn operation uninstall -c serving --namespace knative-serving`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if strings.ToLower(uninstallFlags.Component) == "serving" {
+			if strings.ToLower(uninstallFlags.Component) == common.ServingComponent {
 				// Uninstall the serving
 				if err := uninstallKnativeServing(uninstallFlags, p); err != nil {
 					return err
 				}
 				fmt.Fprintf(cmd.OutOrStdout(), "Knative Serving of the '%s' version was removed in the namespace '%s'.\n", uninstallFlags.Version, uninstallFlags.Namespace)
-			} else if strings.ToLower(uninstallFlags.Component) == "eventing" {
+			} else if strings.ToLower(uninstallFlags.Component) == common.EventingComponent {
 				// Uninstall the eventing
 				if err := uninstallKnativeEventing(uninstallFlags, p); err != nil {
 					return err

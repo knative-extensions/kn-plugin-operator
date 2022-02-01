@@ -22,4 +22,6 @@ const (
 	DefaultKnativeEventingNamespace = "knative-eventing"
 	DefaultNamespace                = "default"
 	Latest                          = "latest"
+	ServingComponent                = "serving"
+	EventingComponent               = "eventing"
 )

@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"strings"
 
+	"knative.dev/kn-plugin-operator/pkg"
+
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/operator/pkg/apis/operator/v1alpha1"
@@ -37,9 +39,9 @@ type KnativeOperatorCR struct {
 
 // GetCRInterface gets the Knative custom resource under a certain namespace
 func (ko *KnativeOperatorCR) GetCRInterface(component, namespace string) (interface{}, error) {
-	if strings.EqualFold(component, "serving") {
+	if strings.EqualFold(component, ServingComponent) {
 		return ko.GetKnativeServing(namespace)
-	} else if strings.EqualFold(component, "eventing") {
+	} else if strings.EqualFold(component, EventingComponent) {
 		return ko.GetKnativeEventing(namespace)
 	}
 	return nil, fmt.Errorf("unknow component is set in --component or -c\n")
@@ -95,4 +97,50 @@ func (ko *KnativeOperatorCR) GetKnativeEventing(namespace string) (interface{}, 
 
 	eventing.Spec = knativeEventing.Spec
 	return knativeEventing, nil
+}
+
+func GenerateOperatorCRString(component, namespace string, p *pkg.OperatorParams) (string, error) {
+	output := ""
+	operatorClient, err := p.NewOperatorClient()
+	if err != nil {
+		return output, fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+
+	ksCR := KnativeOperatorCR{
+		KnativeOperatorClient: operatorClient,
+	}
+
+	kCR, err := ksCR.GetCRInterface(component, namespace)
+	if err != nil {
+		return output, err
+	}
+
+	yamlGenerator := YamlGenarator{
+		Input: kCR,
+	}
+
+	// Generate the CR template
+	return yamlGenerator.GenerateYamlOutput()
+}
+
+func ApplyManifests(yamlTemplateString, overlayContent, yamlValuesContent string, p *pkg.OperatorParams) error {
+	restConfig, err := p.RestConfig()
+	if err != nil {
+		return err
+	}
+
+	yttp := YttProcessor{
+		BaseData:    []byte(yamlTemplateString),
+		OverlayData: []byte(overlayContent),
+		ValuesData:  []byte(yamlValuesContent),
+	}
+
+	manifest := Manifest{
+		YttPro:     &yttp,
+		RestConfig: restConfig,
+	}
+	if err := manifest.Apply(); err != nil {
+		return err
+	}
+	return nil
 }

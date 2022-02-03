@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Knative Authors
+Copyright 2022 The Knative Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,16 +52,6 @@ func (ks *KnativeServing) GetStatus() base.KComponentStatus {
 // KnativeServingSpec defines the desired state of KnativeServing
 type KnativeServingSpec struct {
 	base.CommonSpec `json:",inline"`
-
-	// DEPRECATED.
-	// DeprecatedKnativeIngressGateway is to override the knative-ingress-gateway.
-	// +optional
-	DeprecatedKnativeIngressGateway base.IstioGatewayOverride `json:"knative-ingress-gateway,omitempty"`
-
-	// DEPRECATED.
-	// DeprecatedClusterLocalGateway is to override the cluster-local-gateway.
-	// +optional
-	DeprecatedClusterLocalGateway base.IstioGatewayOverride `json:"cluster-local-gateway,omitempty"`
 
 	// Enables controller to trust registries with self-signed certificates
 	ControllerCustomCerts base.CustomCerts `json:"controller-custom-certs,omitempty"`

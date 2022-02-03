@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Knative Authors
+Copyright 2022 The Knative Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -96,14 +96,11 @@ type KnativeEventingList struct {
 
 // SourceConfigs specifies options for the eventing sources.
 type SourceConfigs struct {
-	Awssqs     base.AwssqsSourceConfiguration     `json:"awssqs"`
-	Ceph       base.CephSourceConfiguration       `json:"ceph"`
-	Couchdb    base.CouchdbSourceConfiguration    `json:"couchdb"`
-	Github     base.GithubSourceConfiguration     `json:"github"`
-	Gitlab     base.GitlabSourceConfiguration     `json:"gitlab"`
-	Kafka      base.KafkaSourceConfiguration      `json:"kafka"`
-	Natss      base.NatssSourceConfiguration      `json:"natss"`
-	Prometheus base.PrometheusSourceConfiguration `json:"prometheus"`
-	Rabbitmq   base.RabbitmqSourceConfiguration   `json:"rabbitmq"`
-	Redis      base.RedisSourceConfiguration      `json:"redis"`
+	Ceph     base.CephSourceConfiguration     `json:"ceph"`
+	Github   base.GithubSourceConfiguration   `json:"github"`
+	Gitlab   base.GitlabSourceConfiguration   `json:"gitlab"`
+	Kafka    base.KafkaSourceConfiguration    `json:"kafka"`
+	Natss    base.NatssSourceConfiguration    `json:"natss"`
+	Rabbitmq base.RabbitmqSourceConfiguration `json:"rabbitmq"`
+	Redis    base.RedisSourceConfiguration    `json:"redis"`
 }

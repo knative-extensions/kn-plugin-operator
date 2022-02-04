@@ -91,6 +91,19 @@ kourier: true
 istio: false
 contour: false
 ingressClass: kourier.ingress.networking.knative.dev`,
+	}, {
+		name: "Knative Serving with Contour enabled",
+		ingressCMDFlags: ingressFlags{
+			Namespace: "test-serving",
+			Contour:   true,
+		},
+		expectedResult: `#@data/values
+---
+namespace: test-serving
+kourier: false
+istio: false
+contour: true
+ingressClass: contour.ingress.networking.knative.dev`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			result := getYamlValuesContent(tt.ingressCMDFlags)

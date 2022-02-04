@@ -1,0 +1,42 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"kind": "KnativeEventing"}),expects=1
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeEventing
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.namespace
+#@overlay/match missing_ok=True
+spec:
+  #@overlay/match missing_ok=True
+  ingress:
+    #@overlay/match missing_ok=True
+    github:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.github
+    #@overlay/match missing_ok=True
+    gitlab:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.gitlab
+    #@overlay/match missing_ok=True
+    ceph:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.ceph
+    #@overlay/match missing_ok=True
+    natss:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.natss
+    #@overlay/match missing_ok=True
+    redis:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.redis
+    #@overlay/match missing_ok=True
+    rabbitmq:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.rabbitmq
+    #@overlay/match missing_ok=True
+    kafka:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.kafka

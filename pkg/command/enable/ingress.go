@@ -131,20 +131,17 @@ func getOverlayYamlContent(rootPath string) string {
 }
 
 func getYamlValuesContent(ingressCMDFlags ingressFlags) string {
-	content := ""
-	if ingressCMDFlags.Istio {
-		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s\nkourier: %s\nistio: %s\ncontour: %s\ningressClass: %s",
-			ingressCMDFlags.Namespace, "false", "true", "false", "istio.ingress.networking.knative.dev")
-	}
-
+	ingressClass := "istio.ingress.networking.knative.dev"
 	if ingressCMDFlags.Kourier {
-		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s\nkourier: %s\nistio: %s\ncontour: %s\ningressClass: %s",
-			ingressCMDFlags.Namespace, "true", "false", "false", "kourier.ingress.networking.knative.dev")
+		ingressClass = "kourier.ingress.networking.knative.dev"
 	}
 
 	if ingressCMDFlags.Contour {
-		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s\nkourier: %s\nistio: %s\ncontour: %s\ningressClass: %s",
-			ingressCMDFlags.Namespace, "false", "false", "true", "contour.ingress.networking.knative.dev")
+		ingressClass = "contour.ingress.networking.knative.dev"
 	}
+
+	content := fmt.Sprintf("#@data/values\n---\nnamespace: %s\nkourier: %t\nistio: %t\ncontour: %t\ningressClass: %s",
+		ingressCMDFlags.Namespace, ingressCMDFlags.Kourier, ingressCMDFlags.Istio, ingressCMDFlags.Contour, ingressClass)
+
 	return content
 }

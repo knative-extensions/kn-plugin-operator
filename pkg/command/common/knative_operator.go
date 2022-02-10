@@ -96,7 +96,7 @@ func (ko *KnativeOperatorCR) GetKnativeEventing(namespace string) (interface{}, 
 	}
 
 	eventing.Spec = knativeEventing.Spec
-	return knativeEventing, nil
+	return eventing, nil
 }
 
 func GenerateOperatorCRString(component, namespace string, p *pkg.OperatorParams) (string, error) {

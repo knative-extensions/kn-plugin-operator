@@ -17,6 +17,7 @@ package core
 import (
 	"github.com/spf13/cobra"
 	"knative.dev/kn-plugin-operator/pkg"
+	"knative.dev/kn-plugin-operator/pkg/command/configure"
 	"knative.dev/kn-plugin-operator/pkg/command/enable"
 	"knative.dev/kn-plugin-operator/pkg/command/install"
 	"knative.dev/kn-plugin-operator/pkg/command/uninstall"
@@ -49,5 +50,6 @@ kn operation install -c eventing
 	rootCmd.AddCommand(install.NewInstallCommand(p))
 	rootCmd.AddCommand(uninstall.NewUninstallCommand(p))
 	rootCmd.AddCommand(enable.NewEnableCommand(p))
+	rootCmd.AddCommand(configure.NewConfigureCommand(p))
 	return rootCmd
 }

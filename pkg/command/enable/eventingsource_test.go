@@ -18,8 +18,6 @@ import (
 	"testing"
 
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
 )
 
 func TestGetYamlValuesContentSource(t *testing.T) {

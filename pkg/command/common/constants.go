@@ -24,4 +24,15 @@ const (
 	Latest                          = "latest"
 	ServingComponent                = "serving"
 	EventingComponent               = "eventing"
+	YttMatchingTag                  = "#@overlay/match missing_ok=True"
+	Space                           = " "
 )
+
+// Spaces returns series of spaces based on the input number
+func Spaces(num int) string {
+	value := ""
+	for i := 0; i < num; i++ {
+		value += Space
+	}
+	return value
+}

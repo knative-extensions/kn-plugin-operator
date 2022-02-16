@@ -11,6 +11,6 @@ require (
 	k8s.io/api v0.22.5
 	k8s.io/apimachinery v0.22.5
 	k8s.io/client-go v0.22.5
-	knative.dev/hack v0.0.0-20220209225905-7331bb16ba00
-	knative.dev/operator v0.29.1-0.20220210232842-cfbc645a5db2
+	knative.dev/hack v0.0.0-20220216040439-0456e8bf6547
+	knative.dev/operator v0.29.1-0.20220211145018-dca31cb94ce8
 )

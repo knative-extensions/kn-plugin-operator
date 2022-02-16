@@ -36,7 +36,7 @@ func TestGetOverlayYamlContentSource(t *testing.T) {
 			Component:     "eventing",
 			Namespace:     "test-eventing",
 			Container:     "eventing-controller",
-			DeployMame:    "eventing-controller",
+			DeployName:    "eventing-controller",
 		},
 		expectedResult: `#@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
@@ -81,7 +81,7 @@ spec:
 			Component:     "serving",
 			Namespace:     "test-serving",
 			Container:     "activator",
-			DeployMame:    "activator",
+			DeployName:    "activator",
 		},
 		expectedResult: `#@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
@@ -124,7 +124,7 @@ spec:
 			Component:   "serving",
 			Namespace:   "test-serving",
 			Container:   "activator",
-			DeployMame:  "activator",
+			DeployName:  "activator",
 		},
 		expectedResult: `#@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
@@ -162,7 +162,7 @@ spec:
 			Component:  "serving",
 			Namespace:  "test-serving",
 			Container:  "activator",
-			DeployMame: "activator",
+			DeployName: "activator",
 		},
 		expectedResult: `#@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
@@ -196,7 +196,7 @@ spec:
 			Component:  "serving",
 			Namespace:  "test-serving",
 			Container:  "activator",
-			DeployMame: "activator",
+			DeployName: "activator",
 		},
 		expectedResult: `#@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
@@ -226,7 +226,7 @@ spec:
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			rootPath := "testdata/"
-			result := getOverlayYamlContentSource(rootPath, tt.resourcesCMDFlags)
+			result := getOverlayYamlContentResource(rootPath, tt.resourcesCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}
@@ -247,7 +247,7 @@ func TestGetYamlValuesContentResources(t *testing.T) {
 			Component:     "eventing",
 			Namespace:     "test-eventing",
 			Container:     "eventing-controller",
-			DeployMame:    "eventing-controller",
+			DeployName:    "eventing-controller",
 		},
 		expectedResult: `#@data/values
 ---
@@ -268,7 +268,7 @@ limitMemory: 1001M`,
 			Component:     "serving",
 			Namespace:     "test-serving",
 			Container:     "activator",
-			DeployMame:    "activator",
+			DeployName:    "activator",
 		},
 		expectedResult: `#@data/values
 ---
@@ -287,7 +287,7 @@ limitMemory: 1001M`,
 			Component:   "serving",
 			Namespace:   "test-serving",
 			Container:   "activator",
-			DeployMame:  "activator1",
+			DeployName:  "activator1",
 		},
 		expectedResult: `#@data/values
 ---
@@ -303,7 +303,7 @@ limitMemory: 1001M`,
 			Component:  "serving",
 			Namespace:  "test-serving",
 			Container:  "activator",
-			DeployMame: "activator",
+			DeployName: "activator",
 		},
 		expectedResult: `#@data/values
 ---
@@ -318,7 +318,7 @@ requestCPU: 2.2G`,
 			Component:  "serving",
 			Namespace:  "test-serving",
 			Container:  "activator",
-			DeployMame: "activator",
+			DeployName: "activator",
 		},
 		expectedResult: `#@data/values
 ---
@@ -349,7 +349,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 			Component:     "eventing",
 			Namespace:     "test-eventing",
 			Container:     "eventing-controller",
-			DeployMame:    "eventing-controller",
+			DeployName:    "eventing-controller",
 		},
 		expectedResult: nil,
 	}, {
@@ -358,7 +358,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 			Component:  "serving",
 			Namespace:  "test-serving",
 			Container:  "activator",
-			DeployMame: "activator",
+			DeployName: "activator",
 		},
 		expectedResult: fmt.Errorf("You need to specify at least one resource parameter: limitCPU, limitMemory, requestCPU or requestMemory."),
 	}, {
@@ -368,7 +368,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 			RequestCPU:  "2.2G",
 			Namespace:   "test-serving",
 			Container:   "activator",
-			DeployMame:  "activator1",
+			DeployName:  "activator1",
 		},
 		expectedResult: fmt.Errorf("You need to specify the component name."),
 	}, {
@@ -377,7 +377,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 			RequestCPU: "2.2G",
 			Component:  "serving",
 			Namespace:  "test-serving",
-			DeployMame: "activator",
+			DeployName: "activator",
 		},
 		expectedResult: fmt.Errorf("You need to specify the container name."),
 	}, {
@@ -394,7 +394,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 		resourcesCMDFlags: resourcesFlags{
 			LimitCPU:   "22G",
 			Component:  "serving",
-			DeployMame: "test-serving",
+			DeployName: "test-serving",
 			Container:  "activator",
 		},
 		expectedResult: fmt.Errorf("You need to specify the namespace."),

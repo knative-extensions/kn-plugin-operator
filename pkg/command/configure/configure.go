@@ -27,9 +27,12 @@ func NewConfigureCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the Knative Serving or Eventing",
 		Example: `
   # Configure the Knative Serving or Eventing
-  kn operation configure resource --component serving --requestMemory 999M --namespace knative-serving`,
+  kn operation configure resources --component serving --deployName activator --requestMemory 999M --namespace knative-serving
+  # Configure the tolerations for Knative Serving and Eventing deployments
+  kn operation configure tolerations --component eventing --deployName eventing-controller --key example-key --operator Exists --effect NoSchedule --namespace knative-eventing`,
 	}
 
 	configureCmd.AddCommand(newResourcesCommand(p))
+	configureCmd.AddCommand(newTolerationsCommand(p))
 	return configureCmd
 }

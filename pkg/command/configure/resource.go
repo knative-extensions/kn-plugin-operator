@@ -33,7 +33,7 @@ type resourcesFlags struct {
 	Component     string
 	Namespace     string
 	Container     string
-	DeployMame    string
+	DeployName    string
 }
 
 var resourcesCMDFlags resourcesFlags
@@ -41,11 +41,11 @@ var resourcesCMDFlags resourcesFlags
 // newResourcesCommand represents the configure commands for Knative Serving or Eventing
 func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	var configureResourcesCmd = &cobra.Command{
-		Use:   "resource",
+		Use:   "resources",
 		Short: "Configure the resource for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the resource for Knative Serving and Eventing deployments
-  kn operation configure resource --component eventing --deployMame eventing-controller --container eventing-controller --requestMemory 200Mi --requestCPU 200m --namespace knative-eventing`,
+  kn operation configure resources --component eventing --deployName eventing-controller --container eventing-controller --requestMemory 200Mi --requestCPU 200m --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateResourcesFlags(resourcesCMDFlags); err != nil {
 				return err
@@ -71,7 +71,7 @@ func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.LimitMemory, "limitMemory", "", "The flag to specify the limit memory")
 	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.RequestCPU, "requestCPU", "", "The flag to specify the request CPU")
 	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.RequestMemory, "requestMemory", "", "The flag to specify the request memory")
-	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.DeployMame, "deployMame", "", "The flag to specify the deployment name")
+	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	configureResourcesCmd.Flags().StringVarP(&resourcesCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.Container, "container", "", "The flag to specify the container name")
 	configureResourcesCmd.Flags().StringVarP(&resourcesCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
@@ -108,7 +108,7 @@ func validateResourcesFlags(resourcesCMDFlags resourcesFlags) error {
 	if resourcesCMDFlags.Component == "" {
 		return fmt.Errorf("You need to specify the component name.")
 	}
-	if resourcesCMDFlags.DeployMame == "" {
+	if resourcesCMDFlags.DeployName == "" {
 		return fmt.Errorf("You need to specify the name of the deployment.")
 	}
 	if resourcesCMDFlags.Namespace == "" {
@@ -127,7 +127,7 @@ func configureResources(resourcesCMDFlags resourcesFlags, rootPath string, p *pk
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentSource(rootPath, resourcesCMDFlags)
+	overlayContent := getOverlayYamlContentResource(rootPath, resourcesCMDFlags)
 	valuesYaml := getYamlValuesContentResources(resourcesCMDFlags)
 
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
@@ -136,7 +136,7 @@ func configureResources(resourcesCMDFlags resourcesFlags, rootPath string, p *pk
 	return nil
 }
 
-func getOverlayYamlContentSource(rootPath string, resourcesCMDFlags resourcesFlags) string {
+func getOverlayYamlContentResource(rootPath string, resourcesCMDFlags resourcesFlags) string {
 	path := rootPath + "/overlay/ks_resource_base.yaml"
 	if strings.EqualFold(resourcesCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_resource_base.yaml"
@@ -210,7 +210,7 @@ func getYamlValuesContentResources(resourcesCMDFlags resourcesFlags) string {
 	container := fmt.Sprintf("container: %s", resourcesCMDFlags.Container)
 	contentArray = append(contentArray, container)
 
-	deploy := fmt.Sprintf("deployName: %s", resourcesCMDFlags.DeployMame)
+	deploy := fmt.Sprintf("deployName: %s", resourcesCMDFlags.DeployName)
 	contentArray = append(contentArray, deploy)
 
 	if resourcesCMDFlags.RequestCPU != "" {

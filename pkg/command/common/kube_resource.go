@@ -18,6 +18,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -108,7 +109,7 @@ func (kr *KubeResource) UpdateOperatorDeployment(name, namespace string) error {
 		return err
 	}
 	if deploy == nil {
-		return nil
+		return fmt.Errorf("The Knative Operator is not install.")
 	}
 
 	deploy.Spec.Template.Spec.Volumes = updateVolumes(deploy.Spec.Template.Spec.Volumes)

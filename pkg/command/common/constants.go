@@ -25,6 +25,7 @@ const (
 	ServingComponent                = "serving"
 	EventingComponent               = "eventing"
 	YttMatchingTag                  = "#@overlay/match missing_ok=True"
+	YttReplaceTag                   = "#@overlay/replace or_add=True"
 	Space                           = " "
 )
 

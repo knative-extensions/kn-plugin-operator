@@ -1,5 +1,8 @@
 # cloud.google.com/go/compute v1.1.0
 cloud.google.com/go/compute/metadata
+# github.com/BurntSushi/toml v1.0.0
+github.com/BurntSushi/toml
+github.com/BurntSushi/toml/internal
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/evanphx/json-patch v4.12.0+incompatible
@@ -34,7 +37,7 @@ github.com/googleapis/gnostic/compiler
 github.com/googleapis/gnostic/extensions
 github.com/googleapis/gnostic/jsonschema
 github.com/googleapis/gnostic/openapiv2
-# github.com/hashicorp/go-version v1.3.0
+# github.com/hashicorp/go-version v1.4.0
 github.com/hashicorp/go-version
 # github.com/imdario/mergo v0.3.12
 github.com/imdario/mergo
@@ -49,7 +52,7 @@ github.com/k14s/starlark-go/resolve
 github.com/k14s/starlark-go/starlark
 github.com/k14s/starlark-go/starlarkstruct
 github.com/k14s/starlark-go/syntax
-# github.com/k14s/ytt v0.37.0
+# github.com/k14s/ytt v0.39.0
 ## explicit
 github.com/k14s/ytt/pkg/cmd/template
 github.com/k14s/ytt/pkg/cmd/ui
@@ -57,11 +60,13 @@ github.com/k14s/ytt/pkg/filepos
 github.com/k14s/ytt/pkg/files
 github.com/k14s/ytt/pkg/orderedmap
 github.com/k14s/ytt/pkg/schema
+github.com/k14s/ytt/pkg/spell
 github.com/k14s/ytt/pkg/template
 github.com/k14s/ytt/pkg/template/core
 github.com/k14s/ytt/pkg/texttemplate
 github.com/k14s/ytt/pkg/version
 github.com/k14s/ytt/pkg/workspace
+github.com/k14s/ytt/pkg/workspace/datavalues
 github.com/k14s/ytt/pkg/workspace/ref
 github.com/k14s/ytt/pkg/yamlmeta
 github.com/k14s/ytt/pkg/yamlmeta/internal/yaml.v2
@@ -392,7 +397,7 @@ k8s.io/kube-openapi/pkg/util/proto
 k8s.io/utils/buffer
 k8s.io/utils/integer
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20220224013837-e1785985d364
+# knative.dev/hack v0.0.0-20220310014646-aae7c2278c6f
 ## explicit
 knative.dev/hack
 # knative.dev/operator v0.29.1-0.20220309190249-ae5dc8ac353c

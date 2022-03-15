@@ -143,9 +143,17 @@ func TestGetOverlayYamlContent(t *testing.T) {
 		},
 		expectedFile: "testdata/overlay/ke.yaml",
 	}, {
-		name:         "Knative Operator",
-		installFlags: installCmdFlags{},
+		name: "Knative Operator",
+		installFlags: installCmdFlags{
+			Version: "1.2.0",
+		},
 		expectedFile: "testdata/overlay/operator.yaml",
+	}, {
+		name: "Knative Operator of 1.3",
+		installFlags: installCmdFlags{
+			Version: "1.3.0",
+		},
+		expectedFile: "testdata/overlay/full_operator.yaml",
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.installFlags.fill_defaults()
@@ -272,6 +280,35 @@ namespace: test`,
 		t.Run(tt.name, func(t *testing.T) {
 			tt.installFlags.fill_defaults()
 			result := getYamlValuesContent(tt.installFlags)
+			testingUtil.AssertEqual(t, result, tt.expectedResult)
+		})
+	}
+}
+
+func TestVersionWebhook(t *testing.T) {
+	for _, tt := range []struct {
+		name           string
+		version        string
+		expectedResult bool
+	}{{
+		name:           "Version 1.3",
+		version:        "1.3",
+		expectedResult: true,
+	}, {
+		name:           "Version 1.2",
+		version:        "1.2",
+		expectedResult: false,
+	}, {
+		name:           "Version 1.4",
+		version:        "1.4",
+		expectedResult: true,
+	}, {
+		name:           "Version 2.0",
+		version:        "2.0",
+		expectedResult: true,
+	}} {
+		t.Run(tt.name, func(t *testing.T) {
+			result := versionWebhook(tt.version)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

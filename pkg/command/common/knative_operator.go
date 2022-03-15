@@ -32,6 +32,21 @@ const (
 	KnativeEventingName = "knative-eventing"
 )
 
+var kOperatorCR *KnativeOperatorCR
+
+func GetKnativeOperatorCR(p *pkg.OperatorParams) (*KnativeOperatorCR, error) {
+	if kOperatorCR != nil {
+		return kOperatorCR, nil
+	}
+	operatorClient, err := p.NewOperatorClient()
+	if err != nil {
+		return nil, fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+	return &KnativeOperatorCR{
+		KnativeOperatorClient: operatorClient,
+	}, nil
+}
+
 // KnativeOperatorCR is used to access the knative custom resource in the Kubernetes cluster.
 type KnativeOperatorCR struct {
 	KnativeOperatorClient *versioned.Clientset
@@ -101,13 +116,9 @@ func (ko *KnativeOperatorCR) GetKnativeEventing(namespace string) (interface{}, 
 
 func GenerateOperatorCRString(component, namespace string, p *pkg.OperatorParams) (string, error) {
 	output := ""
-	operatorClient, err := p.NewOperatorClient()
+	ksCR, err := GetKnativeOperatorCR(p)
 	if err != nil {
-		return output, fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
-	}
-
-	ksCR := KnativeOperatorCR{
-		KnativeOperatorClient: operatorClient,
+		return output, err
 	}
 
 	kCR, err := ksCR.GetCRInterface(component, namespace)

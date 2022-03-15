@@ -115,9 +115,9 @@ func RunInstallationCommand(installFlags installCmdFlags, p *pkg.OperatorParams)
 	return nil
 }
 
-func getOperatorURL(version string) (string, error) {
+func getBaseURL(version, base string) (string, error) {
 	versionSanitized := strings.ToLower(version)
-	URL := "https://github.com/knative/operator/releases/latest/download/operator.yaml"
+	URL := "https://github.com/knative/operator/releases/latest/download/" + base
 	if version != "latest" {
 		if !strings.HasPrefix(version, "v") {
 			versionSanitized = fmt.Sprintf("v%s", versionSanitized)
@@ -130,9 +130,17 @@ func getOperatorURL(version string) (string, error) {
 		if semver.Compare(major, "v0") == 1 {
 			prefix = "knative-"
 		}
-		URL = fmt.Sprintf("https://github.com/knative/operator/releases/download/%s%s/operator.yaml", prefix, versionSanitized)
+		URL = fmt.Sprintf("https://github.com/knative/operator/releases/download/%s%s/%s", prefix, versionSanitized, base)
 	}
 	return URL, nil
+}
+
+func getPostInstallURL(version string) (string, error) {
+	return getBaseURL(version, "operator-post-install.yaml")
+}
+
+func getOperatorURL(version string) (string, error) {
+	return getBaseURL(version, "operator.yaml")
 }
 
 func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string {
@@ -233,10 +241,21 @@ func installOperator(installFlags installCmdFlags, rootPath string, p *pkg.Opera
 		return err
 	}
 
+	postInstallURL, err := getPostInstallURL(installFlags.Version)
+	if err != nil {
+		return err
+	}
+
 	// Generate the CR template by downloading the operator yaml
 	yamlTemplateString, err := common.DownloadFile(URL)
 	if err != nil {
 		return err
+	}
+
+	yamlTemplateStringPostInstall, err := common.DownloadFile(postInstallURL)
+	if err == nil && yamlTemplateStringPostInstall != "" {
+		// If operator-post-install.yaml exists, append the content to the template content
+		yamlTemplateString = fmt.Sprintf("%s\n%s", yamlTemplateString, yamlTemplateStringPostInstall)
 	}
 
 	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)

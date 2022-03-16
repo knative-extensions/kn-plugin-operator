@@ -1,4 +1,6 @@
-# Copyright 2021 The Knative Authors
+#!/usr/bin/env bash
+
+# Copyright 2022 The Knative Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# ==========================================
-# Unit and Build tests
+# This script runs the presubmit tests; it is started by prow for each PR.
+# For convenience, it can also be executed manually.
+# Running the script without parameters, or with the --all-tests
+# flag, causes all tests to be executed, in the right order.
+# Use the flags --build-tests, --unit-tests and --integration-tests
+# to run a specific set of tests.
 
-
-# We can't use MD checks now as they will propagate into
-# the plugins' vendor/ dir
-# (the filter in markdown_build_tests() in test-infra/scripts/presumit-tests.sh is
-# not strong enough
+# Markdown linting failures don't show up properly in Gubernator resulting
+# in a net-negative contributor experience.
 export DISABLE_MD_LINTING=1
 export DISABLE_MD_LINK_CHECK=1
-export PRESUBMIT_TEST_FAIL_FAST=1
+
 export GO111MODULE=on
+export GOFLAGS=-mod=vendor
+
 source $(dirname $0)/../vendor/knative.dev/hack/presubmit-tests.sh
 
-# Run the unit tests with an additional flag '-mod=vendor' to avoid
-# downloading the deps in unit tests CI job
-function unit_tests() {
-  report_go_test -race -mod=vendor ./... || failed=1
-}
+# We use the default build, unit and integration test runners.
 
-# We use the default build and integration test runners.
 main "$@"

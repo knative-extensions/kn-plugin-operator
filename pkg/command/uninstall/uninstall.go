@@ -31,7 +31,6 @@ type uninstallCmdFlags struct {
 	Component  string
 	Namespace  string
 	KubeConfig string
-	Version    string
 }
 
 var (
@@ -53,13 +52,13 @@ func NewUninstallCommand(p *pkg.OperatorParams) *cobra.Command {
 				if err := uninstallKnativeServing(uninstallFlags, p); err != nil {
 					return err
 				}
-				fmt.Fprintf(cmd.OutOrStdout(), "Knative Serving of the '%s' version was removed in the namespace '%s'.\n", uninstallFlags.Version, uninstallFlags.Namespace)
+				fmt.Fprintf(cmd.OutOrStdout(), "Knative Serving was removed in the namespace '%s'.\n", uninstallFlags.Namespace)
 			} else if strings.ToLower(uninstallFlags.Component) == common.EventingComponent {
 				// Uninstall the eventing
 				if err := uninstallKnativeEventing(uninstallFlags, p); err != nil {
 					return err
 				}
-				fmt.Fprintf(cmd.OutOrStdout(), "Knative Eventing of the '%s' version was removed in the namespace '%s'.\n", uninstallFlags.Version, uninstallFlags.Namespace)
+				fmt.Fprintf(cmd.OutOrStdout(), "Knative Eventing was removed in the namespace '%s'.\n", uninstallFlags.Namespace)
 			} else if uninstallFlags.Component != "" {
 				return fmt.Errorf("Unknown component name: you need to set component name to serving or eventing.")
 			} else {
@@ -67,7 +66,7 @@ func NewUninstallCommand(p *pkg.OperatorParams) *cobra.Command {
 				if err := uninstallOperator(uninstallFlags, p); err != nil {
 					return err
 				}
-				fmt.Fprintf(cmd.OutOrStdout(), "Knative operator of the '%s' version was removed in the namespace '%s'.\n", uninstallFlags.Version, uninstallFlags.Namespace)
+				fmt.Fprintf(cmd.OutOrStdout(), "Knative operator was removed in the namespace '%s'.\n", uninstallFlags.Namespace)
 			}
 
 			return nil

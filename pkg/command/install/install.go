@@ -58,7 +58,7 @@ var (
 	installFlags installCmdFlags
 )
 
-// installCmd represents the install commands for the operation
+// NewInstallCommand represents the install commands for the operation
 func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	var installCmd = &cobra.Command{
 		Use:   "install",
@@ -69,26 +69,9 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Fill in the default values for the empty fields
-			installFlags.fill_defaults()
-			p.KubeCfgPath = installFlags.KubeConfig
-
-			rootPath, err := os.Getwd()
+			err := RunInstallationCommand(installFlags, p)
 			if err != nil {
 				return err
-			}
-
-			if installFlags.Component != "" {
-				// Install serving or eventing
-				err = installKnativeComponent(installFlags, rootPath, p)
-				if err != nil {
-					return err
-				}
-			} else {
-				// Install the Knative Operator
-				err = installOperator(installFlags, rootPath, p)
-				if err != nil {
-					return err
-				}
 			}
 
 			fmt.Fprintf(cmd.OutOrStdout(), "Knative operator of the '%s' version was created in the namespace '%s'.\n", installFlags.Version, installFlags.Namespace)
@@ -105,9 +88,36 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	return installCmd
 }
 
-func getOperatorURL(version string) (string, error) {
+func RunInstallationCommand(installFlags installCmdFlags, p *pkg.OperatorParams) error {
+	// Fill in the default values for the empty fields
+	installFlags.fill_defaults()
+	p.KubeCfgPath = installFlags.KubeConfig
+
+	rootPath, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	if installFlags.Component != "" {
+		// Install serving or eventing
+		err = installKnativeComponent(installFlags, rootPath, p)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Install the Knative Operator
+		err = installOperator(installFlags, rootPath, p)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func getBaseURL(version, base string) (string, error) {
 	versionSanitized := strings.ToLower(version)
-	URL := "https://github.com/knative/operator/releases/latest/download/operator.yaml"
+	URL := "https://github.com/knative/operator/releases/latest/download/" + base
 	if version != "latest" {
 		if !strings.HasPrefix(version, "v") {
 			versionSanitized = fmt.Sprintf("v%s", versionSanitized)
@@ -120,9 +130,17 @@ func getOperatorURL(version string) (string, error) {
 		if semver.Compare(major, "v0") == 1 {
 			prefix = "knative-"
 		}
-		URL = fmt.Sprintf("https://github.com/knative/operator/releases/download/%s%s/operator.yaml", prefix, versionSanitized)
+		URL = fmt.Sprintf("https://github.com/knative/operator/releases/download/%s%s/%s", prefix, versionSanitized, base)
 	}
 	return URL, nil
+}
+
+func getPostInstallURL(version string) (string, error) {
+	return getBaseURL(version, "operator-post-install.yaml")
+}
+
+func getOperatorURL(version string) (string, error) {
+	return getBaseURL(version, "operator.yaml")
 }
 
 func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string {
@@ -142,7 +160,18 @@ func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string
 		return ""
 	}
 	overlayContent, _ := common.ReadFile(path)
+	if installFlags.Component == "" && (strings.EqualFold(installFlags.Version, "latest") || versionWebhook(installFlags.Version)) {
+		crdOverlay, _ := common.ReadFile(rootPath + "/overlay/operator_crds.yaml")
+		overlayContent = fmt.Sprintf("%s\n%s", overlayContent, crdOverlay)
+	}
+
 	return overlayContent
+}
+
+func versionWebhook(version string) bool {
+	targetVersion := fmt.Sprintf("v%s", version)
+	semver.MajorMinor(targetVersion)
+	return semver.Compare(targetVersion, "v1.3") >= 0
 }
 
 func getYamlValuesContent(installFlags installCmdFlags) string {
@@ -181,7 +210,10 @@ func installKnativeComponent(installFlags installCmdFlags, rootPath string, p *p
 			Namespace: "default",
 			Version:   "latest",
 		}
-		installOperator(operatorInstallFlags, rootPath, p)
+		err = installOperator(operatorInstallFlags, rootPath, p)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = createNamspaceIfNecessary(installFlags.Namespace, p)
@@ -209,10 +241,21 @@ func installOperator(installFlags installCmdFlags, rootPath string, p *pkg.Opera
 		return err
 	}
 
+	postInstallURL, err := getPostInstallURL(installFlags.Version)
+	if err != nil {
+		return err
+	}
+
 	// Generate the CR template by downloading the operator yaml
 	yamlTemplateString, err := common.DownloadFile(URL)
 	if err != nil {
 		return err
+	}
+
+	yamlTemplateStringPostInstall, err := common.DownloadFile(postInstallURL)
+	if err == nil && yamlTemplateStringPostInstall != "" {
+		// If operator-post-install.yaml exists, append the content to the template content
+		yamlTemplateString = fmt.Sprintf("%s\n%s", yamlTemplateString, yamlTemplateStringPostInstall)
 	}
 
 	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)

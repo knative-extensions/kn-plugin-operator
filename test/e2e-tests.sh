@@ -33,11 +33,12 @@ export EVENTING_NAMESPACE="${EVENTING_NAMESPACE:-eventing-test}"
 export ALPHA_VERSION="${ALPHA_VERSION:-1.2.0}"
 export LATEST_VERSION="${LATEST_VERSION:-latest}"
 
-# source "$(dirname "$0")/e2e-common.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/../vendor/knative.dev/hack/e2e-tests.sh"
+source "$(dirname "$0")/e2e-common.sh"
 
 # Script entry point.
 initialize $@ --skip-istio-addon
+
+install_istio || fail_test "Istio installation failed"
 
 echo ">> Build the binary kn-operator for the operator plugin"
 go build -o kn-operator ./cmd/kn-operator.go || fail_test "Failed to build the binary of the operator plugin"
@@ -45,17 +46,20 @@ go build -o kn-operator ./cmd/kn-operator.go || fail_test "Failed to build the b
 echo ">> Install the Knative Operator ${ALPHA_VERSION}"
 ./kn-operator install -n ${OPERATOR_NAMESPACE} -v ${ALPHA_VERSION} || fail_test "Failed to install Knative Operator ${ALPHA_VERSION}"
 
+echo ">> Verify the installation of Knative Operator ${ALPHA_VERSION}"
+go_test_e2e -tags=alpha -timeout=20m ./test/e2e || failed=1
+
 echo ">> Upgrade to the latest version of Knative Operator"
 ./kn-operator install -n ${OPERATOR_NAMESPACE} -v ${LATEST_VERSION} || fail_test "Failed to upgrade to the latest Knative Operator"
 
-echo ">> Verify the installationg of Knative Operator"
-#TODO
+echo ">> Verify the installation of Knative Operator of the latest version"
+go_test_e2e -tags=beta -timeout=20m ./test/e2e || failed=1
 
 echo ">> Install Knative Serving"
-./kn-operator install -c eventing -n ${SERVING_NAMESPACE} || fail_test "Failed to install Knative Serving"
+./kn-operator install -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to install Knative Serving"
 
 echo ">> Verify the installation of Knative Serving"
-go_test_e2e -timeout=20m ./test/e2e || failed=1
+#TODO
 
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"

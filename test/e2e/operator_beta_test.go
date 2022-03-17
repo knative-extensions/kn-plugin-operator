@@ -1,5 +1,5 @@
-//go:build alpha
-// +build alpha
+//go:build beta
+// +build beta
 
 /*
 Copyright 2022 The Knative Authors
@@ -26,8 +26,8 @@ import (
 	"knative.dev/operator/test/client"
 )
 
-// TestOperatorAlpha verifies the installation of Knative Operator prior to 1.3
-func TestOperatorAlpha(t *testing.T) {
+// TestOperatorBeta verifies the installation of Knative Operator 1.3 or later
+func TestOperatorBeta(t *testing.T) {
 	clients := client.Setup(t)
-	resources.VerifyOperatorInstallationAlpha(t, clients)
+	resources.VerifyOperatorInstallationBeta(t, clients)
 }

@@ -17,9 +17,16 @@ limitations under the License.
 package resources
 
 import (
+	"context"
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/kn-plugin-operator/pkg/command/configure"
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
+	"knative.dev/operator/pkg/apis/operator/base"
+	operatorv1beta1 "knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1"
 	"knative.dev/operator/test"
 )
 
@@ -83,4 +90,35 @@ func VerifyOperatorInstallationBeta(t *testing.T, clients *test.Clients) {
 	_, err = WaitForJob(clients.KubeClient, "storage-version-migration-operator", OperatorNamespace,
 		IsKnativeOperatorJobComplete)
 	testingUtil.AssertEqual(t, err, nil)
+}
+
+func VerifyKnativeServingExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, resourcesFlags configure.ResourcesFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentOverride(t, ks.Spec.DeploymentOverride, resourcesFlags)
+}
+
+func VerifyKnativeEventingExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, resourcesFlags configure.ResourcesFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentOverride(t, ke.Spec.DeploymentOverride, resourcesFlags)
+}
+
+func VerifyDeploymentOverride(t *testing.T, deploymentOverride []base.DeploymentOverride, resourcesFlags configure.ResourcesFlags) {
+	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
+
+	deploy := deploymentOverride[0]
+	testingUtil.AssertEqual(t, deploy.Name, resourcesFlags.DeployName)
+	testingUtil.AssertEqual(t, len(deploy.Resources), 1)
+
+	firstResource := deploy.Resources[0]
+	testingUtil.AssertEqual(t, firstResource.Container, resourcesFlags.Container)
+
+	resourceRequirements := corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{corev1.ResourceCPU: resource.MustParse(resourcesFlags.LimitCPU),
+			corev1.ResourceMemory: resource.MustParse(resourcesFlags.LimitMemory)},
+		Requests: corev1.ResourceList{corev1.ResourceCPU: resource.MustParse(resourcesFlags.RequestCPU),
+			corev1.ResourceMemory: resource.MustParse(resourcesFlags.RequestMemory)},
+	}
+	testingUtil.AssertDeepEqual(t, firstResource.ResourceRequirements, resourceRequirements)
 }

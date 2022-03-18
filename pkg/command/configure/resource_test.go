@@ -24,11 +24,11 @@ import (
 func TestGetOverlayYamlContentSource(t *testing.T) {
 	for _, tt := range []struct {
 		name              string
-		resourcesCMDFlags resourcesFlags
+		resourcesCMDFlags ResourcesFlags
 		expectedResult    string
 	}{{
 		name: "Knative Eventing",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:      "2.5G",
 			LimitMemory:   "1001M",
 			RequestCPU:    "2.2G",
@@ -73,7 +73,7 @@ spec:
         memory: #@ data.values.limitMemory`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:      "2.5G",
 			LimitMemory:   "1001M",
 			RequestCPU:    "2.2G",
@@ -118,7 +118,7 @@ spec:
         memory: #@ data.values.limitMemory`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitMemory: "1001M",
 			RequestCPU:  "2.2G",
 			Component:   "serving",
@@ -157,7 +157,7 @@ spec:
         memory: #@ data.values.limitMemory`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			RequestCPU: "2.2G",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -191,7 +191,7 @@ spec:
         cpu: #@ data.values.requestCPU`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:   "2.2G",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -235,11 +235,11 @@ spec:
 func TestGetYamlValuesContentResources(t *testing.T) {
 	for _, tt := range []struct {
 		name              string
-		resourcesCMDFlags resourcesFlags
+		resourcesCMDFlags ResourcesFlags
 		expectedResult    string
 	}{{
 		name: "Knative Eventing",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:      "2.5G",
 			LimitMemory:   "1001M",
 			RequestCPU:    "2.2G",
@@ -260,7 +260,7 @@ limitCPU: 2.5G
 limitMemory: 1001M`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:      "2.5G",
 			LimitMemory:   "1001M",
 			RequestCPU:    "2.2G",
@@ -281,7 +281,7 @@ limitCPU: 2.5G
 limitMemory: 1001M`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitMemory: "1001M",
 			RequestCPU:  "2.2G",
 			Component:   "serving",
@@ -298,7 +298,7 @@ requestCPU: 2.2G
 limitMemory: 1001M`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			RequestCPU: "2.2G",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -313,7 +313,7 @@ deployName: activator
 requestCPU: 2.2G`,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:   "22G",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -337,11 +337,11 @@ limitCPU: 22G`,
 func TestValidateResourcesFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name              string
-		resourcesCMDFlags resourcesFlags
+		resourcesCMDFlags ResourcesFlags
 		expectedResult    error
 	}{{
 		name: "Knative Eventing",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:      "2.5G",
 			LimitMemory:   "1001M",
 			RequestCPU:    "2.2G",
@@ -354,7 +354,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			Component:  "serving",
 			Namespace:  "test-serving",
 			Container:  "activator",
@@ -363,7 +363,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify at least one resource parameter: limitCPU, limitMemory, requestCPU or requestMemory."),
 	}, {
 		name: "Knative Serving with no component name",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitMemory: "1001M",
 			RequestCPU:  "2.2G",
 			Namespace:   "test-serving",
@@ -373,7 +373,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the component name."),
 	}, {
 		name: "Knative Serving with no container name",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			RequestCPU: "2.2G",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -382,7 +382,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the container name."),
 	}, {
 		name: "Knative Serving with no deployment name",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:  "22G",
 			Component: "serving",
 			Namespace: "test-serving",
@@ -391,7 +391,7 @@ func TestValidateResourcesFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the name of the deployment."),
 	}, {
 		name: "Knative Serving with no namespace",
-		resourcesCMDFlags: resourcesFlags{
+		resourcesCMDFlags: ResourcesFlags{
 			LimitCPU:   "22G",
 			Component:  "serving",
 			DeployName: "test-serving",

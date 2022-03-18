@@ -430,10 +430,10 @@ k8s.io/kube-openapi/pkg/util/proto
 k8s.io/utils/buffer
 k8s.io/utils/integer
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20220314052818-c9c3ea17a2e9
+# knative.dev/hack v0.0.0-20220318020218-14f832e506f8
 ## explicit
 knative.dev/hack
-# knative.dev/operator v0.30.1-0.20220314165318-e4df31b863d9
+# knative.dev/operator v0.30.1-0.20220317144648-9ae9766907f0
 ## explicit
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
@@ -445,7 +445,7 @@ knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1alpha1
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20220310195447-38af013b30ff
+# knative.dev/pkg v0.0.0-20220316002959-3a4cc56708b9
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck
 knative.dev/pkg/apis/duck/ducktypes

@@ -74,7 +74,15 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(cmd.OutOrStdout(), "Knative operator of the '%s' version was created in the namespace '%s'.\n", installFlags.Version, installFlags.Namespace)
+			component := "Operator"
+			if strings.EqualFold(installFlags.Component, common.ServingComponent) {
+				component = common.ServingComponent
+			} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
+				component = common.EventingComponent
+			}
+
+			fmt.Fprintf(cmd.OutOrStdout(), "Knative %s of the '%s' version was created in the namespace '%s'.\n",
+				component, installFlags.Version, installFlags.Namespace)
 			return nil
 		},
 	}

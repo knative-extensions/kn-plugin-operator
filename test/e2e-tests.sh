@@ -58,20 +58,24 @@ go_test_e2e -tags=beta -timeout=20m ./test/e2e || failed=1
 echo ">> Install Knative Serving"
 ./kn-operator install -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to install Knative Serving"
 
-echo ">> Verify the installation of Knative Serving"
-#TODO
+echo ">> Configure the resource with Knative Serving"
+./kn-operator configure resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --container activator --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
+  --requestCPU 1024m || fail_test "Failed to configure Knative Serving"
+
+echo ">> Verify the resource configuration of Knative Serving Custom resource"
+go_test_e2e -tags=servingresourceconfig -timeout=20m ./test/e2e || failed=1
 
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
-echo ">> Verify the installation of Knative Eventing"
-#TODO
+echo ">> Configure the resource with Knative Eventing"
+./kn-operator configure resources -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --container eventing-controller --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
+  --requestCPU 1024m || fail_test "Failed to configure Knative Eventing"
 
-echo ">> Remove Knative Serving"
-./kn-operator uninstall -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to remove Knative Serving"
-
-echo ">> Remove Knative Eventing"
-./kn-operator uninstall -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to remove Knative Eventing"
+echo ">> Verify the resource configuration of Knative Eventing Custom resource"
+go_test_e2e -tags=eventingresourceconfig -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

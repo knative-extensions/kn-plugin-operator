@@ -25,7 +25,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
-type resourcesFlags struct {
+type ResourcesFlags struct {
 	LimitCPU      string
 	LimitMemory   string
 	RequestCPU    string
@@ -36,7 +36,7 @@ type resourcesFlags struct {
 	DeployName    string
 }
 
-var resourcesCMDFlags resourcesFlags
+var resourcesCMDFlags ResourcesFlags
 
 // newResourcesCommand represents the configure commands for Knative Serving or Eventing
 func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
@@ -79,7 +79,7 @@ func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureResourcesCmd
 }
 
-func validateResourcesFlags(resourcesCMDFlags resourcesFlags) error {
+func validateResourcesFlags(resourcesCMDFlags ResourcesFlags) error {
 	count := 0
 
 	if resourcesCMDFlags.LimitCPU != "" {
@@ -117,7 +117,7 @@ func validateResourcesFlags(resourcesCMDFlags resourcesFlags) error {
 	return nil
 }
 
-func configureResources(resourcesCMDFlags resourcesFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureResources(resourcesCMDFlags ResourcesFlags, rootPath string, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(resourcesCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -136,7 +136,7 @@ func configureResources(resourcesCMDFlags resourcesFlags, rootPath string, p *pk
 	return nil
 }
 
-func getOverlayYamlContentResource(rootPath string, resourcesCMDFlags resourcesFlags) string {
+func getOverlayYamlContentResource(rootPath string, resourcesCMDFlags ResourcesFlags) string {
 	path := rootPath + "/overlay/ks_resource_base.yaml"
 	if strings.EqualFold(resourcesCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_resource_base.yaml"
@@ -147,7 +147,7 @@ func getOverlayYamlContentResource(rootPath string, resourcesCMDFlags resourcesF
 	return baseOverlayContent
 }
 
-func getResourceConfiguration(resourcesCMDFlags resourcesFlags) string {
+func getResourceConfiguration(resourcesCMDFlags ResourcesFlags) string {
 	resourceArray := []string{}
 	tag := fmt.Sprintf("%s%s", common.Spaces(6), common.FieldByName("container"))
 	resourceArray = append(resourceArray, tag)
@@ -200,7 +200,7 @@ func getResourceConfiguration(resourcesCMDFlags resourcesFlags) string {
 	return strings.Join(resourceArray, "\n")
 }
 
-func getYamlValuesContentResources(resourcesCMDFlags resourcesFlags) string {
+func getYamlValuesContentResources(resourcesCMDFlags ResourcesFlags) string {
 	contentArray := []string{}
 	header := "#@data/values\n---"
 	contentArray = append(contentArray, header)

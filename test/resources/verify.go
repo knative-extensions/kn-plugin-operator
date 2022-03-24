@@ -107,8 +107,8 @@ func VerifyKnativeEventingExistence(t *testing.T, clients operatorv1beta1.Knativ
 func VerifyDeploymentOverride(t *testing.T, deploymentOverride []base.DeploymentOverride, resourcesFlags configure.ResourcesFlags) {
 	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
 
-	deploy := deploymentOverride[0]
-	testingUtil.AssertEqual(t, deploy.Name, resourcesFlags.DeployName)
+	deploy := findDeployment(resourcesFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
 	testingUtil.AssertEqual(t, len(deploy.Resources), 1)
 
 	firstResource := deploy.Resources[0]
@@ -121,4 +121,58 @@ func VerifyDeploymentOverride(t *testing.T, deploymentOverride []base.Deployment
 			corev1.ResourceMemory: resource.MustParse(resourcesFlags.RequestMemory)},
 	}
 	testingUtil.AssertDeepEqual(t, firstResource.ResourceRequirements, resourceRequirements)
+}
+
+func VerifyKnativeServingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentLabels(t, ks.Spec.DeploymentOverride, deployLabelFlags)
+}
+
+func VerifyKnativeEventingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentLabels(t, ks.Spec.DeploymentOverride, deployLabelFlags)
+}
+
+func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags configure.DeploymentLabelFlags) {
+	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
+
+	deploy := findDeployment(deployLabelFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
+
+	indicator := "label"
+	if deployLabelFlags.Annotation {
+		indicator = "annotation"
+	} else if deployLabelFlags.NodeSelector {
+		indicator = "nodeselector"
+	}
+	result := findKeyValue(t, deployLabelFlags.Key, deployLabelFlags.Value, indicator, deploy)
+	testingUtil.AssertEqual(t, result, true)
+}
+
+func findDeployment(name string, deploymentOverride []base.DeploymentOverride) *base.DeploymentOverride {
+	for _, deploy := range deploymentOverride {
+		if deploy.Name == name {
+			return &deploy
+		}
+	}
+	return nil
+}
+
+func findKeyValue(t *testing.T, key, expectedValue, indicator string, deploy *base.DeploymentOverride) bool {
+	if indicator == "label" {
+		if data, ok := deploy.Labels[key]; ok && expectedValue == data {
+			return true
+		}
+	} else if indicator == "annotation" {
+		if data, ok := deploy.Annotations[key]; ok && expectedValue == data {
+			return true
+		}
+	} else if indicator == "nodeselector" {
+		if data, ok := deploy.NodeSelector[key]; ok && expectedValue == data {
+			return true
+		}
+	}
+	return false
 }

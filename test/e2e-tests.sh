@@ -32,6 +32,10 @@ export SERVING_NAMESPACE="${SERVING_NAMESPACE:-serving-test}"
 export EVENTING_NAMESPACE="${EVENTING_NAMESPACE:-eventing-test}"
 export ALPHA_VERSION="${ALPHA_VERSION:-1.2.0}"
 export LATEST_VERSION="${LATEST_VERSION:-latest}"
+export TEST_KEY="${TEST_KEY:-test-key}"
+export TEST_VALUE="${TEST_VALUE:-test-value}"
+export TEST_KEY_ADDITIONAL="${TEST_KEY_ADDITIONAL:-test-key-additional}"
+export TEST_VALUE_ADDITIONAL="${TEST_VALUE_ADDITIONAL:-test-value-additional}"
 
 source "$(dirname "$0")/e2e-common.sh"
 
@@ -68,24 +72,27 @@ go_test_e2e -tags=servingresourceconfig -timeout=20m ./test/e2e || failed=1
 
 echo ">> Configure the label for Knative Serving"
 ./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key test-key --value test-value --label || fail_test "Failed to configure Knative Serving"
+  --key ${TEST_KEY} --value ${TEST_VALUE} --label || fail_test "Failed to configure Knative Serving"
 
-echo ">> Verify the label configuration of Knative Serving"
-go_test_e2e -tags=servinglabelconfig -timeout=20m ./test/e2e || failed=1
+./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --label || fail_test "Failed to configure Knative Serving"
 
 echo ">> Configure the annotation for Knative Serving"
 ./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key test-key --value test-value --annotation || fail_test "Failed to configure Knative Serving"
+  --key ${TEST_KEY} --value ${TEST_VALUE} --annotation || fail_test "Failed to configure Knative Serving"
 
-echo ">> Verify the annotation configuration of Knative Serving"
-go_test_e2e -tags=servingannotationconfig -timeout=20m ./test/e2e || failed=1
+./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --annotation || fail_test "Failed to configure Knative Serving"
 
 echo ">> Configure the nodeSelector for Knative Serving"
 ./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key test-key --value test-value --nodeSelector || fail_test "Failed to configure Knative Serving"
+  --key ${TEST_KEY} --value ${TEST_VALUE} --nodeSelector || fail_test "Failed to configure Knative Serving"
 
-echo ">> Verify the nodeSelector configuration of Knative Serving"
-go_test_e2e -tags=servingnodeselectorconfig -timeout=20m ./test/e2e || failed=1
+./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --nodeSelector || fail_test "Failed to configure Knative Serving"
+
+echo ">> Verify the label configuration of Knative Serving"
+go_test_e2e -tags=servinglabelconfig -timeout=20m ./test/e2e || failed=1
 
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
@@ -100,24 +107,27 @@ go_test_e2e -tags=eventingresourceconfig -timeout=20m ./test/e2e || failed=1
 
 echo ">> Configure the label for Knative Eventing"
 ./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
-  --key test-key --value test-value --label || fail_test "Failed to configure Knative Eventing"
+  --key ${TEST_KEY} --value ${TEST_VALUE} --label || fail_test "Failed to configure Knative Eventing"
 
-echo ">> Verify the label configuration of Knative Eventing"
-go_test_e2e -tags=eventinglabelconfig -timeout=20m ./test/e2e || failed=1
+./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --label || fail_test "Failed to configure Knative Eventing"
 
 echo ">> Configure the annotation for Knative Eventing"
 ./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
-  --key test-key --value test-value --annotation || fail_test "Failed to configure Knative Eventing"
+  --key ${TEST_KEY} --value ${TEST_VALUE} --annotation || fail_test "Failed to configure Knative Eventing"
 
-echo ">> Verify the annotation configuration of Knative Eventing"
-go_test_e2e -tags=eventingannotationconfig -timeout=20m ./test/e2e || failed=1
+./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --annotation || fail_test "Failed to configure Knative Eventing"
 
 echo ">> Configure the nodeSelector for Knative Eventing"
 ./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
-  --key test-key --value test-value --nodeSelector || fail_test "Failed to configure Knative Eventing"
+  --key ${TEST_KEY} --value ${TEST_VALUE} --nodeSelector || fail_test "Failed to configure Knative Eventing"
 
-echo ">> Verify the nodeSelector configuration of Knative Eventing"
-go_test_e2e -tags=eventingnodeselectorconfig -timeout=20m ./test/e2e || failed=1
+./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --nodeSelector || fail_test "Failed to configure Knative Eventing"
+
+echo ">> Verify the label configuration of Knative Eventing"
+go_test_e2e -tags=eventinglabelconfig -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

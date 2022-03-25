@@ -25,7 +25,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
-type deploymentLabelFlags struct {
+type DeploymentLabelFlags struct {
 	Value        string
 	Key          string
 	Component    string
@@ -36,7 +36,7 @@ type deploymentLabelFlags struct {
 	Label        bool
 }
 
-var deploymentLabelCMDFlags deploymentLabelFlags
+var deploymentLabelCMDFlags DeploymentLabelFlags
 
 // newDeploymentLabelCommand represents the configure commands to configure the labels for Knative deployment
 func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
@@ -79,7 +79,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureLabelsCmd
 }
 
-func validateLabelsFlags(deploymentLabelCMDFlags deploymentLabelFlags) error {
+func validateLabelsFlags(deploymentLabelCMDFlags DeploymentLabelFlags) error {
 	count := 0
 
 	if deploymentLabelCMDFlags.Label {
@@ -119,7 +119,7 @@ func validateLabelsFlags(deploymentLabelCMDFlags deploymentLabelFlags) error {
 	return nil
 }
 
-func configureLabels(deploymentLabelCMDFlags deploymentLabelFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureLabels(deploymentLabelCMDFlags DeploymentLabelFlags, rootPath string, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -137,7 +137,7 @@ func configureLabels(deploymentLabelCMDFlags deploymentLabelFlags, rootPath stri
 	return nil
 }
 
-func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags deploymentLabelFlags) string {
+func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags DeploymentLabelFlags) string {
 	path := rootPath + "/overlay/ks_deploy_label.yaml"
 	if strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_deploy_label.yaml"
@@ -148,7 +148,7 @@ func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags deploym
 	return baseOverlayContent
 }
 
-func getLabelConfiguration(deploymentLabelCMDFlags deploymentLabelFlags) string {
+func getLabelConfiguration(deploymentLabelCMDFlags DeploymentLabelFlags) string {
 	resourceArray := []string{}
 	tag := fmt.Sprintf("%s%s", common.Spaces(4), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)
@@ -177,7 +177,7 @@ func getLabelConfiguration(deploymentLabelCMDFlags deploymentLabelFlags) string 
 	return strings.Join(resourceArray, "\n")
 }
 
-func getYamlValuesContentLabels(deploymentLabelCMDFlags deploymentLabelFlags) string {
+func getYamlValuesContentLabels(deploymentLabelCMDFlags DeploymentLabelFlags) string {
 	contentArray := []string{}
 	header := "#@data/values\n---"
 	contentArray = append(contentArray, header)

@@ -41,14 +41,67 @@ func TestServingLabelConfiguration(t *testing.T) {
 	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
 	defer test.TearDown(clients, names)
 
-	expectedDeploymentLabelFlags := configure.DeploymentLabelFlags{
-		Value:      "test-value",
-		Key:        "test-key",
-		Component:  "serving",
-		DeployName: "activator",
-		Label:      true,
+	for _, tt := range []struct {
+		name           string
+		expectedLabels configure.DeploymentLabelFlags
+	}{{
+		name: "Knative Serving verifying the first key-value pair for labels",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValue,
+			Key:        resources.TestKey,
+			Component:  "serving",
+			DeployName: "activator",
+			Label:      true,
+		},
+	}, {
+		name: "Knative Serving verifying the additional key-value pair for labels",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValueAdditional,
+			Key:        resources.TestKeyAdditional,
+			Component:  "serving",
+			DeployName: "activator",
+			Label:      true,
+		},
+	}, {
+		name: "Knative Serving verifying the first key-value pair for annotations",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValue,
+			Key:        resources.TestKey,
+			Component:  "serving",
+			DeployName: "activator",
+			Annotation: true,
+		},
+	}, {
+		name: "Knative Serving verifying the additional key-value pair for annotations",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValueAdditional,
+			Key:        resources.TestKeyAdditional,
+			Component:  "serving",
+			DeployName: "activator",
+			Annotation: true,
+		},
+	}, {
+		name: "Knative Serving verifying the first key-value pair for nodeSelectors",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:        resources.TestValue,
+			Key:          resources.TestKey,
+			Component:    "serving",
+			DeployName:   "activator",
+			NodeSelector: true,
+		},
+	}, {
+		name: "Knative Serving verifying the additional key-value pair for nodeSelectors",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:        resources.TestValueAdditional,
+			Key:          resources.TestKeyAdditional,
+			Component:    "serving",
+			DeployName:   "activator",
+			NodeSelector: true,
+		},
+	}} {
+		t.Run(tt.name, func(t *testing.T) {
+			resources.VerifyKnativeServingLabelsExistence(t, clients.Operator.KnativeServings(resources.ServingOperatorNamespace),
+				tt.expectedLabels)
+		})
 	}
-
-	resources.VerifyKnativeServingLabelsExistence(t, clients.Operator.KnativeServings(resources.ServingOperatorNamespace),
-		expectedDeploymentLabelFlags)
 }

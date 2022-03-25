@@ -41,14 +41,67 @@ func TestEventingLabelConfiguration(t *testing.T) {
 	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
 	defer test.TearDown(clients, names)
 
-	expectedDeploymentLabelFlags := configure.DeploymentLabelFlags{
-		Value:      "test-value",
-		Key:        "test-key",
-		Component:  "eventing",
-		DeployName: "eventing-controller",
-		Label:      true,
+	for _, tt := range []struct {
+		name           string
+		expectedLabels configure.DeploymentLabelFlags
+	}{{
+		name: "Knative Eventing verifying the first key-value pair for labels",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValue,
+			Key:        resources.TestKey,
+			Component:  "eventing",
+			DeployName: "eventing-controller",
+			Label:      true,
+		},
+	}, {
+		name: "Knative Serving Eventing the additional key-value pair for labels",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValueAdditional,
+			Key:        resources.TestKeyAdditional,
+			Component:  "eventing",
+			DeployName: "eventing-controller",
+			Label:      true,
+		},
+	}, {
+		name: "Knative Eventing verifying the first key-value pair for annotations",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValue,
+			Key:        resources.TestKey,
+			Component:  "eventing",
+			DeployName: "eventing-controller",
+			Annotation: true,
+		},
+	}, {
+		name: "Knative Eventing verifying the additional key-value pair for annotations",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:      resources.TestValueAdditional,
+			Key:        resources.TestKeyAdditional,
+			Component:  "eventing",
+			DeployName: "eventing-controller",
+			Annotation: true,
+		},
+	}, {
+		name: "Knative Eventing verifying the first key-value pair for nodeSelectors",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:        resources.TestValue,
+			Key:          resources.TestKey,
+			Component:    "eventing",
+			DeployName:   "eventing-controller",
+			NodeSelector: true,
+		},
+	}, {
+		name: "Knative Eventing verifying the additional key-value pair for nodeSelectors",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:        resources.TestValueAdditional,
+			Key:          resources.TestKeyAdditional,
+			Component:    "eventing",
+			DeployName:   "eventing-controller",
+			NodeSelector: true,
+		},
+	}} {
+		t.Run(tt.name, func(t *testing.T) {
+			resources.VerifyKnativeEventingLabelsExistence(t, clients.Operator.KnativeEventings(resources.EventingOperatorNamespace),
+				tt.expectedLabels)
+		})
 	}
-
-	resources.VerifyKnativeEventingLabelsExistence(t, clients.Operator.KnativeEventings(resources.EventingOperatorNamespace),
-		expectedDeploymentLabelFlags)
 }

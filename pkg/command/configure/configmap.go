@@ -25,7 +25,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
-type cmsFlags struct {
+type CMsFlags struct {
 	Value     string
 	Key       string
 	Component string
@@ -33,7 +33,7 @@ type cmsFlags struct {
 	CMName    string
 }
 
-var cmsCMDFlags cmsFlags
+var cmsCMDFlags CMsFlags
 
 // newConfigmapsCommand represents the configure commands to update the ConfigMaps in Knative Serving or Eventing
 func newConfigmapsCommand(p *pkg.OperatorParams) *cobra.Command {
@@ -42,7 +42,7 @@ func newConfigmapsCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the configmap for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the CM for Knative Serving and Eventing
-  kn operation configure configmaps --component eventing --cmName eventing-controller --key key --value value--namespace knative-eventing`,
+  kn operation configure configmaps --component eventing --cmName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCMsFlags(cmsCMDFlags); err != nil {
 				return err
@@ -73,7 +73,7 @@ func newConfigmapsCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureCMsCmd
 }
 
-func validateCMsFlags(cmsCMDFlags cmsFlags) error {
+func validateCMsFlags(cmsCMDFlags CMsFlags) error {
 	if cmsCMDFlags.Key == "" {
 		return fmt.Errorf("You need to specify the key in the ConfigMap data.")
 	}
@@ -92,7 +92,7 @@ func validateCMsFlags(cmsCMDFlags cmsFlags) error {
 	return nil
 }
 
-func configureCMs(cmsCMDFlags cmsFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureCMs(cmsCMDFlags CMsFlags, rootPath string, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(cmsCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -110,7 +110,7 @@ func configureCMs(cmsCMDFlags cmsFlags, rootPath string, p *pkg.OperatorParams) 
 	return nil
 }
 
-func getOverlayYamlContentCM(rootPath string, cmsCMDFlags cmsFlags) string {
+func getOverlayYamlContentCM(rootPath string, cmsCMDFlags CMsFlags) string {
 	path := rootPath + "/overlay/ks_cm_base.yaml"
 	if strings.EqualFold(cmsCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_cm_base.yaml"
@@ -121,7 +121,7 @@ func getOverlayYamlContentCM(rootPath string, cmsCMDFlags cmsFlags) string {
 	return baseOverlayContent
 }
 
-func getCMConfiguration(cmsCMDFlags cmsFlags) string {
+func getCMConfiguration(cmsCMDFlags CMsFlags) string {
 	resourceArray := []string{}
 	tag := fmt.Sprintf("%s%s", common.Spaces(4), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)
@@ -138,7 +138,7 @@ func getCMConfiguration(cmsCMDFlags cmsFlags) string {
 	return strings.Join(resourceArray, "\n")
 }
 
-func getYamlValuesContentCMs(cmsCMDFlags cmsFlags) string {
+func getYamlValuesContentCMs(cmsCMDFlags CMsFlags) string {
 	contentArray := []string{}
 	header := "#@data/values\n---"
 	contentArray = append(contentArray, header)

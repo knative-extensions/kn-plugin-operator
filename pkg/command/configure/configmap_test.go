@@ -24,11 +24,11 @@ import (
 func TestValidateCMsFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		cmsCMDFlags    cmsFlags
+		cmsCMDFlags    CMsFlags
 		expectedResult error
 	}{{
 		name: "Knative Eventing",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "eventing",
@@ -38,7 +38,7 @@ func TestValidateCMsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "serving",
@@ -48,7 +48,7 @@ func TestValidateCMsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving with no namespace",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "serving",
@@ -57,7 +57,7 @@ func TestValidateCMsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the namespace."),
 	}, {
 		name: "Knative Eventing with no ConfigMap name",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "eventing",
@@ -66,7 +66,7 @@ func TestValidateCMsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the name of the ConfigMap."),
 	}, {
 		name: "Knative with invalid component name",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "eventing-test",
@@ -76,7 +76,7 @@ func TestValidateCMsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the component for Knative: serving or eventing."),
 	}, {
 		name: "Knative Serving with empty key",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Value:     "test-value",
 			Component: "eventing",
 			Namespace: "test-eventing",
@@ -85,7 +85,7 @@ func TestValidateCMsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the key in the ConfigMap data."),
 	}, {
 		name: "Knative Serving with empty key",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Component: "eventing",
 			Namespace: "test-eventing",
@@ -107,11 +107,11 @@ func TestValidateCMsFlags(t *testing.T) {
 func TestGetOverlayYamlContentCM(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		cmsCMDFlags    cmsFlags
+		cmsCMDFlags    CMsFlags
 		expectedResult string
 	}{{
 		name: "Knative Eventing",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "eventing",
@@ -139,7 +139,7 @@ spec:
       test-key: #@ data.values.value`,
 	}, {
 		name: "Knative Serving",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "serving",
@@ -177,11 +177,11 @@ spec:
 func TestGetYamlValuesContentCMs(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		cmsCMDFlags    cmsFlags
+		cmsCMDFlags    CMsFlags
 		expectedResult string
 	}{{
 		name: "Knative Eventing",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "eventing",
@@ -194,7 +194,7 @@ namespace: test-eventing
 value: test-value`,
 	}, {
 		name: "Knative Serving",
-		cmsCMDFlags: cmsFlags{
+		cmsCMDFlags: CMsFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "serving",

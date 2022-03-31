@@ -176,3 +176,22 @@ func findKeyValue(t *testing.T, key, expectedValue, indicator string, deploy *ba
 	}
 	return false
 }
+
+func VerifyKnativeServingConfigMaps(t *testing.T, clients operatorv1beta1.KnativeServingInterface, cmsFlags configure.CMsFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyConfigMaps(t, ks.Spec.GetConfig(), cmsFlags)
+}
+func VerifyKnativeEventingConfigMaps(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, cmsFlags configure.CMsFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyConfigMaps(t, ke.Spec.GetConfig(), cmsFlags)
+}
+
+func VerifyConfigMaps(t *testing.T, configMapData base.ConfigMapData, cmsFlags configure.CMsFlags) {
+	data, cmExist := configMapData[cmsFlags.CMName]
+	testingUtil.AssertEqual(t, cmExist, true)
+	value, valueExist := data[cmsFlags.Key]
+	testingUtil.AssertEqual(t, valueExist, true)
+	testingUtil.AssertEqual(t, value, cmsFlags.Value)
+}

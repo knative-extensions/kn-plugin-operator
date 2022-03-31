@@ -94,6 +94,19 @@ echo ">> Configure the nodeSelector for Knative Serving"
 echo ">> Verify the label configuration of Knative Serving"
 go_test_e2e -tags=servinglabelconfig -timeout=20m ./test/e2e || failed=1
 
+echo ">> Configure the ConfigMaps for Knative Serving"
+./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network \
+  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Serving"
+
+./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure the ConfigMap for Knative Serving"
+
+./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-deployment \
+  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Serving"
+
+echo ">> Verify the configuration for config maps in Knative Serving"
+go_test_e2e -tags=servingconfigmap -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -128,6 +141,19 @@ echo ">> Configure the nodeSelector for Knative Eventing"
 
 echo ">> Verify the label configuration of Knative Eventing"
 go_test_e2e -tags=eventinglabelconfig -timeout=20m ./test/e2e || failed=1
+
+echo ">> Configure the ConfigMaps for Knative Eventing"
+./kn-operator configure configmaps -c eventing -n ${EVENTING_NAMESPACE} --cmName config-features \
+  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Eventing"
+
+./kn-operator configure configmaps -c eventing -n ${EVENTING_NAMESPACE} --cmName config-features \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure the ConfigMap for Knative Eventing"
+
+./kn-operator configure configmaps -c eventing -n ${EVENTING_NAMESPACE} --cmName config-tracing \
+  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Eventing"
+
+echo ">> Verify the configuration for config maps in Knative Eventing"
+go_test_e2e -tags=eventingconfigmap -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

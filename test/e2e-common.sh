@@ -19,7 +19,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../vendor/knative.dev/hack/e2e-tests.sh"
 
 # Install Istio.
 function install_istio() {
-  echo ">> Installing Istio"
-  curl -sL https://istio.io/downloadIstioctl | sh -
-  $HOME/.istioctl/bin/istioctl install -y
+  #echo ">> Installing Istio"
+  #curl -sL https://istio.io/downloadIstioctl | sh -
+  #$HOME/.istioctl/bin/istioctl install -y
 }

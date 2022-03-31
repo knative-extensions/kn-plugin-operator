@@ -151,7 +151,7 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
 
     #@overlay/match missing_ok=True
@@ -182,7 +182,7 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
 
     #@overlay/match missing_ok=True
@@ -213,7 +213,7 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
 
     #@overlay/match missing_ok=True

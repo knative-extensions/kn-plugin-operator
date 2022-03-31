@@ -25,14 +25,14 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
-type haFlags struct {
+type HAFlags struct {
 	Replicas   string
 	Component  string
 	Namespace  string
 	DeployName string
 }
 
-var haCMDFlags haFlags
+var haCMDFlags HAFlags
 
 // newHACommand represents the HA configure commands for Serving or Eventing
 func newHACommand(p *pkg.OperatorParams) *cobra.Command {
@@ -71,7 +71,7 @@ func newHACommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureHAsCmd
 }
 
-func validateHAsFlags(haCMDFlags haFlags) error {
+func validateHAsFlags(haCMDFlags HAFlags) error {
 	if haCMDFlags.Replicas == "" {
 		return fmt.Errorf("You need to specify the number of the replicas.")
 	}
@@ -87,7 +87,7 @@ func validateHAsFlags(haCMDFlags haFlags) error {
 	return nil
 }
 
-func configureHAs(haCMDFlags haFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureHAs(haCMDFlags HAFlags, rootPath string, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(haCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -106,7 +106,7 @@ func configureHAs(haCMDFlags haFlags, rootPath string, p *pkg.OperatorParams) er
 	return nil
 }
 
-func getOverlayYamlContentHA(rootPath string, haCMDFlags haFlags) string {
+func getOverlayYamlContentHA(rootPath string, haCMDFlags HAFlags) string {
 	path := rootPath + "/overlay/ks_replica.yaml"
 	if strings.EqualFold(haCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_replica.yaml"
@@ -117,7 +117,7 @@ func getOverlayYamlContentHA(rootPath string, haCMDFlags haFlags) string {
 	return baseOverlayContent
 }
 
-func getHAConfiguration(haCMDFlags haFlags) string {
+func getHAConfiguration(haCMDFlags HAFlags) string {
 	resourceArray := []string{}
 	if haCMDFlags.DeployName == "" {
 		// Set the HA number of replicas globally to all deployments
@@ -147,7 +147,7 @@ func getHAConfiguration(haCMDFlags haFlags) string {
 	return strings.Join(resourceArray, "\n")
 }
 
-func getYamlValuesContentHAs(haCMDFlags haFlags) string {
+func getYamlValuesContentHAs(haCMDFlags HAFlags) string {
 	contentArray := []string{}
 	header := "#@data/values\n---"
 	contentArray = append(contentArray, header)

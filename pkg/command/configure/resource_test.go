@@ -52,12 +52,12 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     resources:
 
-      #@overlay/match by="container"
+      #@overlay/match by="container",missing_ok=True
     - container: #@ data.values.container
       #@overlay/match missing_ok=True
       requests:
@@ -97,12 +97,12 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     resources:
 
-      #@overlay/match by="container"
+      #@overlay/match by="container",missing_ok=True
     - container: #@ data.values.container
       #@overlay/match missing_ok=True
       requests:
@@ -140,12 +140,12 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     resources:
 
-      #@overlay/match by="container"
+      #@overlay/match by="container",missing_ok=True
     - container: #@ data.values.container
       #@overlay/match missing_ok=True
       requests:
@@ -178,12 +178,12 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     resources:
 
-      #@overlay/match by="container"
+      #@overlay/match by="container",missing_ok=True
     - container: #@ data.values.container
       #@overlay/match missing_ok=True
       requests:
@@ -212,12 +212,12 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     resources:
 
-      #@overlay/match by="container"
+      #@overlay/match by="container",missing_ok=True
     - container: #@ data.values.container
       #@overlay/match missing_ok=True
       limits:

@@ -50,12 +50,12 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     tolerations:
 
-    #@overlay/match by="key"
+    #@overlay/match by="key",missing_ok=True
     - key: #@ data.values.key
       #@overlay/match missing_ok=True
       operator: #@ data.values.operator
@@ -84,12 +84,12 @@ metadata:
 spec:
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     tolerations:
 
-    #@overlay/match by="key"
+    #@overlay/match by="key",missing_ok=True
     - key: #@ data.values.key
       #@overlay/match missing_ok=True
       operator: #@ data.values.operator

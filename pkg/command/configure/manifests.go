@@ -161,7 +161,7 @@ func getManifestsConfiguration(manifestsCMDFlags manifestsFlags) string {
 	field := fmt.Sprintf("%s%s:", common.Spaces(2), "additionalManifests")
 	resourceArray = append(resourceArray, field)
 
-	tag = fmt.Sprintf("%s%s", common.Spaces(2), common.FieldByNameWithMissing("URL"))
+	tag = fmt.Sprintf("%s%s", common.Spaces(2), common.FieldByName("URL"))
 	resourceArray = append(resourceArray, tag)
 
 	field = fmt.Sprintf("%s- %s: %s", common.Spaces(2), "URL", "#@ data.values.manifestsPath")

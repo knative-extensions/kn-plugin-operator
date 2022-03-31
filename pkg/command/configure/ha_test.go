@@ -24,11 +24,11 @@ import (
 func TestGetOverlayYamlContentHA(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		haCMDFlags     haFlags
+		haCMDFlags     HAFlags
 		expectedResult string
 	}{{
 		name: "Knative Eventing",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "4",
 			Component:  "eventing",
 			Namespace:  "test-eventing",
@@ -49,13 +49,13 @@ spec:
 
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.name
     #@overlay/match missing_ok=True
     replicas: #@ data.values.replicas`,
 	}, {
 		name: "Knative Serving",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "2",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -76,13 +76,13 @@ spec:
 
   #@overlay/match missing_ok=True
   deployments:
-  #@overlay/match by="name"
+  #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.name
     #@overlay/match missing_ok=True
     replicas: #@ data.values.replicas`,
 	}, {
 		name: "Knative Eventing with no deployment name",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:  "4",
 			Component: "eventing",
 			Namespace: "test-eventing",
@@ -106,7 +106,7 @@ spec:
     replicas: #@ data.values.replicas`,
 	}, {
 		name: "Knative Serving with no deployment name",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:  "2",
 			Component: "serving",
 			Namespace: "test-serving",
@@ -140,11 +140,11 @@ spec:
 func TestGetYamlValuesContentHAs(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		haCMDFlags     haFlags
+		haCMDFlags     HAFlags
 		expectedResult string
 	}{{
 		name: "Knative Eventing",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "2",
 			Component:  "eventing",
 			Namespace:  "test-eventing",
@@ -157,7 +157,7 @@ name: eventing-controller
 replicas: 2`,
 	}, {
 		name: "Knative Serving",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "2",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -170,7 +170,7 @@ name: activator
 replicas: 2`,
 	}, {
 		name: "Knative Eventing with no deployment name",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:  "2",
 			Component: "eventing",
 			Namespace: "test-eventing",
@@ -181,7 +181,7 @@ namespace: test-eventing
 replicas: 2`,
 	}, {
 		name: "Knative Serving with no deployment name",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:  "2",
 			Component: "serving",
 			Namespace: "test-serving",
@@ -201,11 +201,11 @@ replicas: 2`,
 func TestValidateHAsFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		haCMDFlags     haFlags
+		haCMDFlags     HAFlags
 		expectedResult error
 	}{{
 		name: "Knative Eventing",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "4",
 			Component:  "eventing",
 			Namespace:  "test-eventing",
@@ -214,7 +214,7 @@ func TestValidateHAsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "3",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -223,7 +223,7 @@ func TestValidateHAsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving with the invalid component",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "3",
 			Component:  "serving-invalid",
 			Namespace:  "test-serving",
@@ -232,7 +232,7 @@ func TestValidateHAsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the component for Knative: serving or eventing."),
 	}, {
 		name: "Knative Serving with no deployment name",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:  "3",
 			Component: "serving",
 			Namespace: "test-serving",
@@ -240,7 +240,7 @@ func TestValidateHAsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving with no namespace",
-		haCMDFlags: haFlags{
+		haCMDFlags: HAFlags{
 			Replicas:   "3",
 			Component:  "serving",
 			DeployName: "activator",

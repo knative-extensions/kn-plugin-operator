@@ -18,6 +18,7 @@ package resources
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -194,4 +195,28 @@ func VerifyConfigMaps(t *testing.T, configMapData base.ConfigMapData, cmsFlags c
 	value, valueExist := data[cmsFlags.Key]
 	testingUtil.AssertEqual(t, valueExist, true)
 	testingUtil.AssertEqual(t, value, cmsFlags.Value)
+}
+
+func VerifyKnativeServingHAs(t *testing.T, clients operatorv1beta1.KnativeServingInterface, haFlags configure.HAFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyHAs(t, ks.Spec.CommonSpec, haFlags)
+}
+
+func VerifyKnativeEventingHAs(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, haFlags configure.HAFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyHAs(t, ke.Spec.CommonSpec, haFlags)
+}
+
+func VerifyHAs(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
+	if haFlags.DeployName != "" {
+		deploy := findDeployment(haFlags.DeployName, spec.DeploymentOverride)
+		testingUtil.AssertEqual(t, deploy == nil, false)
+		stringValue := strconv.Itoa(int(deploy.Replicas))
+		testingUtil.AssertEqual(t, stringValue, haFlags.Replicas)
+	} else {
+		stringValue := strconv.Itoa(int(spec.HighAvailability.Replicas))
+		testingUtil.AssertEqual(t, stringValue, haFlags.Replicas)
+	}
 }

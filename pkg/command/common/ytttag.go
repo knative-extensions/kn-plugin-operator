@@ -18,12 +18,7 @@ package common
 
 import "fmt"
 
-// FieldByName returns the overlay tag by a certain field
+// FieldByName returns the overlay tag by a certain field. It is allowed to miss this field in the existing yaml
 func FieldByName(name string) string {
-	return fmt.Sprintf("#@overlay/match by=\"%s\"", name)
-}
-
-// FieldByNameWithMissing returns the overlay tag by a certain field. It is allowed to miss this field in the existing yaml
-func FieldByNameWithMissing(name string) string {
 	return fmt.Sprintf("#@overlay/match by=\"%s\",missing_ok=True", name)
 }

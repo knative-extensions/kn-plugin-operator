@@ -19,6 +19,8 @@ var (
 	TestKeyAdditional = getenv("TEST_KEY_ADDITIONAL", "test-key-additional")
 	// TestValueAdditional is the additional value of the key-value pair for test cases
 	TestValueAdditional = getenv("TEST_VALUE_ADDITIONAL", "test-value-additional")
+	// TestReplicasNum is the number of replicas
+	TestReplicasNum = getenv("REPLICA_NUM", "4")
 )
 
 func getenv(name, defaultValue string) string {

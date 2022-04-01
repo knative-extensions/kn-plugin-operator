@@ -36,6 +36,7 @@ export TEST_KEY="${TEST_KEY:-test-key}"
 export TEST_VALUE="${TEST_VALUE:-test-value}"
 export TEST_KEY_ADDITIONAL="${TEST_KEY_ADDITIONAL:-test-key-additional}"
 export TEST_VALUE_ADDITIONAL="${TEST_VALUE_ADDITIONAL:-test-value-additional}"
+export REPLICA_NUM="${REPLICA_NUM:-4}"
 
 source "$(dirname "$0")/e2e-common.sh"
 
@@ -62,14 +63,6 @@ go_test_e2e -tags=beta -timeout=20m ./test/e2e || failed=1
 echo ">> Install Knative Serving"
 ./kn-operator install -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to install Knative Serving"
 
-echo ">> Configure the resource with Knative Serving"
-./kn-operator configure resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --container activator --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
-  --requestCPU 1024m || fail_test "Failed to configure Knative Serving"
-
-echo ">> Verify the resource configuration of Knative Serving Custom resource"
-go_test_e2e -tags=servingresourceconfig -timeout=20m ./test/e2e || failed=1
-
 echo ">> Configure the label for Knative Serving"
 ./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
   --key ${TEST_KEY} --value ${TEST_VALUE} --label || fail_test "Failed to configure Knative Serving"
@@ -94,6 +87,14 @@ echo ">> Configure the nodeSelector for Knative Serving"
 echo ">> Verify the label configuration of Knative Serving"
 go_test_e2e -tags=servinglabelconfig -timeout=20m ./test/e2e || failed=1
 
+echo ">> Configure the resource with Knative Serving"
+./kn-operator configure resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --container activator --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
+  --requestCPU 1024m || fail_test "Failed to configure Knative Serving"
+
+echo ">> Verify the resource configuration of Knative Serving Custom resource"
+go_test_e2e -tags=servingresourceconfig -timeout=20m ./test/e2e || failed=1
+
 echo ">> Configure the ConfigMaps for Knative Serving"
 ./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network \
   --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Serving"
@@ -106,6 +107,15 @@ echo ">> Configure the ConfigMaps for Knative Serving"
 
 echo ">> Verify the configuration for config maps in Knative Serving"
 go_test_e2e -tags=servingconfigmap -timeout=20m ./test/e2e || failed=1
+
+echo ">> Configure the number of replicas for Knative Serving"
+./kn-operator configure replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller \
+  --replicas ${REPLICA_NUM} || fail_test "Failed to configure the number of replias for Knative Serving"
+
+./kn-operator configure replicas -c serving -n ${SERVING_NAMESPACE} --replicas ${REPLICA_NUM} || fail_test "Failed to configure the number of replias for Knative Serving"
+
+echo ">> Verify the number of replicas for Knative Serving"
+go_test_e2e -tags=servingha -timeout=20m ./test/e2e || failed=1
 
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
@@ -154,6 +164,15 @@ echo ">> Configure the ConfigMaps for Knative Eventing"
 
 echo ">> Verify the configuration for config maps in Knative Eventing"
 go_test_e2e -tags=eventingconfigmap -timeout=20m ./test/e2e || failed=1
+
+echo ">> Configure the number of replicas for Knative Eventing"
+./kn-operator configure replicas -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --replicas ${REPLICA_NUM} || fail_test "Failed to configure the number of replias for Knative Eventing"
+
+./kn-operator configure replicas -c eventing -n ${EVENTING_NAMESPACE} --replicas ${REPLICA_NUM} || fail_test "Failed to configure the number of replias for Knative Eventing"
+
+echo ">> Verify the number of replicas for Knative Eventing"
+go_test_e2e -tags=eventingha -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

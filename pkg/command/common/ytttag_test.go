@@ -24,5 +24,5 @@ import (
 
 func TestFieldByName(t *testing.T) {
 	value := FieldByName("test")
-	testingUtil.AssertEqual(t, value, "#@overlay/match by=\"test\"")
+	testingUtil.AssertEqual(t, value, "#@overlay/match by=\"test\",missing_ok=True")
 }

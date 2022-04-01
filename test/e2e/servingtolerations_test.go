@@ -1,5 +1,5 @@
-//go:build servingha
-// +build servingha
+//go:build servingtolerations
+// +build servingtolerations
 
 /*
 Copyright 2022 The Knative Authors
@@ -28,8 +28,8 @@ import (
 	"knative.dev/operator/test/client"
 )
 
-// TestServingHAConfiguration verifies whether the operator plugin can configure the number of replicas for Knative Serving
-func TestServingHAConfiguration(t *testing.T) {
+// TestServingTolerationConfiguration verifies whether the operator plugin can configure the tolerations for Knative Serving
+func TestServingTolerationConfiguration(t *testing.T) {
 	clients := client.Setup(t)
 
 	names := test.ResourceNames{
@@ -42,27 +42,33 @@ func TestServingHAConfiguration(t *testing.T) {
 	defer test.TearDown(clients, names)
 
 	for _, tt := range []struct {
-		name            string
-		expectedHAFlags configure.HAFlags
+		name                     string
+		expectedTolerationsFlags configure.TolerationsFlags
 	}{{
-		name: "Knative Serving verifying the number of replicas for one deployment",
-		expectedHAFlags: configure.HAFlags{
-			Replicas:   resources.TestReplicasNum,
+		name: "Knative Serving verifying the toleration for the deployment with Exists operator",
+		expectedTolerationsFlags: configure.TolerationsFlags{
+			Key:        resources.TestTolerationKey,
+			Operator:   resources.TestOperation,
+			Effect:     resources.TestEffect,
 			Component:  "serving",
 			Namespace:  resources.ServingOperatorNamespace,
-			DeployName: "controller",
+			DeployName: "autoscaler",
 		},
 	}, {
-		name: "Knative Serving verifying the global number of replicas",
-		expectedHAFlags: configure.HAFlags{
-			Replicas:  resources.TestReplicasNum,
-			Component: "serving",
-			Namespace: resources.ServingOperatorNamespace,
+		name: "Knative Serving verifying the toleration for the deployment with Equal operator",
+		expectedTolerationsFlags: configure.TolerationsFlags{
+			Key:        resources.TestAdditionalTolerationKey,
+			Operator:   resources.TestAdditionalOperation,
+			Value:      resources.TestAdditionalTolerationValue,
+			Effect:     resources.TestAdditionalEffect,
+			Component:  "serving",
+			Namespace:  resources.ServingOperatorNamespace,
+			DeployName: "autoscaler",
 		},
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			resources.VerifyKnativeServingHAs(t, clients.Operator.KnativeServings(resources.ServingOperatorNamespace),
-				tt.expectedHAFlags)
+			resources.VerifyKnativeServingTolerations(t, clients.Operator.KnativeServings(resources.ServingOperatorNamespace),
+				tt.expectedTolerationsFlags)
 		})
 	}
 }

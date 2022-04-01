@@ -21,6 +21,20 @@ var (
 	TestValueAdditional = getenv("TEST_VALUE_ADDITIONAL", "test-value-additional")
 	// TestReplicasNum is the number of replicas
 	TestReplicasNum = getenv("REPLICA_NUM", "4")
+	// TestTolerationKey is the test key for toleration
+	TestTolerationKey = getenv("TOLERATION_KEY", "toleration-key")
+	// TestOperation is the test operator
+	TestOperation = getenv("OPERATION", "Exists")
+	// TestEffect is the test effect
+	TestEffect = getenv("EFFECT", "NoSchedule")
+	// TestAdditionalTolerationKey is the additional test key for toleration
+	TestAdditionalTolerationKey = getenv("ADDITIONAL_TOLERATION_KEY", "additional-toleration-key")
+	// TestAdditionalOperation is the additional test operator
+	TestAdditionalOperation = getenv("ADDITIONAL_OPERATION", "Equal")
+	// TestAdditionalTolerationValue is the additional test value for toleration
+	TestAdditionalTolerationValue = getenv("ADDITIONAL_TOLERATION_VALUE", "additional-toleration-value")
+	// TestAdditionalEffect is the additional test effect for toleration
+	TestAdditionalEffect = getenv("ADDITIONAL_EFFECT", "NoExecute")
 )
 
 func getenv(name, defaultValue string) string {

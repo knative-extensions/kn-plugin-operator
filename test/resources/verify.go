@@ -220,3 +220,51 @@ func VerifyHAs(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
 		testingUtil.AssertEqual(t, stringValue, haFlags.Replicas)
 	}
 }
+
+func VerifyKnativeServingTolerations(t *testing.T, clients operatorv1beta1.KnativeServingInterface, tolerationsFlags configure.TolerationsFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyTolerations(t, ks.Spec.DeploymentOverride, tolerationsFlags)
+}
+
+func VerifyKnativeEventingTolerations(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, tolerationsFlags configure.TolerationsFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyTolerations(t, ke.Spec.DeploymentOverride, tolerationsFlags)
+}
+
+func VerifyTolerations(t *testing.T, deploymentOverride []base.DeploymentOverride, tolerationsFlags configure.TolerationsFlags) {
+	deploy := findDeployment(tolerationsFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
+	toleration := findToleration(tolerationsFlags.Key, deploy.Tolerations)
+	testingUtil.AssertEqual(t, toleration == nil, false)
+	testingUtil.AssertEqual(t, toleration.Value, tolerationsFlags.Value)
+
+	var operator string
+	if toleration.Operator == corev1.TolerationOpEqual {
+		operator = "Equal"
+	} else if toleration.Operator == corev1.TolerationOpExists {
+		operator = "Exists"
+	}
+
+	var effect string
+	if toleration.Effect == corev1.TaintEffectNoSchedule {
+		effect = "NoSchedule"
+	} else if toleration.Effect == corev1.TaintEffectNoExecute {
+		effect = "NoExecute"
+	} else if toleration.Effect == corev1.TaintEffectPreferNoSchedule {
+		effect = "PreferNoSchedule"
+	}
+
+	testingUtil.AssertDeepEqual(t, operator, tolerationsFlags.Operator)
+	testingUtil.AssertDeepEqual(t, effect, tolerationsFlags.Effect)
+}
+
+func findToleration(key string, tolerations []corev1.Toleration) *corev1.Toleration {
+	for _, toleration := range tolerations {
+		if toleration.Key == key {
+			return &toleration
+		}
+	}
+	return nil
+}

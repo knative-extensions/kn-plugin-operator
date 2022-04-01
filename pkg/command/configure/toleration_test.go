@@ -24,11 +24,11 @@ import (
 func TestGetOverlayYamlContent(t *testing.T) {
 	for _, tt := range []struct {
 		name                string
-		tolerationsCMDFlags tolerationsFlags
+		tolerationsCMDFlags TolerationsFlags
 		expectedResult      string
 	}{{
 		name: "Knative Eventing",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test",
 			Operator:   "Exists",
 			Effect:     "test-effect",
@@ -63,7 +63,7 @@ spec:
       effect: #@ data.values.effect`,
 	}, {
 		name: "Knative Serving",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test",
 			Operator:   "Exists",
 			Effect:     "test-effect",
@@ -107,11 +107,11 @@ spec:
 func TestGetYamlValuesContentTolerations(t *testing.T) {
 	for _, tt := range []struct {
 		name                string
-		tolerationsCMDFlags tolerationsFlags
+		tolerationsCMDFlags TolerationsFlags
 		expectedResult      string
 	}{{
 		name: "Knative Eventing",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test",
 			Operator:   "Exists",
 			Effect:     "test-effect",
@@ -128,7 +128,7 @@ operator: Exists
 effect: test-effect`,
 	}, {
 		name: "Knative Serving",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test",
 			Operator:   "Exists",
 			Effect:     "test-effect",
@@ -154,11 +154,11 @@ effect: test-effect`,
 func TestValidateTolerationsFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name                string
-		tolerationsCMDFlags tolerationsFlags
+		tolerationsCMDFlags TolerationsFlags
 		expectedResult      error
 	}{{
 		name: "Knative Eventing",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test-key",
 			Operator:   "Equal",
 			Effect:     "test-effect",
@@ -169,9 +169,10 @@ func TestValidateTolerationsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the effect to one of the following values: NoSchedule, PreferNoSchedule or NoExecute."),
 	}, {
 		name: "Knative Serving",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test-key",
 			Operator:   "Equal",
+			Value:      "test-value",
 			Effect:     "NoSchedule",
 			Component:  "serving",
 			Namespace:  "test-serving",
@@ -180,7 +181,7 @@ func TestValidateTolerationsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving with invalid operator",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test-key",
 			Operator:   "Equals",
 			Effect:     "test-effect",
@@ -191,15 +192,27 @@ func TestValidateTolerationsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the operator to one of the following values: Exists or Equal."),
 	}, {
 		name: "Knative Serving with no deployment name",
-		tolerationsCMDFlags: tolerationsFlags{
+		tolerationsCMDFlags: TolerationsFlags{
 			Key:        "test-key",
 			Operator:   "Equal",
 			Effect:     "NoSchedule",
+			Value:      "test-value",
 			Component:  "serving",
 			Namespace:  "test-serving",
 			DeployName: "",
 		},
 		expectedResult: fmt.Errorf("You need to specify the name of the deployment."),
+	}, {
+		name: "Knative Serving with no value",
+		tolerationsCMDFlags: TolerationsFlags{
+			Key:        "test-key",
+			Operator:   "Equal",
+			Effect:     "NoSchedule",
+			Component:  "serving",
+			Namespace:  "test-serving",
+			DeployName: "test",
+		},
+		expectedResult: fmt.Errorf("You need to specify the value, if the Operator is Equal."),
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			result := validateTolerationsFlags(tt.tolerationsCMDFlags)

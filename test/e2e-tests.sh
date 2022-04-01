@@ -37,6 +37,13 @@ export TEST_VALUE="${TEST_VALUE:-test-value}"
 export TEST_KEY_ADDITIONAL="${TEST_KEY_ADDITIONAL:-test-key-additional}"
 export TEST_VALUE_ADDITIONAL="${TEST_VALUE_ADDITIONAL:-test-value-additional}"
 export REPLICA_NUM="${REPLICA_NUM:-4}"
+export TOLERATION_KEY="${TOLERATION_KEY:-toleration-key}"
+export OPERATION="${OPERATION:-Exists}"
+export EFFECT="${EFFECT:-NoSchedule}"
+export ADDITIONAL_TOLERATION_KEY="${ADDITIONAL_TOLERATION_KEY:-additional-toleration-key}"
+export ADDITIONAL_OPERATION="${ADDITIONAL_OPERATION:-Equal}"
+export ADDITIONAL_TOLERATION_VALUE="${ADDITIONAL_TOLERATION_VALUE:-additional-toleration-value}"
+export ADDITIONAL_EFFECT="${ADDITIONAL_EFFECT:-NoExecute}"
 
 source "$(dirname "$0")/e2e-common.sh"
 
@@ -117,6 +124,16 @@ echo ">> Configure the number of replicas for Knative Serving"
 echo ">> Verify the number of replicas for Knative Serving"
 go_test_e2e -tags=servingha -timeout=20m ./test/e2e || failed=1
 
+echo ">> Configure the tolerations for Knative Serving"
+./kn-operator configure tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
+  --key ${TOLERATION_KEY} --operator ${OPERATION} --effect ${EFFECT} || fail_test "Failed to configure the tolerations for Knative Serving"
+
+./kn-operator configure tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
+  --key ${ADDITIONAL_TOLERATION_KEY} --operator ${ADDITIONAL_OPERATION} --value ${ADDITIONAL_TOLERATION_VALUE} --effect ${ADDITIONAL_EFFECT} || fail_test "Failed to configure the tolerations for Knative Serving"
+
+echo ">> Verify the tolerations for Knative Serving"
+go_test_e2e -tags=servingtolerations -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -173,6 +190,16 @@ echo ">> Configure the number of replicas for Knative Eventing"
 
 echo ">> Verify the number of replicas for Knative Eventing"
 go_test_e2e -tags=eventingha -timeout=20m ./test/e2e || failed=1
+
+echo ">> Configure the tolerations for Knative Eventing"
+./kn-operator configure tolerations -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-webhook \
+  --key ${TOLERATION_KEY} --operator ${OPERATION} --effect ${EFFECT} || fail_test "Failed to configure the tolerations for Knative Eventing"
+
+./kn-operator configure tolerations -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-webhook \
+  --key ${ADDITIONAL_TOLERATION_KEY} --operator ${ADDITIONAL_OPERATION} --value ${ADDITIONAL_TOLERATION_VALUE} --effect ${ADDITIONAL_EFFECT} || fail_test "Failed to configure the tolerations for Knative Eventing"
+
+echo ">> Verify the tolerations for Knative Eventing"
+go_test_e2e -tags=eventingtolerations -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

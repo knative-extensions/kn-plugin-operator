@@ -25,16 +25,17 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
-type tolerationsFlags struct {
+type TolerationsFlags struct {
 	Key        string
 	Operator   string
+	Value      string
 	Effect     string
 	Component  string
 	Namespace  string
 	DeployName string
 }
 
-var tolerationsCMDFlags tolerationsFlags
+var tolerationsCMDFlags TolerationsFlags
 
 func getValidOperators() []string {
 	return []string{"Exists", "Equal"}
@@ -73,6 +74,7 @@ func newTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 		},
 	}
 
+	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.Value, "value", "", "The flag to specify the value")
 	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.Key, "key", "", "The flag to specify the key")
 	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.Operator, "operator", "", "The flag to specify the operator")
 	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.Effect, "effect", "", "The flag to specify the effect")
@@ -83,7 +85,7 @@ func newTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureTolerationsCmd
 }
 
-func validateTolerationsFlags(tolerationsCMDFlags tolerationsFlags) error {
+func validateTolerationsFlags(tolerationsCMDFlags TolerationsFlags) error {
 	if tolerationsCMDFlags.Key == "" {
 		return fmt.Errorf("You need to specify the key for the toleration.")
 	}
@@ -96,6 +98,9 @@ func validateTolerationsFlags(tolerationsCMDFlags tolerationsFlags) error {
 	if tolerationsCMDFlags.Component == "" {
 		return fmt.Errorf("You need to specify the component name.")
 	}
+	if strings.EqualFold(tolerationsCMDFlags.Operator, "Equal") && tolerationsCMDFlags.Value == "" {
+		return fmt.Errorf("You need to specify the value, if the Operator is Equal.")
+	}
 	if tolerationsCMDFlags.DeployName == "" {
 		return fmt.Errorf("You need to specify the name of the deployment.")
 	}
@@ -105,7 +110,7 @@ func validateTolerationsFlags(tolerationsCMDFlags tolerationsFlags) error {
 	return nil
 }
 
-func configureTolerations(tolerationsCMDFlags tolerationsFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureTolerations(tolerationsCMDFlags TolerationsFlags, rootPath string, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(tolerationsCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -124,18 +129,18 @@ func configureTolerations(tolerationsCMDFlags tolerationsFlags, rootPath string,
 	return nil
 }
 
-func getOverlayYamlContent(rootPath string, tolerationsCMDFlags tolerationsFlags) string {
+func getOverlayYamlContent(rootPath string, tolerationsCMDFlags TolerationsFlags) string {
 	path := rootPath + "/overlay/ks_toleration.yaml"
 	if strings.EqualFold(tolerationsCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_toleration.yaml"
 	}
 	baseOverlayContent, _ := common.ReadFile(path)
-	resourceContent := getTolerationConfiguration()
+	resourceContent := getTolerationConfiguration(tolerationsCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent
 }
 
-func getTolerationConfiguration() string {
+func getTolerationConfiguration(tolerationsCMDFlags TolerationsFlags) string {
 	resourceArray := []string{}
 	tag := fmt.Sprintf("%s%s", common.Spaces(4), common.FieldByName("key"))
 	resourceArray = append(resourceArray, tag)
@@ -148,6 +153,12 @@ func getTolerationConfiguration() string {
 	operatorField := fmt.Sprintf("%s%s", common.Spaces(6), "operator: #@ data.values.operator")
 	resourceArray = append(resourceArray, operatorField)
 
+	if strings.EqualFold(tolerationsCMDFlags.Operator, "Equal") {
+		tag = fmt.Sprintf("%s%s", common.Spaces(6), common.YttMatchingTag)
+		resourceArray = append(resourceArray, tag)
+		tolerationField := fmt.Sprintf("%s%s", common.Spaces(6), "value: #@ data.values.value")
+		resourceArray = append(resourceArray, tolerationField)
+	}
 	tag = fmt.Sprintf("%s%s", common.Spaces(6), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)
 	tolerationField := fmt.Sprintf("%s%s", common.Spaces(6), "effect: #@ data.values.effect")
@@ -156,7 +167,7 @@ func getTolerationConfiguration() string {
 	return strings.Join(resourceArray, "\n")
 }
 
-func getYamlValuesContentTolerations(tolerationsCMDFlags tolerationsFlags) string {
+func getYamlValuesContentTolerations(tolerationsCMDFlags TolerationsFlags) string {
 	contentArray := []string{}
 	header := "#@data/values\n---"
 	contentArray = append(contentArray, header)
@@ -174,6 +185,11 @@ func getYamlValuesContentTolerations(tolerationsCMDFlags tolerationsFlags) strin
 	if tolerationsCMDFlags.Operator != "" {
 		operator := fmt.Sprintf("operator: %s", tolerationsCMDFlags.Operator)
 		contentArray = append(contentArray, operator)
+	}
+
+	if strings.EqualFold(tolerationsCMDFlags.Operator, "Equal") {
+		value := fmt.Sprintf("value: \"%s\"", tolerationsCMDFlags.Value)
+		contentArray = append(contentArray, value)
 	}
 
 	if tolerationsCMDFlags.Effect != "" {

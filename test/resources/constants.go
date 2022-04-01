@@ -35,6 +35,18 @@ var (
 	TestAdditionalTolerationValue = getenv("ADDITIONAL_TOLERATION_VALUE", "additional-toleration-value")
 	// TestAdditionalEffect is the additional test effect for toleration
 	TestAdditionalEffect = getenv("ADDITIONAL_EFFECT", "NoExecute")
+	// TestImageUrl is the URL of the image
+	TestImageUrl = getenv("IMAGE_URL", "gcr.io/knative-releases/knative.dev/eventing/cmd/controller:latest")
+	// TestImageKey is the image key of the image
+	TestImageKey = getenv("IMAGE_KEY", "eventing-controller")
+	// TestServingImageUrl is the URL of the image
+	TestServingImageUrl = getenv("SERVING_IMAGE_URL", "gcr.io/knative-releases/knative.dev/serving/cmd/controller:latest")
+	// TestServingImageKey is the image key of the image
+	TestServingImageKey = getenv("SERVING_IMAGE_KEY", "controller")
+	// TestDefaultEventingImageUrl is the default eventing image url
+	TestDefaultEventingImageUrl = getenv("DEFAULT_EVENTING_IMAGE_URL", "gcr.io/knative-releases/knative.dev/eventing/cmd/${NAME}:latest")
+	// TestDefaultServingImageUrl is the default serving image url
+	TestDefaultServingImageUrl = getenv("DEFAULT_SERVING_IMAGE_URL", "gcr.io/knative-releases/knative.dev/serving/cmd/${NAME}:latest")
 )
 
 func getenv(name, defaultValue string) string {

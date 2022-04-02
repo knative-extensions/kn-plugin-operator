@@ -25,7 +25,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
-type imageFlags struct {
+type ImageFlags struct {
 	ImageUrl   string
 	Component  string
 	Namespace  string
@@ -33,7 +33,7 @@ type imageFlags struct {
 	ImageKey   string
 }
 
-var imageCMDFlags imageFlags
+var imageCMDFlags ImageFlags
 
 // newImageCommand represents the configure commands to configure the image for Knative
 func newImageCommand(p *pkg.OperatorParams) *cobra.Command {
@@ -72,7 +72,7 @@ func newImageCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureImagesCmd
 }
 
-func validateImagesFlags(imageCMDFlags imageFlags) error {
+func validateImagesFlags(imageCMDFlags ImageFlags) error {
 	if imageCMDFlags.ImageKey == "" {
 		return fmt.Errorf("You need to specify the image key.")
 	}
@@ -89,7 +89,7 @@ func validateImagesFlags(imageCMDFlags imageFlags) error {
 	return nil
 }
 
-func configureImages(imageCMDFlags imageFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureImages(imageCMDFlags ImageFlags, rootPath string, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(imageCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -107,7 +107,7 @@ func configureImages(imageCMDFlags imageFlags, rootPath string, p *pkg.OperatorP
 	return nil
 }
 
-func getOverlayYamlContentImage(rootPath string, imageCMDFlags imageFlags) string {
+func getOverlayYamlContentImage(rootPath string, imageCMDFlags ImageFlags) string {
 	path := rootPath + "/overlay/ks_image.yaml"
 	if strings.EqualFold(imageCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_image.yaml"
@@ -118,7 +118,7 @@ func getOverlayYamlContentImage(rootPath string, imageCMDFlags imageFlags) strin
 	return baseOverlayContent
 }
 
-func getImageConfiguration(imageCMDFlags imageFlags) string {
+func getImageConfiguration(imageCMDFlags ImageFlags) string {
 	resourceArray := []string{}
 	fieldFirstLine := "registry"
 	fieldSecondLine := "override"
@@ -159,7 +159,7 @@ func getImageConfiguration(imageCMDFlags imageFlags) string {
 	return strings.Join(resourceArray, "\n")
 }
 
-func getYamlValuesContentImages(imageCMDFlags imageFlags) string {
+func getYamlValuesContentImages(imageCMDFlags ImageFlags) string {
 	contentArray := []string{}
 	header := "#@data/values\n---"
 	contentArray = append(contentArray, header)

@@ -24,11 +24,11 @@ import (
 func TestValidateImagesFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		imageCMDFlags  imageFlags
+		imageCMDFlags  ImageFlags
 		expectedResult error
 	}{{
 		name: "Knative Eventing",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			ImageUrl:   "test-value",
 			Component:  "eventing",
@@ -38,7 +38,7 @@ func TestValidateImagesFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving with multiple aspects",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			ImageUrl:   "test-value",
 			Component:  "serving",
@@ -48,7 +48,7 @@ func TestValidateImagesFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Serving with no deploy name",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:  "test-key",
 			ImageUrl:  "test-value",
 			Component: "serving",
@@ -57,7 +57,7 @@ func TestValidateImagesFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Eventing with no image key",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageUrl:   "test-value",
 			Component:  "eventing",
 			Namespace:  "test-eventing",
@@ -66,7 +66,7 @@ func TestValidateImagesFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the image key."),
 	}, {
 		name: "Knative Eventing with no image value name",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			Component:  "eventing",
 			Namespace:  "test-eventing",
@@ -75,7 +75,7 @@ func TestValidateImagesFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the image URL."),
 	}, {
 		name: "Knative Eventing with invalid component name",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			ImageUrl:   "test-value",
 			Component:  "eventing-test",
@@ -85,7 +85,7 @@ func TestValidateImagesFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the component for Knative: serving or eventing."),
 	}, {
 		name: "Knative Eventing with no namespace",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			ImageUrl:   "test-value",
 			Component:  "eventing-test",
@@ -107,11 +107,11 @@ func TestValidateImagesFlags(t *testing.T) {
 func TestGetOverlayYamlContentImage(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		imageCMDFlags  imageFlags
+		imageCMDFlags  ImageFlags
 		expectedResult string
 	}{{
 		name: "Knative Eventing",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:  "test-key",
 			ImageUrl:  "test-value",
 			Component: "eventing",
@@ -138,7 +138,7 @@ spec:
       test-key: #@ data.values.imageValue`,
 	}, {
 		name: "Knative Serving with the image key default",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "default",
 			ImageUrl:   "test-value",
 			Component:  "serving",
@@ -164,7 +164,7 @@ spec:
     default: #@ data.values.imageValue`,
 	}, {
 		name: "Knative Serving",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			ImageUrl:   "test-value",
 			Component:  "serving",
@@ -192,7 +192,7 @@ spec:
       network/test-key: #@ data.values.imageValue`,
 	}, {
 		name: "Knative Serving for queue-sidecar-image",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:  "queue-sidecar-image",
 			ImageUrl:  "test-value",
 			Component: "serving",
@@ -229,11 +229,11 @@ spec:
 func TestGetYamlValuesContentImages(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
-		imageCMDFlags  imageFlags
+		imageCMDFlags  ImageFlags
 		expectedResult string
 	}{{
 		name: "Knative Eventing",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			ImageUrl:   "test-value",
 			Component:  "eventing",
@@ -247,7 +247,7 @@ deployName: network
 imageValue: test-value`,
 	}, {
 		name: "Knative Serving",
-		imageCMDFlags: imageFlags{
+		imageCMDFlags: ImageFlags{
 			ImageKey:   "test-key",
 			ImageUrl:   "test-value",
 			Component:  "serving",

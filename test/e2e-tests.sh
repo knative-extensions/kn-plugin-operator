@@ -44,6 +44,12 @@ export ADDITIONAL_TOLERATION_KEY="${ADDITIONAL_TOLERATION_KEY:-additional-tolera
 export ADDITIONAL_OPERATION="${ADDITIONAL_OPERATION:-Equal}"
 export ADDITIONAL_TOLERATION_VALUE="${ADDITIONAL_TOLERATION_VALUE:-additional-toleration-value}"
 export ADDITIONAL_EFFECT="${ADDITIONAL_EFFECT:-NoExecute}"
+export IMAGE_URL="${IMAGE_URL:-gcr.io/knative-releases/knative.dev/eventing/cmd/controller:latest}"
+export IMAGE_KEY="${IMAGE_KEY:-eventing-controller}"
+export DEFAULT_SERVING_IMAGE_URL="${DEFAULT_SERVING_IMAGE_URL:-"gcr.io/knative-releases/knative.dev/serving/cmd/\$\{NAME\}:latest"}"
+export DEFAULT_EVENTING_IMAGE_URL="${DEFAULT_EVENTING_IMAGE_URL:-"gcr.io/knative-releases/knative.dev/eventing/cmd/\$\{NAME\}:latest"}"
+export SERVING_IMAGE_KEY="${SERVING_IMAGE_KEY:-controller}"
+export SERVING_IMAGE_URL="${SERVING_IMAGE_URL:-gcr.io/knative-releases/knative.dev/serving/cmd/controller:latest}"
 
 source "$(dirname "$0")/e2e-common.sh"
 
@@ -134,6 +140,17 @@ echo ">> Configure the tolerations for Knative Serving"
 echo ">> Verify the tolerations for Knative Serving"
 go_test_e2e -tags=servingtolerations -timeout=20m ./test/e2e || failed=1
 
+echo ">> Configure the image of the deployment for Knative Seving"
+./kn-operator configure images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
+  --imageKey ${SERVING_IMAGE_KEY} --imageURL ${SERVING_IMAGE_URL} || fail_test "Failed to configure the image of the deployment for Knative Serving"
+
+echo ">> Configure the image of all deployments for Knative Seving"
+./kn-operator configure images -c serving -n ${SERVING_NAMESPACE} \
+  --imageKey default --imageURL ${DEFAULT_SERVING_IMAGE_URL} || fail_test "Failed to configure the image of all deployments for Knative Serving"
+
+echo ">> Verify the image configuration for Knative Seving"
+go_test_e2e -tags=servingimage -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -200,6 +217,17 @@ echo ">> Configure the tolerations for Knative Eventing"
 
 echo ">> Verify the tolerations for Knative Eventing"
 go_test_e2e -tags=eventingtolerations -timeout=20m ./test/e2e || failed=1
+
+echo ">> Configure the image of the deployment for Knative Eventing"
+./kn-operator configure images -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --imageKey ${IMAGE_KEY} --imageURL ${IMAGE_URL} || fail_test "Failed to configure the image of the deployment for Knative Eventing"
+
+echo ">> Configure the image of all deployments for Knative Eventing"
+./kn-operator configure images -c eventing -n ${EVENTING_NAMESPACE} \
+  --imageKey default --imageURL ${DEFAULT_EVENTING_IMAGE_URL} || fail_test "Failed to configure the image of all deployments for Knative Eventing"
+
+echo ">> Verify the image configuration for Knative Eventing"
+go_test_e2e -tags=eventingimage -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

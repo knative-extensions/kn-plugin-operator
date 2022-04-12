@@ -214,10 +214,10 @@ func VerifyHAs(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
 	if haFlags.DeployName != "" {
 		deploy := findDeployment(haFlags.DeployName, spec.DeploymentOverride)
 		testingUtil.AssertEqual(t, deploy == nil, false)
-		stringValue := strconv.Itoa(int(deploy.Replicas))
+		stringValue := strconv.Itoa(int(*deploy.Replicas))
 		testingUtil.AssertEqual(t, stringValue, haFlags.Replicas)
 	} else {
-		stringValue := strconv.Itoa(int(spec.HighAvailability.Replicas))
+		stringValue := strconv.Itoa(int(*spec.HighAvailability.Replicas))
 		testingUtil.AssertEqual(t, stringValue, haFlags.Replicas)
 	}
 }

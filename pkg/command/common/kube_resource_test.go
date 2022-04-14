@@ -30,7 +30,7 @@ func TestAddVerticalBar(t *testing.T) {
 		expectedResult string
 	}{{
 		name: "Create the ConfigMap data for custom manifests",
-		input: `apiVersion: operator.knative.dev/v1alpha1
+		input: `apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
 metadata:
   #@overlay/match missing_ok=True
@@ -45,7 +45,7 @@ spec:
       #@overlay/match missing_ok=True
       test-key: #@ data.values.value`,
 		expectedResult: `|
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
 metadata:
   #@overlay/match missing_ok=True

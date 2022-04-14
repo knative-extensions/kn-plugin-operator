@@ -164,7 +164,7 @@ func TestGetOverlayYamlContentLabel(t *testing.T) {
 
 #@overlay/match by=overlay.subset({"kind": "KnativeEventing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
 metadata:
   #@overlay/match missing_ok=True
@@ -195,7 +195,7 @@ spec:
 
 #@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
 metadata:
   #@overlay/match missing_ok=True
@@ -226,7 +226,7 @@ spec:
 
 #@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
 metadata:
   #@overlay/match missing_ok=True

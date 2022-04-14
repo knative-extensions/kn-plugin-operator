@@ -114,9 +114,6 @@ echo ">> Configure the annotation for Knative Serving's service"
 ./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
   --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --annotation || fail_test "Failed to configure Knative Serving's service"
 
-echo ">> Verify the label configuration of Knative Serving's service"
-go_test_e2e -tags=servingservicelabelconfig -timeout=20m ./test/e2e || failed=1
-
 echo ">> Configure the resource with Knative Serving"
 ./kn-operator configure resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
   --container activator --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
@@ -216,9 +213,6 @@ echo ">> Configure the annotation for Knative Eventing's service"
 
 ./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
   --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --annotation || fail_test "Failed to configure Knative Eventing's service"
-
-echo ">> Verify the label configuration of Knative Eventing's service"
-go_test_e2e -tags=eventingservicelabelconfig -timeout=20m ./test/e2e || failed=1
 
 echo ">> Configure the ConfigMaps for Knative Eventing"
 ./kn-operator configure configmaps -c eventing -n ${EVENTING_NAMESPACE} --cmName config-features \

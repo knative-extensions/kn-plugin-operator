@@ -10,7 +10,3 @@ metadata:
   namespace: #@ data.values.namespace
 #@overlay/match missing_ok=True
 spec:
-  #@overlay/match missing_ok=True
-  deployments:
-  #@overlay/match by="name",missing_ok=True
-  - name: #@ data.values.deployName

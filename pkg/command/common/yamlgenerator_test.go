@@ -21,30 +21,28 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
-	servingv1alpha1 "knative.dev/operator/pkg/apis/operator/v1alpha1"
+	servingv1beta1 "knative.dev/operator/pkg/apis/operator/v1beta1"
 )
 
 func TestYamlGenaratorGenerateYamlOutput(t *testing.T) {
-	expectedYAMLTplData := `apiVersion: operator.knative.dev/v1alpha1
+	expectedYAMLTplData := `apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
 metadata:
   creationTimestamp: null
   name: knative-serving
   namespace: knative-serving
 spec:
-  cluster-local-gateway: {}
   controller-custom-certs:
     name: ""
     type: ""
-  knative-ingress-gateway: {}
   registry: {}
 status: {}
 `
 
-	ks := &servingv1alpha1.KnativeServing{
+	ks := &servingv1beta1.KnativeServing{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "KnativeServing",
-			APIVersion: "operator.knative.dev/v1alpha1",
+			APIVersion: "operator.knative.dev/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "knative-serving",

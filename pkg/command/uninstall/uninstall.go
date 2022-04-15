@@ -85,14 +85,14 @@ func uninstallKnativeServing(uninstallFlags uninstallCmdFlags, p *pkg.OperatorPa
 		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
 	}
 
-	list, err := operatorClient.OperatorV1alpha1().KnativeServings(uninstallFlags.Namespace).List(context.TODO(), metav1.ListOptions{})
+	list, err := operatorClient.OperatorV1beta1().KnativeServings(uninstallFlags.Namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
 
 	var errstrings []string
 	for _, ks := range list.Items {
-		if err = operatorClient.OperatorV1alpha1().KnativeServings(uninstallFlags.Namespace).Delete(context.TODO(),
+		if err = operatorClient.OperatorV1beta1().KnativeServings(uninstallFlags.Namespace).Delete(context.TODO(),
 			ks.Name, metav1.DeleteOptions{}); err != nil {
 			errstrings = append(errstrings, err.Error())
 		}
@@ -110,14 +110,14 @@ func uninstallKnativeEventing(uninstallFlags uninstallCmdFlags, p *pkg.OperatorP
 		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
 	}
 
-	list, err := operatorClient.OperatorV1alpha1().KnativeEventings(uninstallFlags.Namespace).List(context.TODO(), metav1.ListOptions{})
+	list, err := operatorClient.OperatorV1beta1().KnativeEventings(uninstallFlags.Namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
 
 	var errstrings []string
 	for _, ke := range list.Items {
-		if err = operatorClient.OperatorV1alpha1().KnativeEventings(uninstallFlags.Namespace).Delete(context.TODO(),
+		if err = operatorClient.OperatorV1beta1().KnativeEventings(uninstallFlags.Namespace).Delete(context.TODO(),
 			ke.Name, metav1.DeleteOptions{}); err != nil {
 			errstrings = append(errstrings, err.Error())
 		}

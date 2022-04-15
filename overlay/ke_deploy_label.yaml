@@ -3,14 +3,10 @@
 
 #@overlay/match by=overlay.subset({"kind": "KnativeEventing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
 metadata:
   #@overlay/match missing_ok=True
   namespace: #@ data.values.namespace
 #@overlay/match missing_ok=True
 spec:
-  #@overlay/match missing_ok=True
-  deployments:
-  #@overlay/match by="name",missing_ok=True
-  - name: #@ data.values.deployName

@@ -22,8 +22,8 @@ import (
 
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	eventingv1alpha1 "knative.dev/operator/pkg/apis/operator/v1alpha1"
-	servingv1alpha1 "knative.dev/operator/pkg/apis/operator/v1alpha1"
+	eventingv1beta1 "knative.dev/operator/pkg/apis/operator/v1beta1"
+	servingv1beta1 "knative.dev/operator/pkg/apis/operator/v1beta1"
 	"knative.dev/operator/pkg/client/clientset/versioned"
 )
 
@@ -64,13 +64,13 @@ func (ko *KnativeOperatorCR) GetCRInterface(component, namespace string) (interf
 
 // GetKnativeServing gets the Knative Serving custom resource under a certain namespace
 func (ko *KnativeOperatorCR) GetKnativeServing(namespace string) (interface{}, error) {
-	knativeServing, err := ko.KnativeOperatorClient.OperatorV1alpha1().KnativeServings(namespace).Get(context.TODO(),
+	knativeServing, err := ko.KnativeOperatorClient.OperatorV1beta1().KnativeServings(namespace).Get(context.TODO(),
 		KnativeServingName, metav1.GetOptions{})
 
-	serving := &servingv1alpha1.KnativeServing{
+	serving := &servingv1beta1.KnativeServing{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "KnativeServing",
-			APIVersion: "operator.knative.dev/v1alpha1",
+			APIVersion: "operator.knative.dev/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      KnativeServingName,
@@ -90,13 +90,13 @@ func (ko *KnativeOperatorCR) GetKnativeServing(namespace string) (interface{}, e
 
 // GetKnativeEventing gets the Knative Eventing custom resource under a certain namespace
 func (ko *KnativeOperatorCR) GetKnativeEventing(namespace string) (interface{}, error) {
-	knativeEventing, err := ko.KnativeOperatorClient.OperatorV1alpha1().KnativeEventings(namespace).Get(context.TODO(),
+	knativeEventing, err := ko.KnativeOperatorClient.OperatorV1beta1().KnativeEventings(namespace).Get(context.TODO(),
 		KnativeEventingName, metav1.GetOptions{})
 
-	eventing := &eventingv1alpha1.KnativeEventing{
+	eventing := &eventingv1beta1.KnativeEventing{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "KnativeEventing",
-			APIVersion: "operator.knative.dev/v1alpha1",
+			APIVersion: "operator.knative.dev/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      KnativeEventingName,

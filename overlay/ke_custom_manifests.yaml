@@ -3,7 +3,7 @@
 
 #@overlay/match by=overlay.subset({"kind": "KnativeEventing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
 metadata:
   #@overlay/match missing_ok=True

@@ -60,7 +60,29 @@ func TestValidateLabelsFlags(t *testing.T) {
 		},
 		expectedResult: nil,
 	}, {
-		name: "Knative Eventing with no deployment name",
+		name: "Knative Eventing with service name",
+		deploymentLabelCMDFlags: DeploymentLabelFlags{
+			Label:       true,
+			Key:         "test-key",
+			Value:       "test-value",
+			Component:   "eventing",
+			Namespace:   "test-eventing",
+			ServiceName: "eventing-controller",
+		},
+		expectedResult: nil,
+	}, {
+		name: "Knative Eventing with service name and nodeSelector",
+		deploymentLabelCMDFlags: DeploymentLabelFlags{
+			NodeSelector: true,
+			Key:          "test-key",
+			Value:        "test-value",
+			Component:    "eventing",
+			Namespace:    "test-eventing",
+			ServiceName:  "eventing-controller",
+		},
+		expectedResult: fmt.Errorf("You cannot configure the nodeSelector for the service."),
+	}, {
+		name: "Knative Eventing with no deployment name or service name",
 		deploymentLabelCMDFlags: DeploymentLabelFlags{
 			Label:     true,
 			Key:       "test-key",
@@ -68,7 +90,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 			Component: "eventing",
 			Namespace: "test-eventing",
 		},
-		expectedResult: fmt.Errorf("You need to specify the name of the deployment."),
+		expectedResult: fmt.Errorf("You need to specify the name of the deployment or the service."),
 	}, {
 		name: "Knative Eventing with invalid component name",
 		deploymentLabelCMDFlags: DeploymentLabelFlags{
@@ -142,18 +164,18 @@ func TestGetOverlayYamlContentLabel(t *testing.T) {
 
 #@overlay/match by=overlay.subset({"kind": "KnativeEventing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeEventing
 metadata:
   #@overlay/match missing_ok=True
   namespace: #@ data.values.namespace
 #@overlay/match missing_ok=True
 spec:
+
   #@overlay/match missing_ok=True
   deployments:
   #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
-
     #@overlay/match missing_ok=True
     labels:
       #@overlay/match missing_ok=True
@@ -173,18 +195,18 @@ spec:
 
 #@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
 metadata:
   #@overlay/match missing_ok=True
   namespace: #@ data.values.namespace
 #@overlay/match missing_ok=True
 spec:
+
   #@overlay/match missing_ok=True
   deployments:
   #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
-
     #@overlay/match missing_ok=True
     annotations:
       #@overlay/match missing_ok=True
@@ -204,18 +226,18 @@ spec:
 
 #@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
 ---
-apiVersion: operator.knative.dev/v1alpha1
+apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
 metadata:
   #@overlay/match missing_ok=True
   namespace: #@ data.values.namespace
 #@overlay/match missing_ok=True
 spec:
+
   #@overlay/match missing_ok=True
   deployments:
   #@overlay/match by="name",missing_ok=True
   - name: #@ data.values.deployName
-
     #@overlay/match missing_ok=True
     nodeSelector:
       #@overlay/match missing_ok=True
@@ -247,6 +269,20 @@ func TestGetYamlValuesContentLabels(t *testing.T) {
 ---
 namespace: test-eventing
 deployName: network
+value: test-value`,
+	}, {
+		name: "Knative Eventing with service name",
+		deploymentLabelCMDFlags: DeploymentLabelFlags{
+			Key:         "test-key",
+			Value:       "test-value",
+			Component:   "eventing",
+			Namespace:   "test-eventing",
+			ServiceName: "network",
+		},
+		expectedResult: `#@data/values
+---
+namespace: test-eventing
+serviceName: network
 value: test-value`,
 	}, {
 		name: "Knative Serving",

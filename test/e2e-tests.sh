@@ -100,6 +100,20 @@ echo ">> Configure the nodeSelector for Knative Serving"
 echo ">> Verify the label configuration of Knative Serving"
 go_test_e2e -tags=servinglabelconfig -timeout=20m ./test/e2e || failed=1
 
+echo ">> Configure the label for Knative Serving's service"
+./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY} --value ${TEST_VALUE} --label || fail_test "Failed to configure Knative Serving's service"
+
+./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --label || fail_test "Failed to configure Knative Serving's service"
+
+echo ">> Configure the annotation for Knative Serving's service"
+./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY} --value ${TEST_VALUE} --annotation || fail_test "Failed to configure Knative Serving's service"
+
+./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --annotation || fail_test "Failed to configure Knative Serving's service"
+
 echo ">> Configure the resource with Knative Serving"
 ./kn-operator configure resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
   --container activator --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
@@ -185,6 +199,20 @@ echo ">> Configure the nodeSelector for Knative Eventing"
 
 echo ">> Verify the label configuration of Knative Eventing"
 go_test_e2e -tags=eventinglabelconfig -timeout=20m ./test/e2e || failed=1
+
+echo ">> Configure the label for Knative Eventing's service"
+./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY} --value ${TEST_VALUE} --label || fail_test "Failed to configure Knative Eventing's service"
+
+./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --label || fail_test "Failed to configure Knative Eventing's service"
+
+echo ">> Configure the annotation for Knative Eventing's service"
+./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY} --value ${TEST_VALUE} --annotation || fail_test "Failed to configure Knative Eventing's service"
+
+./kn-operator configure labels -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --annotation || fail_test "Failed to configure Knative Eventing's service"
 
 echo ">> Configure the ConfigMaps for Knative Eventing"
 ./kn-operator configure configmaps -c eventing -n ${EVENTING_NAMESPACE} --cmName config-features \

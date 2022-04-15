@@ -31,6 +31,7 @@ type DeploymentLabelFlags struct {
 	Component    string
 	Namespace    string
 	DeployName   string
+	ServiceName  string
 	NodeSelector bool
 	Annotation   bool
 	Label        bool
@@ -72,7 +73,8 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.NodeSelector, "nodeSelector", false, "The flag to enable the nodeSelector configuration")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.Key, "key", "", "The key of the data in the configmap")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.Value, "value", "", "The value of the data in the configmap")
-	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.DeployName, "deployName", "", "The flag to specify the configmap name")
+	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
+	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.ServiceName, "serviceName", "", "The flag to specify the service name")
 	configureLabelsCmd.Flags().StringVarP(&deploymentLabelCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureLabelsCmd.Flags().StringVarP(&deploymentLabelCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
 
@@ -101,14 +103,18 @@ func validateLabelsFlags(deploymentLabelCMDFlags DeploymentLabelFlags) error {
 		return fmt.Errorf("You can specify only one deployment aspect for Knative: NodeSelector, Annotation or Label.")
 	}
 
+	if deploymentLabelCMDFlags.NodeSelector && deploymentLabelCMDFlags.ServiceName != "" {
+		return fmt.Errorf("You cannot configure the nodeSelector for the service.")
+	}
+
 	if deploymentLabelCMDFlags.Key == "" {
 		return fmt.Errorf("You need to specify the key for the deployment.")
 	}
 	if deploymentLabelCMDFlags.Value == "" {
 		return fmt.Errorf("You need to specify the value for the deployment.")
 	}
-	if deploymentLabelCMDFlags.DeployName == "" {
-		return fmt.Errorf("You need to specify the name of the deployment.")
+	if deploymentLabelCMDFlags.DeployName == "" && deploymentLabelCMDFlags.ServiceName == "" {
+		return fmt.Errorf("You need to specify the name of the deployment or the service.")
 	}
 	if deploymentLabelCMDFlags.Namespace == "" {
 		return fmt.Errorf("You need to specify the namespace.")
@@ -150,7 +156,30 @@ func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags Deploym
 
 func getLabelConfiguration(deploymentLabelCMDFlags DeploymentLabelFlags) string {
 	resourceArray := []string{}
-	tag := fmt.Sprintf("%s%s", common.Spaces(4), common.YttMatchingTag)
+
+	tag := fmt.Sprintf("%s%s", common.Spaces(2), common.YttMatchingTag)
+	resourceArray = append(resourceArray, tag)
+
+	if deploymentLabelCMDFlags.DeployName != "" {
+		field := fmt.Sprintf("%s%s:", common.Spaces(2), "deployments")
+		resourceArray = append(resourceArray, field)
+	} else {
+		field := fmt.Sprintf("%s%s:", common.Spaces(2), "services")
+		resourceArray = append(resourceArray, field)
+	}
+
+	field := fmt.Sprintf("%s%s", common.Spaces(2), common.FieldByName("name"))
+	resourceArray = append(resourceArray, field)
+
+	if deploymentLabelCMDFlags.DeployName != "" {
+		deployName := fmt.Sprintf("%s- %s: %s", common.Spaces(2), "name", "#@ data.values.deployName")
+		resourceArray = append(resourceArray, deployName)
+	} else {
+		serviceName := fmt.Sprintf("%s- %s: %s", common.Spaces(2), "name", "#@ data.values.serviceName")
+		resourceArray = append(resourceArray, serviceName)
+	}
+
+	tag = fmt.Sprintf("%s%s", common.Spaces(4), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)
 
 	if deploymentLabelCMDFlags.Label {
@@ -183,8 +212,15 @@ func getYamlValuesContentLabels(deploymentLabelCMDFlags DeploymentLabelFlags) st
 	contentArray = append(contentArray, header)
 	namespace := fmt.Sprintf("namespace: %s", deploymentLabelCMDFlags.Namespace)
 	contentArray = append(contentArray, namespace)
-	deployName := fmt.Sprintf("deployName: %s", deploymentLabelCMDFlags.DeployName)
-	contentArray = append(contentArray, deployName)
+
+	if deploymentLabelCMDFlags.DeployName != "" {
+		deployName := fmt.Sprintf("deployName: %s", deploymentLabelCMDFlags.DeployName)
+		contentArray = append(contentArray, deployName)
+	} else {
+		serviceName := fmt.Sprintf("serviceName: %s", deploymentLabelCMDFlags.ServiceName)
+		contentArray = append(contentArray, serviceName)
+	}
+
 	value := fmt.Sprintf("value: %s", deploymentLabelCMDFlags.Value)
 	contentArray = append(contentArray, value)
 	return strings.Join(contentArray, "\n")

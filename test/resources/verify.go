@@ -137,6 +137,18 @@ func VerifyKnativeEventingLabelsExistence(t *testing.T, clients operatorv1beta1.
 	VerifyDeploymentLabels(t, ks.Spec.DeploymentOverride, deployLabelFlags)
 }
 
+func VerifyKnativeServingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyServiceLabels(t, ks.Spec.ServiceOverride, deployLabelFlags)
+}
+
+func VerifyKnativeEventingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyServiceLabels(t, ks.Spec.ServiceOverride, deployLabelFlags)
+}
+
 func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags configure.DeploymentLabelFlags) {
 	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
 
@@ -173,6 +185,42 @@ func findKeyValue(t *testing.T, key, expectedValue, indicator string, deploy *ba
 		}
 	} else if indicator == "nodeselector" {
 		if data, ok := deploy.NodeSelector[key]; ok && expectedValue == data {
+			return true
+		}
+	}
+	return false
+}
+
+func VerifyServiceLabels(t *testing.T, serviceOverride []base.ServiceOverride, deployLabelFlags configure.DeploymentLabelFlags) {
+	testingUtil.AssertEqual(t, len(serviceOverride), 1)
+
+	service := findService(deployLabelFlags.ServiceName, serviceOverride)
+	testingUtil.AssertEqual(t, service == nil, false)
+
+	indicator := "label"
+	if deployLabelFlags.Annotation {
+		indicator = "annotation"
+	}
+	result := findKeyValueService(t, deployLabelFlags.Key, deployLabelFlags.Value, indicator, service)
+	testingUtil.AssertEqual(t, result, true)
+}
+
+func findService(name string, serviceOverride []base.ServiceOverride) *base.ServiceOverride {
+	for _, service := range serviceOverride {
+		if service.Name == name {
+			return &service
+		}
+	}
+	return nil
+}
+
+func findKeyValueService(t *testing.T, key, expectedValue, indicator string, deploy *base.ServiceOverride) bool {
+	if indicator == "label" {
+		if data, ok := deploy.Labels[key]; ok && expectedValue == data {
+			return true
+		}
+	} else if indicator == "annotation" {
+		if data, ok := deploy.Annotations[key]; ok && expectedValue == data {
 			return true
 		}
 	}

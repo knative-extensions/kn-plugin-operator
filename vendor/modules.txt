@@ -458,7 +458,7 @@ k8s.io/utils/trace
 # knative.dev/hack v0.0.0-20220427014036-5f473869d377
 ## explicit
 knative.dev/hack
-# knative.dev/operator v0.31.1-0.20220427135252-51d76aed684b
+# knative.dev/operator v0.31.1-0.20220502081656-d9942f4ad072
 ## explicit
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
@@ -470,7 +470,7 @@ knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1alpha1
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20220427013826-1f681e126af6
+# knative.dev/pkg v0.0.0-20220502225657-4fced0164c9a
 ## explicit
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck

@@ -35,7 +35,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 			Namespace:  "test-eventing",
 			DeployName: "eventing-controller",
 		},
-		expectedResult: fmt.Errorf("You need to enable at least one deployment aspect for Knative: NodeSelector, Annotation or Label."),
+		expectedResult: fmt.Errorf("You need to specify what to configure for the deployment or service in Knative: NodeSelector, Annotation, Selector or Label."),
 	}, {
 		name: "Knative Eventing with multiple aspects",
 		deploymentLabelCMDFlags: DeploymentLabelFlags{
@@ -47,7 +47,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 			Namespace:  "test-eventing",
 			DeployName: "eventing-controller",
 		},
-		expectedResult: fmt.Errorf("You can specify only one deployment aspect for Knative: NodeSelector, Annotation or Label."),
+		expectedResult: fmt.Errorf("You can only specify one of the following in the command line: NodeSelector, Annotation, Selector or Label."),
 	}, {
 		name: "Knative Eventing",
 		deploymentLabelCMDFlags: DeploymentLabelFlags{
@@ -73,6 +73,17 @@ func TestValidateLabelsFlags(t *testing.T) {
 	}, {
 		name: "Knative Eventing with service name and nodeSelector",
 		deploymentLabelCMDFlags: DeploymentLabelFlags{
+			Selector:    true,
+			Key:         "test-key",
+			Value:       "test-value",
+			Component:   "eventing",
+			Namespace:   "test-eventing",
+			ServiceName: "eventing-controller",
+		},
+		expectedResult: nil,
+	}, {
+		name: "Knative Eventing with service name and nodeSelector",
+		deploymentLabelCMDFlags: DeploymentLabelFlags{
 			NodeSelector: true,
 			Key:          "test-key",
 			Value:        "test-value",
@@ -81,6 +92,17 @@ func TestValidateLabelsFlags(t *testing.T) {
 			ServiceName:  "eventing-controller",
 		},
 		expectedResult: fmt.Errorf("You cannot configure the nodeSelector for the service."),
+	}, {
+		name: "Knative Eventing with deployment name and nodeSelector",
+		deploymentLabelCMDFlags: DeploymentLabelFlags{
+			Selector:   true,
+			Key:        "test-key",
+			Value:      "test-value",
+			Component:  "eventing",
+			Namespace:  "test-eventing",
+			DeployName: "eventing-controller",
+		},
+		expectedResult: fmt.Errorf("You cannot configure the selector for the deployment."),
 	}, {
 		name: "Knative Eventing with no deployment name or service name",
 		deploymentLabelCMDFlags: DeploymentLabelFlags{
@@ -178,6 +200,37 @@ spec:
   - name: #@ data.values.deployName
     #@overlay/match missing_ok=True
     labels:
+      #@overlay/match missing_ok=True
+      test-key: #@ data.values.value`,
+	}, {
+		name: "Knative Serving",
+		deploymentLabelCMDFlags: DeploymentLabelFlags{
+			Selector:    true,
+			Key:         "test-key",
+			Value:       "test-value",
+			Component:   "serving",
+			Namespace:   "test-serving",
+			ServiceName: "network",
+		},
+		expectedResult: `#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: #@ data.values.namespace
+#@overlay/match missing_ok=True
+spec:
+
+  #@overlay/match missing_ok=True
+  services:
+  #@overlay/match by="name",missing_ok=True
+  - name: #@ data.values.serviceName
+    #@overlay/match missing_ok=True
+    selector:
       #@overlay/match missing_ok=True
       test-key: #@ data.values.value`,
 	}, {

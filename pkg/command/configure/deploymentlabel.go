@@ -32,6 +32,7 @@ type DeploymentLabelFlags struct {
 	Namespace    string
 	DeployName   string
 	ServiceName  string
+	Selector     bool
 	NodeSelector bool
 	Annotation   bool
 	Label        bool
@@ -46,7 +47,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the labels for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the labels for Knative Serving and Eventing deployments
-  kn operation configure labels --component eventing --deployName eventing-controller --key key --value value--namespace knative-eventing`,
+  kn operation configure labels --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateLabelsFlags(deploymentLabelCMDFlags); err != nil {
 				return err
@@ -71,6 +72,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.Label, "label", false, "The flag to enable the label configuration")
 	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.Annotation, "annotation", false, "The flag to enable the annotation configuration")
 	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.NodeSelector, "nodeSelector", false, "The flag to enable the nodeSelector configuration")
+	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.Selector, "selector", false, "The flag to enable the selector configuration")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.Key, "key", "", "The key of the data in the configmap")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.Value, "value", "", "The value of the data in the configmap")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
@@ -96,15 +98,23 @@ func validateLabelsFlags(deploymentLabelCMDFlags DeploymentLabelFlags) error {
 		count++
 	}
 
+	if deploymentLabelCMDFlags.Selector {
+		count++
+	}
+
 	if count == 0 {
-		return fmt.Errorf("You need to enable at least one deployment aspect for Knative: NodeSelector, Annotation or Label.")
+		return fmt.Errorf("You need to specify what to configure for the deployment or service in Knative: NodeSelector, Annotation, Selector or Label.")
 	}
 	if count > 1 {
-		return fmt.Errorf("You can specify only one deployment aspect for Knative: NodeSelector, Annotation or Label.")
+		return fmt.Errorf("You can only specify one of the following in the command line: NodeSelector, Annotation, Selector or Label.")
 	}
 
 	if deploymentLabelCMDFlags.NodeSelector && deploymentLabelCMDFlags.ServiceName != "" {
 		return fmt.Errorf("You cannot configure the nodeSelector for the service.")
+	}
+
+	if deploymentLabelCMDFlags.Selector && deploymentLabelCMDFlags.DeployName != "" {
+		return fmt.Errorf("You cannot configure the selector for the deployment.")
 	}
 
 	if deploymentLabelCMDFlags.Key == "" {
@@ -194,6 +204,11 @@ func getLabelConfiguration(deploymentLabelCMDFlags DeploymentLabelFlags) string 
 
 	if deploymentLabelCMDFlags.NodeSelector {
 		field := fmt.Sprintf("%s%s:", common.Spaces(4), "nodeSelector")
+		resourceArray = append(resourceArray, field)
+	}
+
+	if deploymentLabelCMDFlags.Selector {
+		field := fmt.Sprintf("%s%s:", common.Spaces(4), "selector")
 		resourceArray = append(resourceArray, field)
 	}
 

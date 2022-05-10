@@ -31,7 +31,7 @@ export OPERATOR_NAMESPACE="${OPERATOR_NAMESPACE:-operator-test}"
 export SERVING_NAMESPACE="${SERVING_NAMESPACE:-serving-test}"
 export EVENTING_NAMESPACE="${EVENTING_NAMESPACE:-eventing-test}"
 export ALPHA_VERSION="${ALPHA_VERSION:-1.2.0}"
-export LATEST_VERSION="${LATEST_VERSION:-latest}"
+export NIGHTLY_VERSION="${NIGHTLY_VERSION:-nightly}"
 export TEST_KEY="${TEST_KEY:-test-key}"
 export TEST_VALUE="${TEST_VALUE:-test-value}"
 export TEST_KEY_ADDITIONAL="${TEST_KEY_ADDITIONAL:-test-key-additional}"
@@ -68,7 +68,7 @@ echo ">> Verify the installation of Knative Operator ${ALPHA_VERSION}"
 go_test_e2e -tags=alpha -timeout=20m ./test/e2e || failed=1
 
 echo ">> Upgrade to the latest version of Knative Operator"
-./kn-operator install -n ${OPERATOR_NAMESPACE} -v ${LATEST_VERSION} || fail_test "Failed to upgrade to the latest Knative Operator"
+./kn-operator install -n ${OPERATOR_NAMESPACE} -v ${NIGHTLY_VERSION} || fail_test "Failed to upgrade to the nightly built Knative Operator"
 
 echo ">> Verify the installation of Knative Operator of the latest version"
 go_test_e2e -tags=beta -timeout=20m ./test/e2e || failed=1

@@ -80,6 +80,24 @@ func TestServingServiceLabelConfiguration(t *testing.T) {
 			ServiceName: "activator-service",
 			Annotation:  true,
 		},
+	}, {
+		name: "Knative Serving verifying the first key-value pair for selector",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:       resources.TestValue,
+			Key:         resources.TestKey,
+			Component:   "serving",
+			ServiceName: "activator-service",
+			Selector:    true,
+		},
+	}, {
+		name: "Knative Serving verifying the additional key-value pair for selector",
+		expectedLabels: configure.DeploymentLabelFlags{
+			Value:       resources.TestValueAdditional,
+			Key:         resources.TestKeyAdditional,
+			Component:   "serving",
+			ServiceName: "activator-service",
+			Selector:    true,
+		},
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			resources.VerifyKnativeServingServiceLabelsExistence(t, clients.Operator.KnativeServings(resources.ServingOperatorNamespace),

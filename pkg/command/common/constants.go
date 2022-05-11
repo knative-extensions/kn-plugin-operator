@@ -22,6 +22,7 @@ const (
 	DefaultKnativeEventingNamespace = "knative-eventing"
 	DefaultNamespace                = "default"
 	Latest                          = "latest"
+	Nightly                         = "nightly"
 	ServingComponent                = "serving"
 	EventingComponent               = "eventing"
 	YttMatchingTag                  = "#@overlay/match missing_ok=True"

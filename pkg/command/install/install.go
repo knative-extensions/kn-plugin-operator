@@ -36,7 +36,7 @@ type installCmdFlags struct {
 
 func (flags *installCmdFlags) fill_defaults() {
 	if flags.Version == "" {
-		flags.Version = "latest"
+		flags.Version = common.Latest
 	}
 
 	if flags.IstioNamespace == "" && strings.EqualFold(flags.Component, common.ServingComponent) {
@@ -90,7 +90,7 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	installCmd.Flags().StringVar(&installFlags.KubeConfig, "kubeconfig", "", "The kubeconfig of the Knative resources (default is KUBECONFIG from environment variable)")
 	installCmd.Flags().StringVarP(&installFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
 	installCmd.Flags().StringVarP(&installFlags.Component, "component", "c", "", "The name of the Knative Component to install")
-	installCmd.Flags().StringVarP(&installFlags.Version, "version", "v", "latest", "The version of the the Knative Operator or the Knative component")
+	installCmd.Flags().StringVarP(&installFlags.Version, "version", "v", common.Latest, "The version of the the Knative Operator or the Knative component")
 	installCmd.Flags().StringVar(&installFlags.IstioNamespace, "istio-namespace", "", "The namespace of istio")
 
 	return installCmd
@@ -126,7 +126,7 @@ func RunInstallationCommand(installFlags installCmdFlags, p *pkg.OperatorParams)
 func getBaseURL(version, base string) (string, error) {
 	versionSanitized := strings.ToLower(version)
 	URL := "https://github.com/knative/operator/releases/latest/download/" + base
-	if version != "latest" {
+	if version != common.Latest && version != common.Nightly {
 		if !strings.HasPrefix(version, "v") {
 			versionSanitized = fmt.Sprintf("v%s", versionSanitized)
 		}
@@ -139,6 +139,9 @@ func getBaseURL(version, base string) (string, error) {
 			prefix = "knative-"
 		}
 		URL = fmt.Sprintf("https://github.com/knative/operator/releases/download/%s%s/%s", prefix, versionSanitized, base)
+	}
+	if version == common.Nightly {
+		URL = "https://storage.googleapis.com/knative-nightly/operator/latest/" + base
 	}
 	return URL, nil
 }
@@ -168,7 +171,7 @@ func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string
 		return ""
 	}
 	overlayContent, _ := common.ReadFile(path)
-	if installFlags.Component == "" && (strings.EqualFold(installFlags.Version, "latest") || versionWebhook(installFlags.Version)) {
+	if installFlags.Component == "" && (strings.EqualFold(installFlags.Version, common.Latest) || strings.EqualFold(installFlags.Version, common.Nightly) || versionWebhook(installFlags.Version)) {
 		crdOverlay, _ := common.ReadFile(rootPath + "/overlay/operator_crds.yaml")
 		overlayContent = fmt.Sprintf("%s\n%s", overlayContent, crdOverlay)
 	}
@@ -216,7 +219,7 @@ func installKnativeComponent(installFlags installCmdFlags, rootPath string, p *p
 	} else if !exists {
 		operatorInstallFlags := installCmdFlags{
 			Namespace: "default",
-			Version:   "latest",
+			Version:   common.Latest,
 		}
 		err = installOperator(operatorInstallFlags, rootPath, p)
 		if err != nil {

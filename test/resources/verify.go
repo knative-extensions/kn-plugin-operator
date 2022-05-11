@@ -200,6 +200,8 @@ func VerifyServiceLabels(t *testing.T, serviceOverride []base.ServiceOverride, d
 	indicator := "label"
 	if deployLabelFlags.Annotation {
 		indicator = "annotation"
+	} else if deployLabelFlags.Selector {
+		indicator = "selector"
 	}
 	result := findKeyValueService(t, deployLabelFlags.Key, deployLabelFlags.Value, indicator, service)
 	testingUtil.AssertEqual(t, result, true)
@@ -221,6 +223,10 @@ func findKeyValueService(t *testing.T, key, expectedValue, indicator string, dep
 		}
 	} else if indicator == "annotation" {
 		if data, ok := deploy.Annotations[key]; ok && expectedValue == data {
+			return true
+		}
+	} else if indicator == "selector" {
+		if data, ok := deploy.Selector[key]; ok && expectedValue == data {
 			return true
 		}
 	}

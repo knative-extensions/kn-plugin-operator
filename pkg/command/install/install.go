@@ -180,7 +180,10 @@ func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string
 }
 
 func versionWebhook(version string) bool {
-	targetVersion := fmt.Sprintf("v%s", version)
+	targetVersion := version
+	if !strings.HasPrefix(version, "v") {
+		targetVersion = fmt.Sprintf("v%s", targetVersion)
+	}
 	semver.MajorMinor(targetVersion)
 	return semver.Compare(targetVersion, "v1.3") >= 0
 }

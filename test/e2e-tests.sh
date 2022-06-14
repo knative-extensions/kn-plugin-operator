@@ -30,7 +30,6 @@ export GO111MODULE=on
 export OPERATOR_NAMESPACE="${OPERATOR_NAMESPACE:-operator-test}"
 export SERVING_NAMESPACE="${SERVING_NAMESPACE:-serving-test}"
 export EVENTING_NAMESPACE="${EVENTING_NAMESPACE:-eventing-test}"
-export ALPHA_VERSION="${ALPHA_VERSION:-1.2.0}"
 export NIGHTLY_VERSION="${NIGHTLY_VERSION:-nightly}"
 export TEST_KEY="${TEST_KEY:-test-key}"
 export TEST_VALUE="${TEST_VALUE:-test-value}"
@@ -60,12 +59,6 @@ install_istio || fail_test "Istio installation failed"
 
 echo ">> Build the binary kn-operator for the operator plugin"
 go build -o kn-operator ./cmd/kn-operator.go || fail_test "Failed to build the binary of the operator plugin"
-
-echo ">> Install the Knative Operator ${ALPHA_VERSION}"
-./kn-operator install -n ${OPERATOR_NAMESPACE} -v ${ALPHA_VERSION} || fail_test "Failed to install Knative Operator ${ALPHA_VERSION}"
-
-echo ">> Verify the installation of Knative Operator ${ALPHA_VERSION}"
-go_test_e2e -tags=alpha -timeout=20m ./test/e2e || failed=1
 
 echo ">> Upgrade to the latest version of Knative Operator"
 ./kn-operator install -n ${OPERATOR_NAMESPACE} -v ${NIGHTLY_VERSION} || fail_test "Failed to upgrade to the nightly built Knative Operator"

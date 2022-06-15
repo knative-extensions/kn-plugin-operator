@@ -1,4 +1,4 @@
-#@overlay/match by=overlay.subset({"kind": "CustomResourceDefinition", "metadata":{"name":"knativeservings.operator.knative.dev"}}),expects=1
+#@overlay/match by=overlay.subset({"kind": "CustomResourceDefinition", "metadata":{"name":"knativeservings.operator.knative.dev"}, "spec":{"conversion":{"strategy":"Webhook"}}}),expects="0+"
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -14,7 +14,7 @@ spec:
           #@overlay/match missing_ok=True
           namespace: #@ data.values.namespace
 
-#@overlay/match by=overlay.subset({"kind": "CustomResourceDefinition", "metadata":{"name":"knativeeventings.operator.knative.dev"}}),expects=1
+#@overlay/match by=overlay.subset({"kind": "CustomResourceDefinition", "metadata":{"name":"knativeeventings.operator.knative.dev"}, "spec":{"conversion":{"strategy":"Webhook"}}}),expects="0+"
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition

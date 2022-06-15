@@ -295,8 +295,16 @@ func TestVersionWebhook(t *testing.T) {
 		version:        "1.3",
 		expectedResult: true,
 	}, {
+		name:           "Version v1.3",
+		version:        "v1.3",
+		expectedResult: true,
+	}, {
 		name:           "Version 1.2",
 		version:        "1.2",
+		expectedResult: false,
+	}, {
+		name:           "Version v1.2",
+		version:        "v1.2",
 		expectedResult: false,
 	}, {
 		name:           "Version 1.4",

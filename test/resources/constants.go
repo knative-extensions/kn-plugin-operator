@@ -47,6 +47,14 @@ var (
 	TestDefaultEventingImageUrl = getenv("DEFAULT_EVENTING_IMAGE_URL", "gcr.io/knative-releases/knative.dev/eventing/cmd/${NAME}:latest")
 	// TestDefaultServingImageUrl is the default serving image url
 	TestDefaultServingImageUrl = getenv("DEFAULT_SERVING_IMAGE_URL", "gcr.io/knative-releases/knative.dev/serving/cmd/${NAME}:latest")
+	// TestEnvName is the name of the env var
+	TestEnvName = getenv("ENV_NAME", "test-name")
+	// TestEnvValue is the value of the env var
+	TestEnvValue = getenv("ENV_VALUE", "test-value")
+	// TestAddEnvName is the additional name of the env var
+	TestAddEnvName = getenv("ADDITIONAL_ENV_NAME", "additional-test-name")
+	// TestAddEnvValue is the additional value of the env var
+	TestAddEnvValue = getenv("ADDITIONAL_ENV_VALUE", "additional-test-value")
 )
 
 func getenv(name, defaultValue string) string {

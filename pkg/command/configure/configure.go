@@ -38,6 +38,7 @@ func NewConfigureCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureCmd.AddCommand(newConfigmapsCommand(p))
 	configureCmd.AddCommand(newDeploymentLabelCommand(p))
 	configureCmd.AddCommand(newImageCommand(p))
+	configureCmd.AddCommand(newEnvVarCommand(p))
 	configureCmd.AddCommand(newManifestsCommand(p))
 	return configureCmd
 }

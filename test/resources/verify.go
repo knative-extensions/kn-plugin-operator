@@ -349,3 +349,41 @@ func VerifyImages(t *testing.T, registry base.Registry, imageFlags configure.Ima
 		testingUtil.AssertEqual(t, registry.Default, imageFlags.ImageUrl)
 	}
 }
+
+func VerifyKnativeEventingEnvVars(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, envVarFlags configure.EnvVarFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyEnvVars(t, ke.Spec.DeploymentOverride, envVarFlags)
+}
+
+func VerifyKnativeServingEnvVars(t *testing.T, clients operatorv1beta1.KnativeServingInterface, envVarFlags configure.EnvVarFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyEnvVars(t, ks.Spec.DeploymentOverride, envVarFlags)
+}
+
+func VerifyEnvVars(t *testing.T, deploymentOverride []base.DeploymentOverride, envVarFlags configure.EnvVarFlags) {
+	deploy := findDeployment(envVarFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
+	envVar := findEnvVar(envVarFlags.ContainerName, deploy.Env)
+	testingUtil.AssertEqual(t, envVar == nil, false)
+	testingUtil.AssertEqual(t, includeEnvVar(envVarFlags.EnvName, envVarFlags.EnvValue, envVar.EnvVars), true)
+}
+
+func findEnvVar(name string, envVarOverrides []base.EnvRequirementsOverride) *base.EnvRequirementsOverride {
+	for _, envVarOverride := range envVarOverrides {
+		if envVarOverride.Container == name {
+			return &envVarOverride
+		}
+	}
+	return nil
+}
+
+func includeEnvVar(name, value string, envVars []corev1.EnvVar) bool {
+	for _, envVar := range envVars {
+		if envVar.Name == name && envVar.Value == value {
+			return true
+		}
+	}
+	return false
+}

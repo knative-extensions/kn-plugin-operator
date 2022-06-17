@@ -50,6 +50,11 @@ export DEFAULT_EVENTING_IMAGE_URL="${DEFAULT_EVENTING_IMAGE_URL:-"gcr.io/knative
 export SERVING_IMAGE_KEY="${SERVING_IMAGE_KEY:-controller}"
 export SERVING_IMAGE_URL="${SERVING_IMAGE_URL:-gcr.io/knative-releases/knative.dev/serving/cmd/controller:latest}"
 
+export ENV_NAME="${ENV_NAME:-test-name}"
+export ENV_VALUE="${ENV_VALUE:-test-value}"
+export ADDITIONAL_ENV_NAME="${ADDITIONAL_ENV_NAME:-additional-test-name}"
+export ADDITIONAL_ENV_VALUE="${ADDITIONAL_ENV_VALUE:-additional-test-value}"
+
 source "$(dirname "$0")/e2e-common.sh"
 
 # Script entry point.
@@ -168,6 +173,19 @@ echo ">> Configure the image of all deployments for Knative Seving"
 echo ">> Verify the image configuration for Knative Seving"
 go_test_e2e -tags=servingimage -timeout=20m ./test/e2e || failed=1
 
+echo ">> Configure the environment variables for the container in the deployment of Knative Seving"
+./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
+
+./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+  --name ${ADDITIONAL_ENV_NAME} --value ${ADDITIONAL_ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
+
+./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName activator --container activator \
+  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
+
+echo ">> Verify the env var configuration for Knative Serving"
+go_test_e2e -tags=servingenvvar -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -262,6 +280,19 @@ echo ">> Configure the image of all deployments for Knative Eventing"
 
 echo ">> Verify the image configuration for Knative Eventing"
 go_test_e2e -tags=eventingimage -timeout=20m ./test/e2e || failed=1
+
+echo ">> Configure the environment variables for the container in the deployment of Knative Eventing"
+./kn-operator configure envvars -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller --container eventing-controller \
+  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Eventing"
+
+./kn-operator configure envvars -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller --container eventing-controller \
+  --name ${ADDITIONAL_ENV_NAME} --value ${ADDITIONAL_ENV_VALUE} || fail_test "Failed to configure the env var for Knative Eventing"
+
+./kn-operator configure envvars -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-webhook --container eventing-webhook \
+  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Eventing"
+
+echo ">> Verify the env var configuration for Knative Eventing"
+go_test_e2e -tags=eventingenvvar -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

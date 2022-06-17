@@ -18,12 +18,13 @@ import (
 	"fmt"
 	"strings"
 
-	"knative.dev/kn-plugin-operator/pkg"
-
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
 	eventingv1beta1 "knative.dev/operator/pkg/apis/operator/v1beta1"
 	servingv1beta1 "knative.dev/operator/pkg/apis/operator/v1beta1"
+
+	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/operator/pkg/client/clientset/versioned"
 )
 
@@ -150,8 +151,14 @@ func ApplyManifests(yamlTemplateString, overlayContent, yamlValuesContent string
 		YttPro:     &yttp,
 		RestConfig: restConfig,
 	}
-	if err := manifest.Apply(); err != nil {
+
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return manifest.Apply()
+	})
+
+	if err != nil {
 		return err
 	}
+
 	return nil
 }

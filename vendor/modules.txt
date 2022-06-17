@@ -438,6 +438,7 @@ k8s.io/client-go/util/flowcontrol
 k8s.io/client-go/util/homedir
 k8s.io/client-go/util/jsonpath
 k8s.io/client-go/util/keyutil
+k8s.io/client-go/util/retry
 k8s.io/client-go/util/workqueue
 # k8s.io/klog/v2 v2.60.1-0.20220317184644-43cc75f9ae89
 k8s.io/klog/v2

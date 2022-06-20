@@ -106,6 +106,33 @@ func VerifyKnativeEventingExistence(t *testing.T, clients operatorv1beta1.Knativ
 	VerifyDeploymentOverride(t, ke.Spec.DeploymentOverride, resourcesFlags)
 }
 
+func VerifyKnativeEventingResouceDeletion(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, resourcesFlags configure.ResourcesFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentOverrideResourceDeletion(t, ke.Spec.DeploymentOverride, resourcesFlags)
+}
+
+func VerifyKnativeServingResouceDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, resourcesFlags configure.ResourcesFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentOverrideResourceDeletion(t, ks.Spec.DeploymentOverride, resourcesFlags)
+}
+
+func VerifyDeploymentOverrideResourceDeletion(t *testing.T, deploymentOverride []base.DeploymentOverride, resourcesFlags configure.ResourcesFlags) {
+	deploy := findDeployment(resourcesFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
+	testingUtil.AssertEqual(t, findContainer(deploy.Resources, resourcesFlags.Container), false)
+}
+
+func findContainer(resources []base.ResourceRequirementsOverride, container string) bool {
+	for _, resource := range resources {
+		if resource.Container == container {
+			return true
+		}
+	}
+	return false
+}
+
 func VerifyDeploymentOverride(t *testing.T, deploymentOverride []base.DeploymentOverride, resourcesFlags configure.ResourcesFlags) {
 	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
 

@@ -17,12 +17,14 @@ package remove
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
+	"k8s.io/client-go/util/retry"
+
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
+	"knative.dev/operator/pkg/apis/operator/base"
 )
 
 type ResourcesFlags struct {
@@ -82,24 +84,71 @@ func validateResourcesFlags(resourcesCMDFlags ResourcesFlags) error {
 	if resourcesCMDFlags.Namespace == "" {
 		return fmt.Errorf("You need to specify the namespace.")
 	}
+	if resourcesCMDFlags.Container != "" && resourcesCMDFlags.DeployName == "" {
+		return fmt.Errorf("You need to specify the deployment name for the container.")
+	}
+
 	return nil
 }
 
 func removeResources(resourcesCMDFlags ResourcesFlags, rootPath string, p *pkg.OperatorParams) error {
-	component := common.ServingComponent
-	if strings.EqualFold(resourcesCMDFlags.Component, common.EventingComponent) {
-		component = common.EventingComponent
-	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, resourcesCMDFlags.Namespace, p)
+	ksCR, err := common.GetKnativeOperatorCR(p)
 	if err != nil {
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentResource(rootPath, resourcesCMDFlags)
-	valuesYaml := getYamlValuesContentResources(resourcesCMDFlags)
-
-	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
+	deploymentOverrides, err := ksCR.GetDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace)
+	if err != nil {
 		return err
 	}
+
+	deploymentOverrides = removeResourcesFields(deploymentOverrides, resourcesCMDFlags)
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return ksCR.UpdateDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace, deploymentOverrides)
+	})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func removeResourcesFields(deploymentOverrides []base.DeploymentOverride, resourcesCMDFlags ResourcesFlags) []base.DeploymentOverride {
+	if resourcesCMDFlags.DeployName == "" {
+		// If no deploy is specified, we will iterate all the deployments to remove all resource configurations.
+		for i := range deploymentOverrides {
+			deploymentOverrides[i].Resources = nil
+		}
+	} else if resourcesCMDFlags.Container == "" {
+		for i, deploy := range deploymentOverrides {
+			if deploy.Name == resourcesCMDFlags.DeployName {
+				deploymentOverrides[i].Resources = nil
+			}
+		}
+	} else if resourcesCMDFlags.Container != "" {
+		deployIndex := -1
+		containerIndex := -1
+		var resourceRequirementsOverrides []base.ResourceRequirementsOverride
+		for i, deploy := range deploymentOverrides {
+			if deploy.Name == resourcesCMDFlags.DeployName {
+				deployIndex = i
+				for j, resource := range deploy.Resources {
+					if resource.Container == resourcesCMDFlags.Container {
+						containerIndex = j
+						resourceRequirementsOverrides = deploy.Resources
+						break
+					}
+				}
+				break
+			}
+		}
+
+		if containerIndex != -1 {
+			modifiedOverrides := append(resourceRequirementsOverrides[:containerIndex], resourceRequirementsOverrides[containerIndex+1:]...)
+			deploymentOverrides[deployIndex].Resources = modifiedOverrides
+		}
+	}
+
+	return deploymentOverrides
 }

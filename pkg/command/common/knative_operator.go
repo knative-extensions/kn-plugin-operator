@@ -65,8 +65,7 @@ func (ko *KnativeOperatorCR) GetCRInterface(component, namespace string) (interf
 
 // GetKnativeServing gets the Knative Serving custom resource under a certain namespace
 func (ko *KnativeOperatorCR) GetKnativeServing(namespace string) (interface{}, error) {
-	knativeServing, err := ko.KnativeOperatorClient.OperatorV1beta1().KnativeServings(namespace).Get(context.TODO(),
-		KnativeServingName, metav1.GetOptions{})
+	knativeServing, err := ko.GetKnativeServingInCluster(namespace)
 
 	serving := &servingv1beta1.KnativeServing{
 		TypeMeta: metav1.TypeMeta{
@@ -89,10 +88,21 @@ func (ko *KnativeOperatorCR) GetKnativeServing(namespace string) (interface{}, e
 	return serving, nil
 }
 
+// GetKnativeServingInCluster gets the Knative Serving custom resource in the cluster under a certain namespace
+func (ko *KnativeOperatorCR) GetKnativeServingInCluster(namespace string) (*servingv1beta1.KnativeServing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeServings(namespace).Get(context.TODO(),
+		KnativeServingName, metav1.GetOptions{})
+}
+
+// UpdateKnativeServing updates the Knative Serving custom resource in the cluster based on the provided Knative Serving
+func (ko *KnativeOperatorCR) UpdateKnativeServing(ks *servingv1beta1.KnativeServing) (*servingv1beta1.KnativeServing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeServings(ks.Namespace).Update(context.TODO(), ks,
+		metav1.UpdateOptions{})
+}
+
 // GetKnativeEventing gets the Knative Eventing custom resource under a certain namespace
 func (ko *KnativeOperatorCR) GetKnativeEventing(namespace string) (interface{}, error) {
-	knativeEventing, err := ko.KnativeOperatorClient.OperatorV1beta1().KnativeEventings(namespace).Get(context.TODO(),
-		KnativeEventingName, metav1.GetOptions{})
+	knativeEventing, err := ko.GetKnativeEventingInCluster(namespace)
 
 	eventing := &eventingv1beta1.KnativeEventing{
 		TypeMeta: metav1.TypeMeta{
@@ -113,6 +123,18 @@ func (ko *KnativeOperatorCR) GetKnativeEventing(namespace string) (interface{}, 
 
 	eventing.Spec = knativeEventing.Spec
 	return eventing, nil
+}
+
+// GetKnativeEventingInCluster gets the Knative Eventing custom resource in the cluster under a certain namespace
+func (ko *KnativeOperatorCR) GetKnativeEventingInCluster(namespace string) (*eventingv1beta1.KnativeEventing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeEventings(namespace).Get(context.TODO(),
+		namespace, metav1.GetOptions{})
+}
+
+// UpdateKnativeEventing updates the Knative Eventing custom resource in the cluster based on the provided Knative Eventing
+func (ko *KnativeOperatorCR) UpdateKnativeEventing(ke *eventingv1beta1.KnativeEventing) (*eventingv1beta1.KnativeEventing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeEventings(ke.Namespace).Update(context.TODO(), ke,
+		metav1.UpdateOptions{})
 }
 
 func GenerateOperatorCRString(component, namespace string, p *pkg.OperatorParams) (string, error) {

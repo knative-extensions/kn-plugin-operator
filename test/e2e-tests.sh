@@ -186,6 +186,13 @@ echo ">> Configure the environment variables for the container in the deployment
 echo ">> Verify the env var configuration for Knative Serving"
 go_test_e2e -tags=servingenvvar -timeout=20m ./test/e2e || failed=1
 
+echo ">> Remove the resource configuration for with Knative Serving"
+./kn-operator remove resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --container activator || fail_test "Failed to remove the resource configuration for Knative Serving"
+
+echo ">> Verify the resource configuration deletion for Knative Serving Custom resource"
+go_test_e2e -tags=servingresourceremove -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -293,6 +300,13 @@ echo ">> Configure the environment variables for the container in the deployment
 
 echo ">> Verify the env var configuration for Knative Eventing"
 go_test_e2e -tags=eventingenvvar -timeout=20m ./test/e2e || failed=1
+
+echo ">> Remove the resource configuration for with Knative Eventing"
+./kn-operator remove resources -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --container eventing-controller || fail_test "Failed to remove the resource configuration for Knative Eventing"
+
+echo ">> Verify the resource configuration deletion for Knative Eventing Custom resource"
+go_test_e2e -tags=eventingresourcerremove -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

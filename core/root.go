@@ -20,6 +20,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/configure"
 	"knative.dev/kn-plugin-operator/pkg/command/enable"
 	"knative.dev/kn-plugin-operator/pkg/command/install"
+	"knative.dev/kn-plugin-operator/pkg/command/remove"
 	"knative.dev/kn-plugin-operator/pkg/command/uninstall"
 )
 
@@ -39,17 +40,11 @@ kn operation install -c serving
 kn operation install -c eventing
 `,
 	}
-	//ctx, cancel := context.WithCancel(context.Background())
-	//
-	//p := &command.KameletPluginParams{
-	//	Context:       ctx,
-	//	ContextCancel: cancel,
-	//}
-	//p.Initialize()
 
 	rootCmd.AddCommand(install.NewInstallCommand(p))
 	rootCmd.AddCommand(uninstall.NewUninstallCommand(p))
 	rootCmd.AddCommand(enable.NewEnableCommand(p))
 	rootCmd.AddCommand(configure.NewConfigureCommand(p))
+	rootCmd.AddCommand(remove.NewRemoveCommand(p))
 	return rootCmd
 }

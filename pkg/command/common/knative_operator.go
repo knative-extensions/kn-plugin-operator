@@ -25,6 +25,7 @@ import (
 	servingv1beta1 "knative.dev/operator/pkg/apis/operator/v1beta1"
 
 	"knative.dev/kn-plugin-operator/pkg"
+	"knative.dev/operator/pkg/apis/operator/base"
 	"knative.dev/operator/pkg/client/clientset/versioned"
 )
 
@@ -65,8 +66,7 @@ func (ko *KnativeOperatorCR) GetCRInterface(component, namespace string) (interf
 
 // GetKnativeServing gets the Knative Serving custom resource under a certain namespace
 func (ko *KnativeOperatorCR) GetKnativeServing(namespace string) (interface{}, error) {
-	knativeServing, err := ko.KnativeOperatorClient.OperatorV1beta1().KnativeServings(namespace).Get(context.TODO(),
-		KnativeServingName, metav1.GetOptions{})
+	knativeServing, err := ko.GetKnativeServingInCluster(namespace)
 
 	serving := &servingv1beta1.KnativeServing{
 		TypeMeta: metav1.TypeMeta{
@@ -89,10 +89,79 @@ func (ko *KnativeOperatorCR) GetKnativeServing(namespace string) (interface{}, e
 	return serving, nil
 }
 
+func (ko *KnativeOperatorCR) GetDeployments(component, namespace string) ([]base.DeploymentOverride, error) {
+	var deploymentOverrides []base.DeploymentOverride
+	if strings.EqualFold(component, ServingComponent) {
+		ks, err := ko.GetKnativeServingInCluster(namespace)
+		if err != nil {
+			return deploymentOverrides, err
+		}
+		deploymentOverrides = ks.Spec.DeploymentOverride
+	} else if strings.EqualFold(component, EventingComponent) {
+		ke, err := ko.GetKnativeEventingInCluster(namespace)
+		if err != nil {
+			return deploymentOverrides, err
+		}
+		deploymentOverrides = ke.Spec.DeploymentOverride
+	}
+
+	return deploymentOverrides, nil
+}
+
+func (ko *KnativeOperatorCR) UpdateDeployments(component, namespace string, deployOverrides []base.DeploymentOverride) error {
+	if strings.EqualFold(component, ServingComponent) {
+		ks, err := ko.GetKnativeServingInCluster(namespace)
+		if err != nil {
+			return err
+		}
+		ks.Spec.DeploymentOverride = deployOverrides
+		_, err = ko.UpdateKnativeServing(ks)
+		if err != nil {
+			return err
+		}
+
+	} else if strings.EqualFold(component, EventingComponent) {
+		ke, err := ko.GetKnativeEventingInCluster(namespace)
+		if err != nil {
+			return err
+		}
+		ke.Spec.DeploymentOverride = deployOverrides
+		_, err = ko.UpdateKnativeEventing(ke)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// GetKnativeServingInCluster gets the Knative Serving custom resource in the cluster under a certain namespace
+func (ko *KnativeOperatorCR) GetKnativeServingInCluster(namespace string) (*servingv1beta1.KnativeServing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeServings(namespace).Get(context.TODO(),
+		KnativeServingName, metav1.GetOptions{})
+}
+
+// UpdateKnativeServing updates the Knative Serving custom resource in the cluster based on the provided Knative Serving
+func (ko *KnativeOperatorCR) UpdateKnativeServing(ks *servingv1beta1.KnativeServing) (*servingv1beta1.KnativeServing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeServings(ks.Namespace).Update(context.TODO(), ks,
+		metav1.UpdateOptions{})
+}
+
+// GetKnativeEventingInCluster gets the Knative Eventing custom resource in the cluster under a certain namespace
+func (ko *KnativeOperatorCR) GetKnativeEventingInCluster(namespace string) (*eventingv1beta1.KnativeEventing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeEventings(namespace).Get(context.TODO(),
+		KnativeEventingName, metav1.GetOptions{})
+}
+
+// UpdateKnativeEventing updates the Knative Eventing custom resource in the cluster based on the provided Knative Eventing
+func (ko *KnativeOperatorCR) UpdateKnativeEventing(ks *eventingv1beta1.KnativeEventing) (*eventingv1beta1.KnativeEventing, error) {
+	return ko.KnativeOperatorClient.OperatorV1beta1().KnativeEventings(ks.Namespace).Update(context.TODO(), ks,
+		metav1.UpdateOptions{})
+}
+
 // GetKnativeEventing gets the Knative Eventing custom resource under a certain namespace
 func (ko *KnativeOperatorCR) GetKnativeEventing(namespace string) (interface{}, error) {
-	knativeEventing, err := ko.KnativeOperatorClient.OperatorV1beta1().KnativeEventings(namespace).Get(context.TODO(),
-		KnativeEventingName, metav1.GetOptions{})
+	knativeEventing, err := ko.GetKnativeEventingInCluster(namespace)
 
 	eventing := &eventingv1beta1.KnativeEventing{
 		TypeMeta: metav1.TypeMeta{

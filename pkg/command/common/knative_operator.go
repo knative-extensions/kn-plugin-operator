@@ -89,6 +89,52 @@ func (ko *KnativeOperatorCR) GetKnativeServing(namespace string) (interface{}, e
 	return serving, nil
 }
 
+func (ko *KnativeOperatorCR) GetConfigMaps(component, namespace string) (base.ConfigMapData, error) {
+	var cmData base.ConfigMapData
+	if strings.EqualFold(component, ServingComponent) {
+		ks, err := ko.GetKnativeServingInCluster(namespace)
+		if err != nil {
+			return cmData, err
+		}
+		cmData = ks.Spec.Config
+	} else if strings.EqualFold(component, EventingComponent) {
+		ke, err := ko.GetKnativeEventingInCluster(namespace)
+		if err != nil {
+			return cmData, err
+		}
+		cmData = ke.Spec.Config
+	}
+
+	return cmData, nil
+}
+
+func (ko *KnativeOperatorCR) UpdateConfigMaps(component, namespace string, cmData base.ConfigMapData) error {
+	if strings.EqualFold(component, ServingComponent) {
+		ks, err := ko.GetKnativeServingInCluster(namespace)
+		if err != nil {
+			return err
+		}
+		ks.Spec.Config = cmData
+		_, err = ko.UpdateKnativeServing(ks)
+		if err != nil {
+			return err
+		}
+
+	} else if strings.EqualFold(component, EventingComponent) {
+		ke, err := ko.GetKnativeEventingInCluster(namespace)
+		if err != nil {
+			return err
+		}
+		ke.Spec.Config = cmData
+		_, err = ko.UpdateKnativeEventing(ke)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (ko *KnativeOperatorCR) GetDeployments(component, namespace string) ([]base.DeploymentOverride, error) {
 	var deploymentOverrides []base.DeploymentOverride
 	if strings.EqualFold(component, ServingComponent) {

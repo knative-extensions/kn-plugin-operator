@@ -22,7 +22,7 @@ package e2e
 import (
 	"testing"
 
-	"knative.dev/kn-plugin-operator/pkg/command/configure"
+	"knative.dev/kn-plugin-operator/pkg/command/common"
 	"knative.dev/kn-plugin-operator/test/resources"
 	"knative.dev/operator/test"
 	"knative.dev/operator/test/client"
@@ -43,10 +43,10 @@ func TestEventingConfigMapConfiguration(t *testing.T) {
 
 	for _, tt := range []struct {
 		name               string
-		expectedConfigMaps configure.CMsFlags
+		expectedConfigMaps common.CMsFlags
 	}{{
 		name: "Knative Eventing verifying the first key-value pair for ConfigMap",
-		expectedConfigMaps: configure.CMsFlags{
+		expectedConfigMaps: common.CMsFlags{
 			Value:     resources.TestValue,
 			Key:       resources.TestKey,
 			Component: "eventing",
@@ -55,7 +55,7 @@ func TestEventingConfigMapConfiguration(t *testing.T) {
 		},
 	}, {
 		name: "Knative Eventing verifying the additional key-value pair for ConfigMap",
-		expectedConfigMaps: configure.CMsFlags{
+		expectedConfigMaps: common.CMsFlags{
 			Value:     resources.TestValueAdditional,
 			Key:       resources.TestKeyAdditional,
 			Component: "eventing",
@@ -64,7 +64,7 @@ func TestEventingConfigMapConfiguration(t *testing.T) {
 		},
 	}, {
 		name: "Knative Eventing verifying the first key-value pair for another ConfigMap",
-		expectedConfigMaps: configure.CMsFlags{
+		expectedConfigMaps: common.CMsFlags{
 			Value:     resources.TestValue,
 			Key:       resources.TestKey,
 			Component: "eventing",

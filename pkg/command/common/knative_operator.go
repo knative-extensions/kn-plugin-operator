@@ -109,30 +109,12 @@ func (ko *KnativeOperatorCR) GetConfigMaps(component, namespace string) (base.Co
 }
 
 func (ko *KnativeOperatorCR) UpdateConfigMaps(component, namespace string, cmData base.ConfigMapData) error {
-	if strings.EqualFold(component, ServingComponent) {
-		ks, err := ko.GetKnativeServingInCluster(namespace)
-		if err != nil {
-			return err
-		}
-		ks.Spec.Config = cmData
-		_, err = ko.UpdateKnativeServing(ks)
-		if err != nil {
-			return err
-		}
-
-	} else if strings.EqualFold(component, EventingComponent) {
-		ke, err := ko.GetKnativeEventingInCluster(namespace)
-		if err != nil {
-			return err
-		}
-		ke.Spec.Config = cmData
-		_, err = ko.UpdateKnativeEventing(ke)
-		if err != nil {
-			return err
-		}
+	commonSpec, err := ko.getCommonSpec(component, namespace)
+	if err != nil {
+		return err
 	}
-
-	return nil
+	commonSpec.Config = cmData
+	return ko.updateCommonSpec(component, namespace, commonSpec)
 }
 
 func (ko *KnativeOperatorCR) GetDeployments(component, namespace string) ([]base.DeploymentOverride, error) {
@@ -155,12 +137,41 @@ func (ko *KnativeOperatorCR) GetDeployments(component, namespace string) ([]base
 }
 
 func (ko *KnativeOperatorCR) UpdateDeployments(component, namespace string, deployOverrides []base.DeploymentOverride) error {
+	commonSpec, err := ko.getCommonSpec(component, namespace)
+	if err != nil {
+		return err
+	}
+	commonSpec.DeploymentOverride = deployOverrides
+	return ko.updateCommonSpec(component, namespace, commonSpec)
+}
+
+func (ko *KnativeOperatorCR) getCommonSpec(component, namespace string) (*base.CommonSpec, error) {
+	var commonSpec base.CommonSpec
+	if strings.EqualFold(component, ServingComponent) {
+		ks, err := ko.GetKnativeServingInCluster(namespace)
+		if err != nil {
+			return nil, err
+		}
+		commonSpec = ks.Spec.CommonSpec
+
+	} else if strings.EqualFold(component, EventingComponent) {
+		ke, err := ko.GetKnativeEventingInCluster(namespace)
+		if err != nil {
+			return nil, err
+		}
+		commonSpec = ke.Spec.CommonSpec
+	}
+
+	return &commonSpec, nil
+}
+
+func (ko *KnativeOperatorCR) updateCommonSpec(component, namespace string, commonSpec *base.CommonSpec) error {
 	if strings.EqualFold(component, ServingComponent) {
 		ks, err := ko.GetKnativeServingInCluster(namespace)
 		if err != nil {
 			return err
 		}
-		ks.Spec.DeploymentOverride = deployOverrides
+		ks.Spec.CommonSpec = *commonSpec
 		_, err = ko.UpdateKnativeServing(ks)
 		if err != nil {
 			return err
@@ -171,7 +182,7 @@ func (ko *KnativeOperatorCR) UpdateDeployments(component, namespace string, depl
 		if err != nil {
 			return err
 		}
-		ke.Spec.DeploymentOverride = deployOverrides
+		ke.Spec.CommonSpec = *commonSpec
 		_, err = ko.UpdateKnativeEventing(ke)
 		if err != nil {
 			return err

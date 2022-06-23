@@ -18,11 +18,9 @@ import (
 	"fmt"
 	"testing"
 
-	"knative.dev/operator/pkg/apis/operator/base"
-
 	"knative.dev/kn-plugin-operator/pkg/command/common"
-
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
+	"knative.dev/operator/pkg/apis/operator/base"
 )
 
 func TestValidateCMsFlags(t *testing.T) {

@@ -34,7 +34,8 @@ func NewRemoveCommand(p *pkg.OperatorParams) *cobra.Command {
   kn operation remove resources --component serving --deployName activator --namespace knative-serving`,
 	}
 
-	removeCmd.AddCommand(newResourcesCommand(p))
+	removeCmd.AddCommand(removeResourcesCommand(p))
+	removeCmd.AddCommand(removeConfigMapsCommand(p))
 
 	return removeCmd
 }

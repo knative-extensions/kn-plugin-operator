@@ -1,5 +1,5 @@
-//go:build eventingconfigmap
-// +build eventingconfigmap
+//go:build servingcmrremove
+// +build servingcmrremove
 
 /*
 Copyright 2022 The Knative Authors
@@ -28,14 +28,14 @@ import (
 	"knative.dev/operator/test/client"
 )
 
-// TestEventingConfigMapConfiguration verifies whether the operator plugin can configure the ConfigMaps for Knative Eventing
-func TestEventingConfigMapConfiguration(t *testing.T) {
+// TestServingConfigMapDeletion verifies whether the operator plugin can delete the ConfigMaps configuration for Knative Serving
+func TestServingConfigMapDeletion(t *testing.T) {
 	clients := client.Setup(t)
 
 	names := test.ResourceNames{
 		KnativeServing:  "knative-serving",
 		KnativeEventing: "knative-eventing",
-		Namespace:       resources.EventingOperatorNamespace,
+		Namespace:       resources.ServingOperatorNamespace,
 	}
 
 	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
@@ -45,35 +45,23 @@ func TestEventingConfigMapConfiguration(t *testing.T) {
 		name               string
 		expectedConfigMaps common.CMsFlags
 	}{{
-		name: "Knative Eventing verifying the first key-value pair for ConfigMap",
+		name: "Knative Serving verifying the key-value pair deletion for the ConfigMap",
 		expectedConfigMaps: common.CMsFlags{
-			Value:     resources.TestValue,
 			Key:       resources.TestKey,
-			Component: "eventing",
-			CMName:    "config-features",
-			Namespace: resources.EventingOperatorNamespace,
+			Component: "serving",
+			CMName:    "config-deployment",
+			Namespace: resources.ServingOperatorNamespace,
 		},
 	}, {
-		name: "Knative Eventing verifying the additional key-value pair for ConfigMap",
+		name: "Knative Serving verifying the key-value pair deletion for the ConfigMap",
 		expectedConfigMaps: common.CMsFlags{
-			Value:     resources.TestValueAdditional,
-			Key:       resources.TestKeyAdditional,
-			Component: "eventing",
-			CMName:    "config-features",
-			Namespace: resources.EventingOperatorNamespace,
-		},
-	}, {
-		name: "Knative Eventing verifying the first key-value pair for another ConfigMap",
-		expectedConfigMaps: common.CMsFlags{
-			Value:     resources.TestValue,
-			Key:       resources.TestKey,
-			Component: "eventing",
-			CMName:    "config-tracing",
-			Namespace: resources.EventingOperatorNamespace,
+			Component: "serving",
+			CMName:    "config-network",
+			Namespace: resources.ServingOperatorNamespace,
 		},
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			resources.VerifyKnativeEventingConfigMaps(t, clients.Operator.KnativeEventings(resources.EventingOperatorNamespace),
+			resources.VerifyKnativeServingConfigMapsDeletion(t, clients.Operator.KnativeServings(resources.ServingOperatorNamespace),
 				tt.expectedConfigMaps)
 		})
 	}

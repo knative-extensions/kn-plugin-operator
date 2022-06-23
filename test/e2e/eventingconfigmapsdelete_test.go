@@ -1,5 +1,5 @@
-//go:build eventingconfigmap
-// +build eventingconfigmap
+//go:build eventingcmrremove
+// +build eventingcmrremove
 
 /*
 Copyright 2022 The Knative Authors
@@ -28,8 +28,8 @@ import (
 	"knative.dev/operator/test/client"
 )
 
-// TestEventingConfigMapConfiguration verifies whether the operator plugin can configure the ConfigMaps for Knative Eventing
-func TestEventingConfigMapConfiguration(t *testing.T) {
+// TestEventingConfigMapDeletion verifies whether the operator plugin can delete the ConfigMaps configuration for Knative Eventing
+func TestEventingConfigMapDeletion(t *testing.T) {
 	clients := client.Setup(t)
 
 	names := test.ResourceNames{
@@ -45,35 +45,23 @@ func TestEventingConfigMapConfiguration(t *testing.T) {
 		name               string
 		expectedConfigMaps common.CMsFlags
 	}{{
-		name: "Knative Eventing verifying the first key-value pair for ConfigMap",
+		name: "Knative Eventing verifying the key-value pair deletion for the ConfigMap",
 		expectedConfigMaps: common.CMsFlags{
-			Value:     resources.TestValue,
-			Key:       resources.TestKey,
-			Component: "eventing",
-			CMName:    "config-features",
-			Namespace: resources.EventingOperatorNamespace,
-		},
-	}, {
-		name: "Knative Eventing verifying the additional key-value pair for ConfigMap",
-		expectedConfigMaps: common.CMsFlags{
-			Value:     resources.TestValueAdditional,
-			Key:       resources.TestKeyAdditional,
-			Component: "eventing",
-			CMName:    "config-features",
-			Namespace: resources.EventingOperatorNamespace,
-		},
-	}, {
-		name: "Knative Eventing verifying the first key-value pair for another ConfigMap",
-		expectedConfigMaps: common.CMsFlags{
-			Value:     resources.TestValue,
 			Key:       resources.TestKey,
 			Component: "eventing",
 			CMName:    "config-tracing",
 			Namespace: resources.EventingOperatorNamespace,
 		},
+	}, {
+		name: "Knative Eventing verifying the key-value pair deletion for the ConfigMap",
+		expectedConfigMaps: common.CMsFlags{
+			Component: "eventing",
+			CMName:    "config-features",
+			Namespace: resources.EventingOperatorNamespace,
+		},
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			resources.VerifyKnativeEventingConfigMaps(t, clients.Operator.KnativeEventings(resources.EventingOperatorNamespace),
+			resources.VerifyKnativeEventingConfigMapsDeletion(t, clients.Operator.KnativeEventings(resources.EventingOperatorNamespace),
 				tt.expectedConfigMaps)
 		})
 	}

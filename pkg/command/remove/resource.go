@@ -16,7 +16,6 @@ package remove
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
@@ -36,8 +35,8 @@ type ResourcesFlags struct {
 
 var resourcesCMDFlags ResourcesFlags
 
-// newResourcesCommand represents the configure commands for Knative Serving or Eventing
-func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
+// removeResourcesCommand represents the remove commands for the resources in Knative Serving or Eventing
+func removeResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	var deleteResourcesCmd = &cobra.Command{
 		Use:   "resources",
 		Short: "Remove the resource for Knative Serving and Eventing deployments",
@@ -53,12 +52,7 @@ func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = removeResources(resourcesCMDFlags, rootPath, p)
+			err := removeResources(resourcesCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -91,7 +85,7 @@ func validateResourcesFlags(resourcesCMDFlags ResourcesFlags) error {
 	return nil
 }
 
-func removeResources(resourcesCMDFlags ResourcesFlags, rootPath string, p *pkg.OperatorParams) error {
+func removeResources(resourcesCMDFlags ResourcesFlags, p *pkg.OperatorParams) error {
 	ksCR, err := common.GetKnativeOperatorCR(p)
 	if err != nil {
 		return err

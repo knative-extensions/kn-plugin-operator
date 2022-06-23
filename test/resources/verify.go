@@ -267,6 +267,7 @@ func VerifyKnativeServingConfigMaps(t *testing.T, clients operatorv1beta1.Knativ
 	testingUtil.AssertEqual(t, err, nil)
 	VerifyConfigMaps(t, ks.Spec.GetConfig(), cmsFlags)
 }
+
 func VerifyKnativeEventingConfigMaps(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, cmsFlags common.CMsFlags) {
 	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
@@ -279,6 +280,30 @@ func VerifyConfigMaps(t *testing.T, configMapData base.ConfigMapData, cmsFlags c
 	value, valueExist := data[cmsFlags.Key]
 	testingUtil.AssertEqual(t, valueExist, true)
 	testingUtil.AssertEqual(t, value, cmsFlags.Value)
+}
+
+func VerifyKnativeEventingConfigMapsDeletion(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, cmsFlags common.CMsFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyConfigMapsDeletion(t, ke.Spec.GetConfig(), cmsFlags)
+}
+
+func VerifyKnativeServingConfigMapsDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, cmsFlags common.CMsFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyConfigMapsDeletion(t, ks.Spec.GetConfig(), cmsFlags)
+}
+
+func VerifyConfigMapsDeletion(t *testing.T, configMapData base.ConfigMapData, cmsFlags common.CMsFlags) {
+	if cmsFlags.Key == "" {
+		_, cmExist := configMapData[cmsFlags.CMName]
+		testingUtil.AssertEqual(t, cmExist, false)
+	} else {
+		data, cmExist := configMapData[cmsFlags.CMName]
+		testingUtil.AssertEqual(t, cmExist, true)
+		_, valueExist := data[cmsFlags.Key]
+		testingUtil.AssertEqual(t, valueExist, false)
+	}
 }
 
 func VerifyKnativeServingHAs(t *testing.T, clients operatorv1beta1.KnativeServingInterface, haFlags configure.HAFlags) {

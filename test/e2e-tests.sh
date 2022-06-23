@@ -193,6 +193,16 @@ echo ">> Remove the resource configuration for with Knative Serving"
 echo ">> Verify the resource configuration deletion for Knative Serving Custom resource"
 go_test_e2e -tags=servingresourceremove -timeout=20m ./test/e2e || failed=1
 
+
+echo ">> Remove the configMap configuration for with Knative Serving"
+./kn-operator remove configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-deployment \
+  --key ${TEST_KEY} || fail_test "Failed to remove the configmap configuration for Knative Serving"
+
+./kn-operator remove configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network || fail_test "Failed to delete the ConfigMap configuration for Knative Serving"
+
+echo ">> Verify the configMap configuration deletion for Knative Serving Custom resource"
+go_test_e2e -tags=servingcmrremove -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -307,6 +317,15 @@ echo ">> Remove the resource configuration for with Knative Eventing"
 
 echo ">> Verify the resource configuration deletion for Knative Eventing Custom resource"
 go_test_e2e -tags=eventingresourcerremove -timeout=20m ./test/e2e || failed=1
+
+echo ">> Remove the configMap configuration for with Knative Eventing"
+./kn-operator remove configmaps -c eventing -n ${EVENTING_NAMESPACE} --cmName config-tracing \
+  --key ${TEST_KEY} || fail_test "Failed to remove the configmap configuration for Knative Eventing"
+
+./kn-operator remove configmaps -c eventing -n ${EVENTING_NAMESPACE} --cmName config-features || fail_test "Failed to delete the ConfigMap configuration for Knative Eventing"
+
+echo ">> Verify the configMap configuration deletion for Knative Eventing Custom resource"
+go_test_e2e -tags=eventingcmrremove -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

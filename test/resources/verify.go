@@ -122,6 +122,12 @@ func VerifyKnativeEventingTolerationDeletion(t *testing.T, clients operatorv1bet
 	VerifyDeploymentOverrideTolerationDeletion(t, ke.Spec.DeploymentOverride, tolerationsFlags)
 }
 
+func VerifyKnativeServingTolerationDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, tolerationsFlags remove.TolerationsFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentOverrideTolerationDeletion(t, ks.Spec.DeploymentOverride, tolerationsFlags)
+}
+
 func VerifyDeploymentOverrideTolerationDeletion(t *testing.T, deploymentOverride []base.DeploymentOverride, tolerationsFlags remove.TolerationsFlags) {
 	deploy := findDeployment(tolerationsFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)

@@ -202,6 +202,13 @@ echo ">> Remove the configMap configuration for with Knative Serving"
 echo ">> Verify the configMap configuration deletion for Knative Serving Custom resource"
 go_test_e2e -tags=servingcmrremove -timeout=20m ./test/e2e || failed=1
 
+echo ">> Remove the toleration configuration for with Knative Serving"
+./kn-operator remove tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
+  --key ${TOLERATION_KEY} || fail_test "Failed to remove the toleration configuration for Knative Serving"
+
+echo ">> Verify the toleration configuration deletion for Knative Serving Custom resource"
+go_test_e2e -tags=servingtolerationremove -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 

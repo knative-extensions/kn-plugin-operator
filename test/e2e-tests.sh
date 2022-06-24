@@ -193,7 +193,6 @@ echo ">> Remove the resource configuration for with Knative Serving"
 echo ">> Verify the resource configuration deletion for Knative Serving Custom resource"
 go_test_e2e -tags=servingresourceremove -timeout=20m ./test/e2e || failed=1
 
-
 echo ">> Remove the configMap configuration for with Knative Serving"
 ./kn-operator remove configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-deployment \
   --key ${TEST_KEY} || fail_test "Failed to remove the configmap configuration for Knative Serving"
@@ -329,6 +328,13 @@ go_test_e2e -tags=eventingcmrremove -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"
+
+echo ">> Remove the toleration configuration for with Knative Eventing"
+./kn-operator remove tolerations -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-webhook \
+  --key ${TOLERATION_KEY} || fail_test "Failed to remove the toleration configuration for Knative Eventing"
+
+echo ">> Verify the toleration configuration deletion for Knative Eventing Custom resource"
+go_test_e2e -tags=eventingtolerationremove -timeout=20m ./test/e2e || failed=1
 
 (( failed )) && fail_test
 

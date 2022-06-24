@@ -22,6 +22,8 @@ import (
 	"strconv"
 	"testing"
 
+	"knative.dev/kn-plugin-operator/pkg/command/remove"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -114,6 +116,18 @@ func VerifyKnativeEventingResouceDeletion(t *testing.T, clients operatorv1beta1.
 	VerifyDeploymentOverrideResourceDeletion(t, ke.Spec.DeploymentOverride, resourcesFlags)
 }
 
+func VerifyKnativeEventingTolerationDeletion(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, tolerationsFlags remove.TolerationsFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentOverrideTolerationDeletion(t, ke.Spec.DeploymentOverride, tolerationsFlags)
+}
+
+func VerifyDeploymentOverrideTolerationDeletion(t *testing.T, deploymentOverride []base.DeploymentOverride, tolerationsFlags remove.TolerationsFlags) {
+	deploy := findDeployment(tolerationsFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
+	testingUtil.AssertEqual(t, findTolerationKey(deploy.Tolerations, tolerationsFlags.Key), false)
+}
+
 func VerifyKnativeServingResouceDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, resourcesFlags configure.ResourcesFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
@@ -129,6 +143,15 @@ func VerifyDeploymentOverrideResourceDeletion(t *testing.T, deploymentOverride [
 func findContainer(resources []base.ResourceRequirementsOverride, container string) bool {
 	for _, resource := range resources {
 		if resource.Container == container {
+			return true
+		}
+	}
+	return false
+}
+
+func findTolerationKey(tolerations []corev1.Toleration, key string) bool {
+	for _, toleration := range tolerations {
+		if toleration.Key == key {
 			return true
 		}
 	}

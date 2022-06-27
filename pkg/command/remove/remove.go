@@ -37,6 +37,7 @@ func NewRemoveCommand(p *pkg.OperatorParams) *cobra.Command {
 	removeCmd.AddCommand(removeResourcesCommand(p))
 	removeCmd.AddCommand(removeConfigMapsCommand(p))
 	removeCmd.AddCommand(removeTolerationsCommand(p))
+	removeCmd.AddCommand(removeImageCommand(p))
 
 	return removeCmd
 }

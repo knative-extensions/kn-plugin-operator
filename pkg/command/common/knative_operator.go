@@ -108,6 +108,34 @@ func (ko *KnativeOperatorCR) GetConfigMaps(component, namespace string) (base.Co
 	return cmData, nil
 }
 
+func (ko *KnativeOperatorCR) GetRegistry(component, namespace string) (base.Registry, error) {
+	var registry base.Registry
+	if strings.EqualFold(component, ServingComponent) {
+		ks, err := ko.GetKnativeServingInCluster(namespace)
+		if err != nil {
+			return registry, err
+		}
+		registry = ks.Spec.Registry
+	} else if strings.EqualFold(component, EventingComponent) {
+		ke, err := ko.GetKnativeEventingInCluster(namespace)
+		if err != nil {
+			return registry, err
+		}
+		registry = ke.Spec.Registry
+	}
+
+	return registry, nil
+}
+
+func (ko *KnativeOperatorCR) UpdateRegistry(component, namespace string, registry base.Registry) error {
+	commonSpec, err := ko.getCommonSpec(component, namespace)
+	if err != nil {
+		return err
+	}
+	commonSpec.Registry = registry
+	return ko.updateCommonSpec(component, namespace, commonSpec)
+}
+
 func (ko *KnativeOperatorCR) UpdateConfigMaps(component, namespace string, cmData base.ConfigMapData) error {
 	commonSpec, err := ko.getCommonSpec(component, namespace)
 	if err != nil {

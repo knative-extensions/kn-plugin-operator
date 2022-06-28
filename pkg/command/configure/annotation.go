@@ -122,14 +122,24 @@ func getAnnotationConfiguration(annotationCMDFlags common.KeyValueFlags) string 
 	tag := fmt.Sprintf("%s%s", common.Spaces(2), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)
 
-	field := fmt.Sprintf("%s%s:", common.Spaces(2), "deployments")
+	if annotationCMDFlags.DeployName != "" {
+		field := fmt.Sprintf("%s%s:", common.Spaces(2), "deployments")
+		resourceArray = append(resourceArray, field)
+	} else {
+		field := fmt.Sprintf("%s%s:", common.Spaces(2), "services")
+		resourceArray = append(resourceArray, field)
+	}
+
+	field := fmt.Sprintf("%s%s", common.Spaces(2), common.FieldByName("name"))
 	resourceArray = append(resourceArray, field)
 
-	field = fmt.Sprintf("%s%s", common.Spaces(2), common.FieldByName("name"))
-	resourceArray = append(resourceArray, field)
-
-	deployName := fmt.Sprintf("%s- %s: %s", common.Spaces(2), "name", "#@ data.values.deployName")
-	resourceArray = append(resourceArray, deployName)
+	if annotationCMDFlags.DeployName != "" {
+		deployName := fmt.Sprintf("%s- %s: %s", common.Spaces(2), "name", "#@ data.values.deployName")
+		resourceArray = append(resourceArray, deployName)
+	} else {
+		serviceName := fmt.Sprintf("%s- %s: %s", common.Spaces(2), "name", "#@ data.values.serviceName")
+		resourceArray = append(resourceArray, serviceName)
+	}
 
 	tag = fmt.Sprintf("%s%s", common.Spaces(4), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)

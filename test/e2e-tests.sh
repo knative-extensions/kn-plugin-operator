@@ -113,11 +113,11 @@ echo ">> Configure the annotation for Knative Serving's service"
   --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
 
 echo ">> Configure the selector for Knative Serving's service"
-./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY} --value ${TEST_VALUE} --selector || fail_test "Failed to configure Knative Serving's service"
+./kn-operator configure selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving's service"
 
-./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} --selector || fail_test "Failed to configure Knative Serving's service"
+./kn-operator configure selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
 
 echo ">> Verify the label configuration of Knative Serving's service"
 go_test_e2e -tags=servingservicelabelconfig -timeout=20m ./test/e2e || failed=1
@@ -256,6 +256,13 @@ echo ">> Configure the annotation for Knative Eventing's service"
   --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Eventing's service"
 
 ./kn-operator configure annotations -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Eventing's service"
+
+echo ">> Configure the selector for Knative Eventing's service"
+./kn-operator configure selectors -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Eventing's service"
+
+./kn-operator configure selectors -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
   --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Eventing's service"
 
 echo ">> Verify the label configuration of Knative Eventing's service"

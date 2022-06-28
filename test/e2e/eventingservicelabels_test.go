@@ -80,6 +80,24 @@ func TestEventingServiceLabelConfiguration(t *testing.T) {
 			ServiceName: "eventing-webhook",
 			Annotation:  true,
 		},
+	}, {
+		name: "Knative Eventing verifying the first key-value pair for selector",
+		expectedLabels: common.KeyValueFlags{
+			Value:       resources.TestValue,
+			Key:         resources.TestKey,
+			Component:   "eventing",
+			ServiceName: "eventing-webhook",
+			Selector:    true,
+		},
+	}, {
+		name: "Knative Eventing verifying the additional key-value pair for selector",
+		expectedLabels: common.KeyValueFlags{
+			Value:       resources.TestValueAdditional,
+			Key:         resources.TestKeyAdditional,
+			Component:   "eventing",
+			ServiceName: "eventing-webhook",
+			Selector:    true,
+		},
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			resources.VerifyKnativeEventingServiceLabelsExistence(t, clients.Operator.KnativeEventings(resources.EventingOperatorNamespace),

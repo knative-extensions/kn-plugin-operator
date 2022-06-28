@@ -22,7 +22,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
 )
 
-func TestValidateAnnotationsFlags(t *testing.T) {
+func TestValidateKeyValuesFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name                string
 		annotationsCMDFlags common.KeyValueFlags
@@ -95,7 +95,7 @@ func TestValidateAnnotationsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the value for the deployment."),
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			result := validateAnnotationsFlags(tt.annotationsCMDFlags)
+			result := validateKeyValuesFlags(tt.annotationsCMDFlags)
 			if tt.expectedResult == nil {
 				testingUtil.AssertEqual(t, result, nil)
 			} else {

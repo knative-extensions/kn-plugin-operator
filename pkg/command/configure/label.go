@@ -36,7 +36,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
   # Configure the labels for Knative Serving and Eventing deployments
   kn operation configure labels --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := validateLabelsFlags(deploymentLabelCMDFlags); err != nil {
+			if err := validateLabelsAnnotationsFlags(deploymentLabelCMDFlags); err != nil {
 				return err
 			}
 
@@ -66,21 +66,31 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureLabelsCmd
 }
 
-func validateLabelsFlags(deploymentLabelCMDFlags common.KeyValueFlags) error {
+func validateKeyValuePairs(deploymentLabelCMDFlags common.KeyValueFlags) error {
 	if deploymentLabelCMDFlags.Key == "" {
-		return fmt.Errorf("You need to specify the key for the deployment.")
+		return fmt.Errorf("You need to specify the key.")
 	}
 	if deploymentLabelCMDFlags.Value == "" {
-		return fmt.Errorf("You need to specify the value for the deployment.")
-	}
-	if deploymentLabelCMDFlags.DeployName == "" && deploymentLabelCMDFlags.ServiceName == "" {
-		return fmt.Errorf("You need to specify the name of the deployment or the service.")
+		return fmt.Errorf("You need to specify the value.")
 	}
 	if deploymentLabelCMDFlags.Namespace == "" {
 		return fmt.Errorf("You need to specify the namespace.")
 	}
+	if deploymentLabelCMDFlags.Component == "" {
+		return fmt.Errorf("You need to specify the component for Knative: serving or eventing.")
+	}
 	if deploymentLabelCMDFlags.Component != "" && !strings.EqualFold(deploymentLabelCMDFlags.Component, common.ServingComponent) && !strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
 		return fmt.Errorf("You need to specify the component for Knative: serving or eventing.")
+	}
+	return nil
+}
+
+func validateLabelsAnnotationsFlags(deploymentLabelCMDFlags common.KeyValueFlags) error {
+	if err := validateKeyValuePairs(deploymentLabelCMDFlags); err != nil {
+		return err
+	}
+	if deploymentLabelCMDFlags.DeployName == "" && deploymentLabelCMDFlags.ServiceName == "" {
+		return fmt.Errorf("You need to specify the name of the deployment or the service.")
 	}
 	return nil
 }

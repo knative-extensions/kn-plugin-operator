@@ -15,95 +15,11 @@
 package configure
 
 import (
-	"fmt"
 	"testing"
 
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
 )
-
-func TestValidateKeyValuesFlags(t *testing.T) {
-	for _, tt := range []struct {
-		name                string
-		annotationsCMDFlags common.KeyValueFlags
-		expectedResult      error
-	}{{
-		name: "Knative Eventing with no deployment aspect",
-		annotationsCMDFlags: common.KeyValueFlags{
-			Key:        "test-key",
-			Value:      "test-value",
-			Component:  "eventing",
-			Namespace:  "test-eventing",
-			DeployName: "eventing-controller",
-		},
-		expectedResult: nil,
-	}, {
-		name: "Knative Eventing with service name and nodeSelector",
-		annotationsCMDFlags: common.KeyValueFlags{
-			Key:         "test-key",
-			Value:       "test-value",
-			Component:   "eventing",
-			Namespace:   "test-eventing",
-			ServiceName: "eventing-controller",
-		},
-		expectedResult: nil,
-	}, {
-		name: "Knative Eventing with no deployment name or service name",
-		annotationsCMDFlags: common.KeyValueFlags{
-			Key:       "test-key",
-			Value:     "test-value",
-			Component: "eventing",
-			Namespace: "test-eventing",
-		},
-		expectedResult: fmt.Errorf("You need to specify the name of the deployment or the service."),
-	}, {
-		name: "Knative Eventing with invalid component name",
-		annotationsCMDFlags: common.KeyValueFlags{
-			Key:        "test-key",
-			Value:      "test-value",
-			Component:  "eventing-test",
-			Namespace:  "test-eventing",
-			DeployName: "eventing-controller",
-		},
-		expectedResult: fmt.Errorf("You need to specify the component for Knative: serving or eventing."),
-	}, {
-		name: "Knative Eventing with no namespace",
-		annotationsCMDFlags: common.KeyValueFlags{
-			Key:        "test-key",
-			Value:      "test-value",
-			Component:  "eventing-test",
-			DeployName: "eventing-controller",
-		},
-		expectedResult: fmt.Errorf("You need to specify the namespace."),
-	}, {
-		name: "Knative Eventing with no key",
-		annotationsCMDFlags: common.KeyValueFlags{
-			Value:      "test-value",
-			Component:  "eventing-test",
-			Namespace:  "test-eventing",
-			DeployName: "eventing-controller",
-		},
-		expectedResult: fmt.Errorf("You need to specify the key for the deployment."),
-	}, {
-		name: "Knative Eventing with no value",
-		annotationsCMDFlags: common.KeyValueFlags{
-			Key:        "test-value",
-			Component:  "eventing-test",
-			Namespace:  "test-eventing",
-			DeployName: "eventing-controller",
-		},
-		expectedResult: fmt.Errorf("You need to specify the value for the deployment."),
-	}} {
-		t.Run(tt.name, func(t *testing.T) {
-			result := validateKeyValuesFlags(tt.annotationsCMDFlags)
-			if tt.expectedResult == nil {
-				testingUtil.AssertEqual(t, result, nil)
-			} else {
-				testingUtil.AssertEqual(t, result.Error(), tt.expectedResult.Error())
-			}
-		})
-	}
-}
 
 func TestGetOverlayYamlContentAnnotation(t *testing.T) {
 	for _, tt := range []struct {

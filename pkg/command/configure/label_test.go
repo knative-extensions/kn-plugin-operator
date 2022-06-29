@@ -22,7 +22,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
 )
 
-func TestValidateLabelsFlags(t *testing.T) {
+func TestValidateLabelsAnnotationsFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name                    string
 		deploymentLabelCMDFlags common.KeyValueFlags
@@ -103,7 +103,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 			Namespace:  "test-eventing",
 			DeployName: "eventing-controller",
 		},
-		expectedResult: fmt.Errorf("You need to specify the key for the deployment."),
+		expectedResult: fmt.Errorf("You need to specify the key."),
 	}, {
 		name: "Knative Eventing with no value",
 		deploymentLabelCMDFlags: common.KeyValueFlags{
@@ -112,10 +112,10 @@ func TestValidateLabelsFlags(t *testing.T) {
 			Namespace:  "test-eventing",
 			DeployName: "eventing-controller",
 		},
-		expectedResult: fmt.Errorf("You need to specify the value for the deployment."),
+		expectedResult: fmt.Errorf("You need to specify the value."),
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			result := validateLabelsFlags(tt.deploymentLabelCMDFlags)
+			result := validateLabelsAnnotationsFlags(tt.deploymentLabelCMDFlags)
 			if tt.expectedResult == nil {
 				testingUtil.AssertEqual(t, result, nil)
 			} else {

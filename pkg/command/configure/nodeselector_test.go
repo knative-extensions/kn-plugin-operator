@@ -83,7 +83,7 @@ func TestValidateNodeSelectorFlags(t *testing.T) {
 			Namespace:  "test-eventing",
 			DeployName: "eventing-controller",
 		},
-		expectedResult: fmt.Errorf("You need to specify the key for the deployment."),
+		expectedResult: fmt.Errorf("You need to specify the key."),
 	}, {
 		name: "Knative Eventing with no value",
 		nodeSelectorCMDFlags: common.KeyValueFlags{
@@ -92,7 +92,7 @@ func TestValidateNodeSelectorFlags(t *testing.T) {
 			Namespace:  "test-eventing",
 			DeployName: "eventing-controller",
 		},
-		expectedResult: fmt.Errorf("You need to specify the value for the deployment."),
+		expectedResult: fmt.Errorf("You need to specify the value."),
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			result := validateNodeSelectorFlags(tt.nodeSelectorCMDFlags)

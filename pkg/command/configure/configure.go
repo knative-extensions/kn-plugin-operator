@@ -40,5 +40,9 @@ func NewConfigureCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureCmd.AddCommand(newImageCommand(p))
 	configureCmd.AddCommand(newEnvVarCommand(p))
 	configureCmd.AddCommand(newManifestsCommand(p))
+	configureCmd.AddCommand(newAnnotationCommand(p))
+	configureCmd.AddCommand(newNodeSelectorCommand(p))
+	configureCmd.AddCommand(newSelectorCommand(p))
+
 	return configureCmd
 }

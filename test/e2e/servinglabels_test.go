@@ -22,7 +22,7 @@ package e2e
 import (
 	"testing"
 
-	"knative.dev/kn-plugin-operator/pkg/command/configure"
+	"knative.dev/kn-plugin-operator/pkg/command/common"
 	"knative.dev/kn-plugin-operator/test/resources"
 	"knative.dev/operator/test"
 	"knative.dev/operator/test/client"
@@ -43,10 +43,10 @@ func TestServingLabelConfiguration(t *testing.T) {
 
 	for _, tt := range []struct {
 		name           string
-		expectedLabels configure.DeploymentLabelFlags
+		expectedLabels common.KeyValueFlags
 	}{{
 		name: "Knative Serving verifying the first key-value pair for labels",
-		expectedLabels: configure.DeploymentLabelFlags{
+		expectedLabels: common.KeyValueFlags{
 			Value:      resources.TestValue,
 			Key:        resources.TestKey,
 			Component:  "serving",
@@ -55,7 +55,7 @@ func TestServingLabelConfiguration(t *testing.T) {
 		},
 	}, {
 		name: "Knative Serving verifying the additional key-value pair for labels",
-		expectedLabels: configure.DeploymentLabelFlags{
+		expectedLabels: common.KeyValueFlags{
 			Value:      resources.TestValueAdditional,
 			Key:        resources.TestKeyAdditional,
 			Component:  "serving",
@@ -64,7 +64,7 @@ func TestServingLabelConfiguration(t *testing.T) {
 		},
 	}, {
 		name: "Knative Serving verifying the first key-value pair for annotations",
-		expectedLabels: configure.DeploymentLabelFlags{
+		expectedLabels: common.KeyValueFlags{
 			Value:      resources.TestValue,
 			Key:        resources.TestKey,
 			Component:  "serving",
@@ -73,7 +73,7 @@ func TestServingLabelConfiguration(t *testing.T) {
 		},
 	}, {
 		name: "Knative Serving verifying the additional key-value pair for annotations",
-		expectedLabels: configure.DeploymentLabelFlags{
+		expectedLabels: common.KeyValueFlags{
 			Value:      resources.TestValueAdditional,
 			Key:        resources.TestKeyAdditional,
 			Component:  "serving",
@@ -82,7 +82,7 @@ func TestServingLabelConfiguration(t *testing.T) {
 		},
 	}, {
 		name: "Knative Serving verifying the first key-value pair for nodeSelectors",
-		expectedLabels: configure.DeploymentLabelFlags{
+		expectedLabels: common.KeyValueFlags{
 			Value:        resources.TestValue,
 			Key:          resources.TestKey,
 			Component:    "serving",
@@ -91,7 +91,7 @@ func TestServingLabelConfiguration(t *testing.T) {
 		},
 	}, {
 		name: "Knative Serving verifying the additional key-value pair for nodeSelectors",
-		expectedLabels: configure.DeploymentLabelFlags{
+		expectedLabels: common.KeyValueFlags{
 			Value:        resources.TestValueAdditional,
 			Key:          resources.TestKeyAdditional,
 			Component:    "serving",

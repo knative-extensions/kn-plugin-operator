@@ -18,40 +18,28 @@ import (
 	"fmt"
 	"testing"
 
+	"knative.dev/kn-plugin-operator/pkg/command/common"
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
 )
 
 func TestValidateLabelsFlags(t *testing.T) {
 	for _, tt := range []struct {
 		name                    string
-		deploymentLabelCMDFlags DeploymentLabelFlags
+		deploymentLabelCMDFlags common.KeyValueFlags
 		expectedResult          error
 	}{{
-		name: "Knative Eventing with no deployment aspect",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
+		name: "Knative Eventing",
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-key",
 			Value:      "test-value",
 			Component:  "eventing",
 			Namespace:  "test-eventing",
 			DeployName: "eventing-controller",
 		},
-		expectedResult: fmt.Errorf("You need to specify what to configure for the deployment or service in Knative: NodeSelector, Annotation, Selector or Label."),
-	}, {
-		name: "Knative Eventing with multiple aspects",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:      true,
-			Annotation: true,
-			Key:        "test-key",
-			Value:      "test-value",
-			Component:  "eventing",
-			Namespace:  "test-eventing",
-			DeployName: "eventing-controller",
-		},
-		expectedResult: fmt.Errorf("You can only specify one of the following in the command line: NodeSelector, Annotation, Selector or Label."),
+		expectedResult: nil,
 	}, {
 		name: "Knative Eventing",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:      true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-key",
 			Value:      "test-value",
 			Component:  "eventing",
@@ -61,8 +49,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Eventing with service name",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:       true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:         "test-key",
 			Value:       "test-value",
 			Component:   "eventing",
@@ -72,8 +59,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 		expectedResult: nil,
 	}, {
 		name: "Knative Eventing with service name and nodeSelector",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Selector:    true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:         "test-key",
 			Value:       "test-value",
 			Component:   "eventing",
@@ -81,32 +67,9 @@ func TestValidateLabelsFlags(t *testing.T) {
 			ServiceName: "eventing-controller",
 		},
 		expectedResult: nil,
-	}, {
-		name: "Knative Eventing with service name and nodeSelector",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			NodeSelector: true,
-			Key:          "test-key",
-			Value:        "test-value",
-			Component:    "eventing",
-			Namespace:    "test-eventing",
-			ServiceName:  "eventing-controller",
-		},
-		expectedResult: fmt.Errorf("You cannot configure the nodeSelector for the service."),
-	}, {
-		name: "Knative Eventing with deployment name and nodeSelector",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Selector:   true,
-			Key:        "test-key",
-			Value:      "test-value",
-			Component:  "eventing",
-			Namespace:  "test-eventing",
-			DeployName: "eventing-controller",
-		},
-		expectedResult: fmt.Errorf("You cannot configure the selector for the deployment."),
 	}, {
 		name: "Knative Eventing with no deployment name or service name",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:     true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:       "test-key",
 			Value:     "test-value",
 			Component: "eventing",
@@ -115,8 +78,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the name of the deployment or the service."),
 	}, {
 		name: "Knative Eventing with invalid component name",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:      true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-key",
 			Value:      "test-value",
 			Component:  "eventing-test",
@@ -126,8 +88,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the component for Knative: serving or eventing."),
 	}, {
 		name: "Knative Eventing with no namespace",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:      true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-key",
 			Value:      "test-value",
 			Component:  "eventing-test",
@@ -136,8 +97,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the namespace."),
 	}, {
 		name: "Knative Eventing with no key",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:      true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Value:      "test-value",
 			Component:  "eventing-test",
 			Namespace:  "test-eventing",
@@ -146,8 +106,7 @@ func TestValidateLabelsFlags(t *testing.T) {
 		expectedResult: fmt.Errorf("You need to specify the key for the deployment."),
 	}, {
 		name: "Knative Eventing with no value",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:      true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-value",
 			Component:  "eventing-test",
 			Namespace:  "test-eventing",
@@ -169,12 +128,11 @@ func TestValidateLabelsFlags(t *testing.T) {
 func TestGetOverlayYamlContentLabel(t *testing.T) {
 	for _, tt := range []struct {
 		name                    string
-		deploymentLabelCMDFlags DeploymentLabelFlags
+		deploymentLabelCMDFlags common.KeyValueFlags
 		expectedResult          string
 	}{{
 		name: "Knative Eventing",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Label:      true,
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-key",
 			Value:      "test-value",
 			Component:  "eventing",
@@ -202,99 +160,6 @@ spec:
     labels:
       #@overlay/match missing_ok=True
       test-key: #@ data.values.value`,
-	}, {
-		name: "Knative Serving",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Selector:    true,
-			Key:         "test-key",
-			Value:       "test-value",
-			Component:   "serving",
-			Namespace:   "test-serving",
-			ServiceName: "network",
-		},
-		expectedResult: `#@ load("@ytt:overlay", "overlay")
-#@ load("@ytt:data", "data")
-
-#@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
----
-apiVersion: operator.knative.dev/v1beta1
-kind: KnativeServing
-metadata:
-  #@overlay/match missing_ok=True
-  namespace: #@ data.values.namespace
-#@overlay/match missing_ok=True
-spec:
-
-  #@overlay/match missing_ok=True
-  services:
-  #@overlay/match by="name",missing_ok=True
-  - name: #@ data.values.serviceName
-    #@overlay/match missing_ok=True
-    selector:
-      #@overlay/match missing_ok=True
-      test-key: #@ data.values.value`,
-	}, {
-		name: "Knative Serving",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			Annotation: true,
-			Key:        "test-key",
-			Value:      "test-value",
-			Component:  "serving",
-			Namespace:  "test-serving",
-			DeployName: "network",
-		},
-		expectedResult: `#@ load("@ytt:overlay", "overlay")
-#@ load("@ytt:data", "data")
-
-#@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
----
-apiVersion: operator.knative.dev/v1beta1
-kind: KnativeServing
-metadata:
-  #@overlay/match missing_ok=True
-  namespace: #@ data.values.namespace
-#@overlay/match missing_ok=True
-spec:
-
-  #@overlay/match missing_ok=True
-  deployments:
-  #@overlay/match by="name",missing_ok=True
-  - name: #@ data.values.deployName
-    #@overlay/match missing_ok=True
-    annotations:
-      #@overlay/match missing_ok=True
-      test-key: #@ data.values.value`,
-	}, {
-		name: "Knative Serving",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
-			NodeSelector: true,
-			Key:          "test-key",
-			Value:        "test-value",
-			Component:    "serving",
-			Namespace:    "test-serving",
-			DeployName:   "network",
-		},
-		expectedResult: `#@ load("@ytt:overlay", "overlay")
-#@ load("@ytt:data", "data")
-
-#@overlay/match by=overlay.subset({"kind": "KnativeServing"}),expects=1
----
-apiVersion: operator.knative.dev/v1beta1
-kind: KnativeServing
-metadata:
-  #@overlay/match missing_ok=True
-  namespace: #@ data.values.namespace
-#@overlay/match missing_ok=True
-spec:
-
-  #@overlay/match missing_ok=True
-  deployments:
-  #@overlay/match by="name",missing_ok=True
-  - name: #@ data.values.deployName
-    #@overlay/match missing_ok=True
-    nodeSelector:
-      #@overlay/match missing_ok=True
-      test-key: #@ data.values.value`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			rootPath := "testdata/"
@@ -307,11 +172,11 @@ spec:
 func TestGetYamlValuesContentLabels(t *testing.T) {
 	for _, tt := range []struct {
 		name                    string
-		deploymentLabelCMDFlags DeploymentLabelFlags
+		deploymentLabelCMDFlags common.KeyValueFlags
 		expectedResult          string
 	}{{
 		name: "Knative Eventing",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-key",
 			Value:      "test-value",
 			Component:  "eventing",
@@ -325,7 +190,7 @@ deployName: network
 value: test-value`,
 	}, {
 		name: "Knative Eventing with service name",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:         "test-key",
 			Value:       "test-value",
 			Component:   "eventing",
@@ -339,7 +204,7 @@ serviceName: network
 value: test-value`,
 	}, {
 		name: "Knative Serving",
-		deploymentLabelCMDFlags: DeploymentLabelFlags{
+		deploymentLabelCMDFlags: common.KeyValueFlags{
 			Key:        "test-key",
 			Value:      "test-value",
 			Component:  "serving",
@@ -353,7 +218,7 @@ deployName: network
 value: test-value`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			result := getYamlValuesContentLabels(tt.deploymentLabelCMDFlags)
+			result := getYamlValuesContent(tt.deploymentLabelCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

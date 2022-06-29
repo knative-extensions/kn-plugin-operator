@@ -23,3 +23,16 @@ type CMsFlags struct {
 	Namespace string
 	CMName    string
 }
+
+type KeyValueFlags struct {
+	Value        string
+	Key          string
+	Component    string
+	Namespace    string
+	DeployName   string
+	ServiceName  string
+	Selector     bool
+	NodeSelector bool
+	Annotation   bool
+	Label        bool
+}

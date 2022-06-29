@@ -22,14 +22,13 @@ import (
 	"strconv"
 	"testing"
 
-	"knative.dev/kn-plugin-operator/pkg/command/remove"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 	"knative.dev/kn-plugin-operator/pkg/command/configure"
+	"knative.dev/kn-plugin-operator/pkg/command/remove"
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
 	"knative.dev/operator/pkg/apis/operator/base"
 	operatorv1beta1 "knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1"
@@ -183,31 +182,31 @@ func VerifyDeploymentOverride(t *testing.T, deploymentOverride []base.Deployment
 	testingUtil.AssertDeepEqual(t, firstResource.ResourceRequirements, resourceRequirements)
 }
 
-func VerifyKnativeServingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+func VerifyKnativeServingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
 	VerifyDeploymentLabels(t, ks.Spec.DeploymentOverride, deployLabelFlags)
 }
 
-func VerifyKnativeEventingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+func VerifyKnativeEventingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
 	VerifyDeploymentLabels(t, ks.Spec.DeploymentOverride, deployLabelFlags)
 }
 
-func VerifyKnativeServingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+func VerifyKnativeServingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
 	VerifyServiceLabels(t, ks.Spec.ServiceOverride, deployLabelFlags)
 }
 
-func VerifyKnativeEventingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags configure.DeploymentLabelFlags) {
+func VerifyKnativeEventingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
 	VerifyServiceLabels(t, ks.Spec.ServiceOverride, deployLabelFlags)
 }
 
-func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags configure.DeploymentLabelFlags) {
+func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags common.KeyValueFlags) {
 	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
 
 	deploy := findDeployment(deployLabelFlags.DeployName, deploymentOverride)
@@ -249,7 +248,7 @@ func findKeyValue(t *testing.T, key, expectedValue, indicator string, deploy *ba
 	return false
 }
 
-func VerifyServiceLabels(t *testing.T, serviceOverride []base.ServiceOverride, deployLabelFlags configure.DeploymentLabelFlags) {
+func VerifyServiceLabels(t *testing.T, serviceOverride []base.ServiceOverride, deployLabelFlags common.KeyValueFlags) {
 	testingUtil.AssertEqual(t, len(serviceOverride), 1)
 
 	service := findService(deployLabelFlags.ServiceName, serviceOverride)

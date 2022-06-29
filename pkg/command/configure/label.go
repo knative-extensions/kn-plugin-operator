@@ -25,20 +25,7 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
 
-type DeploymentLabelFlags struct {
-	Value        string
-	Key          string
-	Component    string
-	Namespace    string
-	DeployName   string
-	ServiceName  string
-	Selector     bool
-	NodeSelector bool
-	Annotation   bool
-	Label        bool
-}
-
-var deploymentLabelCMDFlags DeploymentLabelFlags
+var deploymentLabelCMDFlags common.KeyValueFlags
 
 // newDeploymentLabelCommand represents the configure commands to configure the labels for Knative deployment
 func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
@@ -69,10 +56,6 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 		},
 	}
 
-	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.Label, "label", false, "The flag to enable the label configuration")
-	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.Annotation, "annotation", false, "The flag to enable the annotation configuration")
-	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.NodeSelector, "nodeSelector", false, "The flag to enable the nodeSelector configuration")
-	configureLabelsCmd.Flags().BoolVar(&deploymentLabelCMDFlags.Selector, "selector", false, "The flag to enable the selector configuration")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.Key, "key", "", "The key of the data in the configmap")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.Value, "value", "", "The value of the data in the configmap")
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
@@ -83,40 +66,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureLabelsCmd
 }
 
-func validateLabelsFlags(deploymentLabelCMDFlags DeploymentLabelFlags) error {
-	count := 0
-
-	if deploymentLabelCMDFlags.Label {
-		count++
-	}
-
-	if deploymentLabelCMDFlags.NodeSelector {
-		count++
-	}
-
-	if deploymentLabelCMDFlags.Annotation {
-		count++
-	}
-
-	if deploymentLabelCMDFlags.Selector {
-		count++
-	}
-
-	if count == 0 {
-		return fmt.Errorf("You need to specify what to configure for the deployment or service in Knative: NodeSelector, Annotation, Selector or Label.")
-	}
-	if count > 1 {
-		return fmt.Errorf("You can only specify one of the following in the command line: NodeSelector, Annotation, Selector or Label.")
-	}
-
-	if deploymentLabelCMDFlags.NodeSelector && deploymentLabelCMDFlags.ServiceName != "" {
-		return fmt.Errorf("You cannot configure the nodeSelector for the service.")
-	}
-
-	if deploymentLabelCMDFlags.Selector && deploymentLabelCMDFlags.DeployName != "" {
-		return fmt.Errorf("You cannot configure the selector for the deployment.")
-	}
-
+func validateLabelsFlags(deploymentLabelCMDFlags common.KeyValueFlags) error {
 	if deploymentLabelCMDFlags.Key == "" {
 		return fmt.Errorf("You need to specify the key for the deployment.")
 	}
@@ -135,7 +85,7 @@ func validateLabelsFlags(deploymentLabelCMDFlags DeploymentLabelFlags) error {
 	return nil
 }
 
-func configureLabels(deploymentLabelCMDFlags DeploymentLabelFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureLabels(deploymentLabelCMDFlags common.KeyValueFlags, rootPath string, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -146,14 +96,14 @@ func configureLabels(deploymentLabelCMDFlags DeploymentLabelFlags, rootPath stri
 	}
 
 	overlayContent := getOverlayYamlContentLabel(rootPath, deploymentLabelCMDFlags)
-	valuesYaml := getYamlValuesContentLabels(deploymentLabelCMDFlags)
+	valuesYaml := getYamlValuesContent(deploymentLabelCMDFlags)
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags DeploymentLabelFlags) string {
+func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags common.KeyValueFlags) string {
 	path := rootPath + "/overlay/ks_deploy_label.yaml"
 	if strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
 		path = rootPath + "/overlay/ke_deploy_label.yaml"
@@ -164,7 +114,7 @@ func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags Deploym
 	return baseOverlayContent
 }
 
-func getLabelConfiguration(deploymentLabelCMDFlags DeploymentLabelFlags) string {
+func getLabelConfiguration(deploymentLabelCMDFlags common.KeyValueFlags) string {
 	resourceArray := []string{}
 
 	tag := fmt.Sprintf("%s%s", common.Spaces(2), common.YttMatchingTag)
@@ -192,25 +142,8 @@ func getLabelConfiguration(deploymentLabelCMDFlags DeploymentLabelFlags) string 
 	tag = fmt.Sprintf("%s%s", common.Spaces(4), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)
 
-	if deploymentLabelCMDFlags.Label {
-		field := fmt.Sprintf("%s%s:", common.Spaces(4), "labels")
-		resourceArray = append(resourceArray, field)
-	}
-
-	if deploymentLabelCMDFlags.Annotation {
-		field := fmt.Sprintf("%s%s:", common.Spaces(4), "annotations")
-		resourceArray = append(resourceArray, field)
-	}
-
-	if deploymentLabelCMDFlags.NodeSelector {
-		field := fmt.Sprintf("%s%s:", common.Spaces(4), "nodeSelector")
-		resourceArray = append(resourceArray, field)
-	}
-
-	if deploymentLabelCMDFlags.Selector {
-		field := fmt.Sprintf("%s%s:", common.Spaces(4), "selector")
-		resourceArray = append(resourceArray, field)
-	}
+	field = fmt.Sprintf("%s%s:", common.Spaces(4), "labels")
+	resourceArray = append(resourceArray, field)
 
 	tag = fmt.Sprintf("%s%s", common.Spaces(6), common.YttMatchingTag)
 	resourceArray = append(resourceArray, tag)
@@ -221,7 +154,7 @@ func getLabelConfiguration(deploymentLabelCMDFlags DeploymentLabelFlags) string 
 	return strings.Join(resourceArray, "\n")
 }
 
-func getYamlValuesContentLabels(deploymentLabelCMDFlags DeploymentLabelFlags) string {
+func getYamlValuesContent(deploymentLabelCMDFlags common.KeyValueFlags) string {
 	contentArray := []string{}
 	header := "#@data/values\n---"
 	contentArray = append(contentArray, header)

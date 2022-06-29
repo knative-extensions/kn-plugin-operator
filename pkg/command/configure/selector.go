@@ -66,18 +66,8 @@ func newSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 }
 
 func validateSelectorFlags(keyValuesCMDFlags common.KeyValueFlags) error {
-	if keyValuesCMDFlags.Key == "" {
-		return fmt.Errorf("You need to specify the key for the deployment.")
-	}
-	if keyValuesCMDFlags.Value == "" {
-		return fmt.Errorf("You need to specify the value for the deployment.")
-	}
-
-	if keyValuesCMDFlags.Namespace == "" {
-		return fmt.Errorf("You need to specify the namespace.")
-	}
-	if keyValuesCMDFlags.Component != "" && !strings.EqualFold(keyValuesCMDFlags.Component, common.ServingComponent) && !strings.EqualFold(keyValuesCMDFlags.Component, common.EventingComponent) {
-		return fmt.Errorf("You need to specify the component for Knative: serving or eventing.")
+	if err := validateKeyValuePairs(keyValuesCMDFlags); err != nil {
+		return err
 	}
 	if keyValuesCMDFlags.ServiceName == "" {
 		return fmt.Errorf("You need to specify the name of the service.")

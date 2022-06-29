@@ -38,7 +38,7 @@ func newAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
   # Configure the annotations for Knative Serving and Eventing services
   kn operation annotations --component eventing --serviceName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := validateKeyValuesFlags(annotationCMDFlags); err != nil {
+			if err := validateLabelsAnnotationsFlags(annotationCMDFlags); err != nil {
 				return err
 			}
 
@@ -66,25 +66,6 @@ func newAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureLabelsCmd.Flags().StringVarP(&annotationCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
 
 	return configureLabelsCmd
-}
-
-func validateKeyValuesFlags(keyValuesCMDFlags common.KeyValueFlags) error {
-	if keyValuesCMDFlags.Key == "" {
-		return fmt.Errorf("You need to specify the key for the deployment.")
-	}
-	if keyValuesCMDFlags.Value == "" {
-		return fmt.Errorf("You need to specify the value for the deployment.")
-	}
-	if keyValuesCMDFlags.DeployName == "" && keyValuesCMDFlags.ServiceName == "" {
-		return fmt.Errorf("You need to specify the name of the deployment or the service.")
-	}
-	if keyValuesCMDFlags.Namespace == "" {
-		return fmt.Errorf("You need to specify the namespace.")
-	}
-	if keyValuesCMDFlags.Component != "" && !strings.EqualFold(keyValuesCMDFlags.Component, common.ServingComponent) && !strings.EqualFold(keyValuesCMDFlags.Component, common.EventingComponent) {
-		return fmt.Errorf("You need to specify the component for Knative: serving or eventing.")
-	}
-	return nil
 }
 
 func configureAnnotations(annotationCMDFlags common.KeyValueFlags, rootPath string, p *pkg.OperatorParams) error {

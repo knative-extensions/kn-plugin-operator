@@ -228,6 +228,19 @@ echo ">> Remove the number of replicas for Knative Serving"
 echo ">> Verify the number of replicas for Knative Serving after removal"
 go_test_e2e -tags=servingharemove -timeout=20m ./test/e2e || failed=1
 
+echo ">> Remove the environment variables for the container in the deployment of Knative Serving"
+./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+  --name ${ENV_NAME}|| fail_test "Failed to delete the env var for Knative Serving"
+
+./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+  --name ${ADDITIONAL_ENV_NAME}|| fail_test "Failed to delete the env var for Knative Serving"
+
+./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName activator --container activator \
+  --name ${ENV_NAME} || fail_test "Failed to delete the env var for Knative Serving"
+
+echo ">> Verify the environment variables deletion for Knative Serving Custom resource"
+go_test_e2e -tags=servingenvvarsremove -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -377,6 +390,19 @@ echo ">> Remove the number of replicas for Knative Eventing"
 
 echo ">> Verify the number of replicas for Knative Eventing after removal"
 go_test_e2e -tags=eventingharemove -timeout=20m ./test/e2e || failed=1
+
+echo ">> Remove the environment variables for the container in the deployment of Knative Eventing"
+./kn-operator remove envvars -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller --container eventing-controller \
+  --name ${ENV_NAME} || fail_test "Failed to remove the env var for Knative Eventing"
+
+./kn-operator remove envvars -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller --container eventing-controller \
+  --name ${ADDITIONAL_ENV_NAME} || fail_test "Failed to remove the env var for Knative Eventing"
+
+./kn-operator remove envvars -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-webhook --container eventing-webhook \
+  --name ${ENV_NAME} || fail_test "Failed to delete the env var for Knative Eventing"
+
+echo ">> Verify the environment variables deletion for Knative Eventing Custom resource"
+go_test_e2e -tags=eventingenvvarsremove -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

@@ -491,12 +491,32 @@ func VerifyKnativeServingEnvVars(t *testing.T, clients operatorv1beta1.KnativeSe
 	VerifyEnvVars(t, ks.Spec.DeploymentOverride, envVarFlags)
 }
 
+func VerifyKnativeEventingEnvVarsDeletion(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, envVarFlags configure.EnvVarFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyEnvVarsDelete(t, ke.Spec.DeploymentOverride, envVarFlags)
+}
+
+func VerifyKnativeServingEnvVarsDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, envVarFlags configure.EnvVarFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyEnvVarsDelete(t, ks.Spec.DeploymentOverride, envVarFlags)
+}
+
 func VerifyEnvVars(t *testing.T, deploymentOverride []base.DeploymentOverride, envVarFlags configure.EnvVarFlags) {
 	deploy := findDeployment(envVarFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)
 	envVar := findEnvVar(envVarFlags.ContainerName, deploy.Env)
 	testingUtil.AssertEqual(t, envVar == nil, false)
 	testingUtil.AssertEqual(t, includeEnvVar(envVarFlags.EnvName, envVarFlags.EnvValue, envVar.EnvVars), true)
+}
+
+func VerifyEnvVarsDelete(t *testing.T, deploymentOverride []base.DeploymentOverride, envVarFlags configure.EnvVarFlags) {
+	deploy := findDeployment(envVarFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
+	envVar := findEnvVar(envVarFlags.ContainerName, deploy.Env)
+	testingUtil.AssertEqual(t, envVar == nil, false)
+	testingUtil.AssertEqual(t, includeEnvVar(envVarFlags.EnvName, envVarFlags.EnvValue, envVar.EnvVars), false)
 }
 
 func findEnvVar(name string, envVarOverrides []base.EnvRequirementsOverride) *base.EnvRequirementsOverride {

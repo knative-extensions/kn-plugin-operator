@@ -241,6 +241,54 @@ echo ">> Remove the environment variables for the container in the deployment of
 echo ">> Verify the environment variables deletion for Knative Serving Custom resource"
 go_test_e2e -tags=servingenvvarsremove -timeout=20m ./test/e2e || failed=1
 
+echo ">> Remove the label for Knative Serving"
+./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
+
+./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
+
+echo ">> Remove the annotation for Knative Serving"
+./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
+
+./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
+
+echo ">> Remove the nodeSelector for Knative Serving"
+./kn-operator remove nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
+
+./kn-operator remove nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
+
+echo ">> Verify the label, annotation and node selector deletion of Knative Serving"
+go_test_e2e -tags=servinglabeldelete -timeout=20m ./test/e2e || failed=1
+
+echo ">> Remove the label for Knative Serving's service"
+./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
+
+./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
+
+echo ">> Remove the annotation for Knative Serving's service"
+./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
+
+./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
+
+echo ">> Remove the selector for Knative Serving's service"
+./kn-operator remove selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
+
+./kn-operator remove selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
+
+echo ">> Verify the label, annotation selector deletion of Knative Serving's service"
+go_test_e2e -tags=servingservicelabeldelete -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -403,6 +451,54 @@ echo ">> Remove the environment variables for the container in the deployment of
 
 echo ">> Verify the environment variables deletion for Knative Eventing Custom resource"
 go_test_e2e -tags=eventingenvvarsremove -timeout=20m ./test/e2e || failed=1
+
+echo ">> Remove the label for Knative Eventing"
+./kn-operator remove labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY} || fail_test "Failed to configure Knative Eventing"
+
+./kn-operator remove labels -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to configure Knative Eventing"
+
+echo ">> Remove the annotation for Knative Eventing"
+./kn-operator remove annotations -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Eventing"
+
+./kn-operator remove annotations -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Eventing"
+
+echo ">> Remove the nodeSelector for Knative Eventing"
+./kn-operator remove nodeSelectors -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Eventing"
+
+./kn-operator remove nodeSelectors -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Eventing"
+
+echo ">> Verify the label, annotation and nodeSelector deletion of Knative Eventing"
+go_test_e2e -tags=eventinglabeldelete -timeout=20m ./test/e2e || failed=1
+
+echo ">> Remove the label for Knative Eventing's service"
+./kn-operator remove labels -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Eventing's service"
+
+./kn-operator remove labels -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Eventing's service"
+
+echo ">> Remove the annotation for Knative Eventing's service"
+./kn-operator remove annotations -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Eventing's service"
+
+./kn-operator remove annotations -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Eventing's service"
+
+echo ">> Remove the selector for Knative Eventing's service"
+./kn-operator remove selectors -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY} || fail_test "Failed to remove Knative Eventing's service"
+
+./kn-operator remove selectors -c eventing -n ${EVENTING_NAMESPACE} --serviceName eventing-webhook \
+  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Eventing's service"
+
+echo ">> Verify the label, annotation and selector deletion of Knative Eventing's service"
+go_test_e2e -tags=eventingservicelabeldelete -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

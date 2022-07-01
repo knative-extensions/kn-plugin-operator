@@ -418,6 +418,18 @@ func VerifyKnativeServingImages(t *testing.T, clients operatorv1beta1.KnativeSer
 	VerifyImages(t, ks.Spec.Registry, imageFlags)
 }
 
+func VerifyKnativeEventingImagesDelete(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, imageFlags configure.ImageFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyImages(t, ke.Spec.Registry, imageFlags)
+}
+
+func VerifyKnativeServingImagesDelete(t *testing.T, clients operatorv1beta1.KnativeServingInterface, imageFlags configure.ImageFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyImages(t, ks.Spec.Registry, imageFlags)
+}
+
 func VerifyImages(t *testing.T, registry base.Registry, imageFlags configure.ImageFlags) {
 	overrideMap := registry.Override
 	imageKey := imageFlags.ImageKey

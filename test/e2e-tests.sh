@@ -209,6 +209,17 @@ echo ">> Remove the toleration configuration for with Knative Serving"
 echo ">> Verify the toleration configuration deletion for Knative Serving Custom resource"
 go_test_e2e -tags=servingtolerationremove -timeout=20m ./test/e2e || failed=1
 
+echo ">> Delete the image of the deployment for Knative Seving"
+./kn-operator delete images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
+  --imageKey ${SERVING_IMAGE_KEY} || fail_test "Failed to delete the image of the deployment for Knative Serving"
+
+echo ">> Delete the image of all deployments for Knative Seving"
+./kn-operator delete images -c serving -n ${SERVING_NAMESPACE} \
+  --imageKey default || fail_test "Failed to delete the image of all deployments for Knative Serving"
+
+echo ">> Verify the image deletion for Knative Seving"
+go_test_e2e -tags=servingimagedelete -timeout=20m ./test/e2e || failed=1
+
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"
 
@@ -339,6 +350,17 @@ echo ">> Remove the configMap configuration for with Knative Eventing"
 
 echo ">> Verify the configMap configuration deletion for Knative Eventing Custom resource"
 go_test_e2e -tags=eventingcmrremove -timeout=20m ./test/e2e || failed=1
+
+echo ">> Delete the image of the deployment for Knative Eventing"
+./kn-operator delete images -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller \
+  --imageKey ${IMAGE_KEY} || fail_test "Failed to delete the image of the deployment for Knative Eventing"
+
+echo ">> Delete the image of all deployments for Knative Eventing"
+./kn-operator delete images -c eventing -n ${EVENTING_NAMESPACE} \
+  --imageKey default || fail_test "Failed to delete the image of all deployments for Knative Eventing"
+
+echo ">> Verify the image deletion for Knative Eventing"
+go_test_e2e -tags=eventingimagedelete -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove Knative Operator"
 ./kn-operator uninstall -n ${OPERATOR_NAMESPACE} || fail_test "Failed to remove Knative Operator"

@@ -346,6 +346,18 @@ func VerifyKnativeEventingHAs(t *testing.T, clients operatorv1beta1.KnativeEvent
 	VerifyHAs(t, ke.Spec.CommonSpec, haFlags)
 }
 
+func VerifyKnativeServingHAsDelete(t *testing.T, clients operatorv1beta1.KnativeServingInterface, haFlags configure.HAFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyHAsDelete(t, ks.Spec.CommonSpec, haFlags)
+}
+
+func VerifyKnativeEventingHAsDelete(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, haFlags configure.HAFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyHAsDelete(t, ke.Spec.CommonSpec, haFlags)
+}
+
 func VerifyHAs(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
 	if haFlags.DeployName != "" {
 		deploy := findDeployment(haFlags.DeployName, spec.DeploymentOverride)
@@ -355,6 +367,16 @@ func VerifyHAs(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
 	} else {
 		stringValue := strconv.Itoa(int(*spec.HighAvailability.Replicas))
 		testingUtil.AssertEqual(t, stringValue, haFlags.Replicas)
+	}
+}
+
+func VerifyHAsDelete(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
+	if haFlags.DeployName != "" {
+		deploy := findDeployment(haFlags.DeployName, spec.DeploymentOverride)
+		testingUtil.AssertEqual(t, deploy == nil, false)
+		testingUtil.AssertEqual(t, deploy.Replicas == nil, true)
+	} else {
+		testingUtil.AssertEqual(t, spec.HighAvailability.Replicas == nil, true)
 	}
 }
 

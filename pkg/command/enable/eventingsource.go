@@ -29,7 +29,6 @@ type eventingSourceFlags struct {
 	Github    bool
 	Gitlab    bool
 	Kafka     bool
-	Natss     bool
 	Rabbitmq  bool
 	Redis     bool
 	Namespace string
@@ -71,7 +70,6 @@ func newEventingSourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	enableEventingSourceCmd.Flags().BoolVar(&eventingSourceCmdFlags.Github, "github", false, "The flag to enable the github source")
 	enableEventingSourceCmd.Flags().BoolVar(&eventingSourceCmdFlags.Gitlab, "gitlab", false, "The flag to enable the gitlab source")
 	enableEventingSourceCmd.Flags().BoolVar(&eventingSourceCmdFlags.Redis, "redis", false, "The flag to enable the redis source")
-	enableEventingSourceCmd.Flags().BoolVar(&eventingSourceCmdFlags.Natss, "natss", false, "The flag to enable the natss source")
 	enableEventingSourceCmd.Flags().BoolVar(&eventingSourceCmdFlags.Rabbitmq, "rabbitmq", false, "The flag to enable the rabbitmq source")
 	enableEventingSourceCmd.Flags().StringVarP(&eventingSourceCmdFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
 
@@ -101,7 +99,7 @@ func getOverlayYamlContentSource(rootPath string) string {
 }
 
 func getYamlValuesContentSource(eventingSourceCmdFlags eventingSourceFlags) string {
-	return fmt.Sprintf("#@data/values\n---\nnamespace: %s\nredis: %t\nrabbitmq: %t\ngitlab: %t\ngithub: %t\nceph: %t\nkafka: %t\nnatss: %t",
+	return fmt.Sprintf("#@data/values\n---\nnamespace: %s\nredis: %t\nrabbitmq: %t\ngitlab: %t\ngithub: %t\nceph: %t\nkafka: %t",
 		eventingSourceCmdFlags.Namespace, eventingSourceCmdFlags.Redis, eventingSourceCmdFlags.Rabbitmq, eventingSourceCmdFlags.Gitlab,
-		eventingSourceCmdFlags.Github, eventingSourceCmdFlags.Ceph, eventingSourceCmdFlags.Kafka, eventingSourceCmdFlags.Natss)
+		eventingSourceCmdFlags.Github, eventingSourceCmdFlags.Ceph, eventingSourceCmdFlags.Kafka)
 }

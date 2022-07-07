@@ -25,10 +25,6 @@ spec:
       #@overlay/match missing_ok=True
       enabled: #@ data.values.ceph
     #@overlay/match missing_ok=True
-    natss:
-      #@overlay/match missing_ok=True
-      enabled: #@ data.values.natss
-    #@overlay/match missing_ok=True
     redis:
       #@overlay/match missing_ok=True
       enabled: #@ data.values.redis

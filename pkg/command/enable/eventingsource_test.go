@@ -26,11 +26,11 @@ func TestGetYamlValuesContentSource(t *testing.T) {
 		eventingSourceCmdFlags eventingSourceFlags
 		expectedResult         string
 	}{{
-		name: "Knative Eventing with ceph and natss enabled",
+		name: "Knative Eventing with ceph and Kafka enabled",
 		eventingSourceCmdFlags: eventingSourceFlags{
 			Namespace: "test-eventing",
 			Ceph:      true,
-			Natss:     true,
+			Kafka:     true,
 		},
 		expectedResult: `#@data/values
 ---
@@ -40,8 +40,7 @@ rabbitmq: false
 gitlab: false
 github: false
 ceph: true
-kafka: false
-natss: true`,
+kafka: true`,
 	}, {
 		name: "Knative Eventing with redis and github enabled",
 		eventingSourceCmdFlags: eventingSourceFlags{
@@ -57,8 +56,7 @@ rabbitmq: false
 gitlab: false
 github: true
 ceph: false
-kafka: false
-natss: false`,
+kafka: false`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			result := getYamlValuesContentSource(tt.eventingSourceCmdFlags)

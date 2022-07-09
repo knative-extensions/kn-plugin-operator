@@ -201,9 +201,47 @@ func VerifyKnativeServingServiceLabelsExistence(t *testing.T, clients operatorv1
 }
 
 func VerifyKnativeEventingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags common.KeyValueFlags) {
+	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyServiceLabels(t, ke.Spec.ServiceOverride, deployLabelFlags)
+}
+
+func VerifyKnativeServingLabelsDelete(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyDeploymentLabelsDelete(t, ks.Spec.DeploymentOverride, deployLabelFlags)
+}
+
+func VerifyKnativeEventingLabelsDelete(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyServiceLabels(t, ks.Spec.ServiceOverride, deployLabelFlags)
+	VerifyDeploymentLabelsDelete(t, ks.Spec.DeploymentOverride, deployLabelFlags)
+}
+
+func VerifyKnativeServingServiceLabelsDelete(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyServiceLabelsDelete(t, ks.Spec.ServiceOverride, deployLabelFlags)
+}
+
+func VerifyKnativeEventingServiceLabelsDelete(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags common.KeyValueFlags) {
+	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
+	testingUtil.AssertEqual(t, err, nil)
+	VerifyServiceLabelsDelete(t, ks.Spec.ServiceOverride, deployLabelFlags)
+}
+
+func VerifyDeploymentLabelsDelete(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags common.KeyValueFlags) {
+	deploy := findDeployment(deployLabelFlags.DeployName, deploymentOverride)
+	testingUtil.AssertEqual(t, deploy == nil, false)
+
+	indicator := "label"
+	if deployLabelFlags.Annotation {
+		indicator = "annotation"
+	} else if deployLabelFlags.NodeSelector {
+		indicator = "nodeselector"
+	}
+	result := findKeyValue(t, deployLabelFlags.Key, deployLabelFlags.Value, indicator, deploy)
+	testingUtil.AssertEqual(t, result, false)
 }
 
 func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags common.KeyValueFlags) {
@@ -246,6 +284,20 @@ func findKeyValue(t *testing.T, key, expectedValue, indicator string, deploy *ba
 		}
 	}
 	return false
+}
+
+func VerifyServiceLabelsDelete(t *testing.T, serviceOverride []base.ServiceOverride, deployLabelFlags common.KeyValueFlags) {
+	service := findService(deployLabelFlags.ServiceName, serviceOverride)
+	testingUtil.AssertEqual(t, service == nil, false)
+
+	indicator := "label"
+	if deployLabelFlags.Annotation {
+		indicator = "annotation"
+	} else if deployLabelFlags.Selector {
+		indicator = "selector"
+	}
+	result := findKeyValueService(t, deployLabelFlags.Key, deployLabelFlags.Value, indicator, service)
+	testingUtil.AssertEqual(t, result, false)
 }
 
 func VerifyServiceLabels(t *testing.T, serviceOverride []base.ServiceOverride, deployLabelFlags common.KeyValueFlags) {

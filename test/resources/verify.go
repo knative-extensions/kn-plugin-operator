@@ -68,15 +68,7 @@ func VerifyOperatorInstallationBeta(t *testing.T, clients *test.Clients) {
 		OperatorNamespace)
 	testingUtil.AssertEqual(t, err, nil)
 
-	_, err = WaitForServiceAccount(clients.KubeClient, "knative-operator-post-install-job",
-		OperatorNamespace)
-	testingUtil.AssertEqual(t, err, nil)
-
 	_, err = WaitForClusterRoleBinding(clients.KubeClient, "operator-webhook",
-		OperatorNamespace, IsClusterRoleBindingReady)
-	testingUtil.AssertEqual(t, err, nil)
-
-	_, err = WaitForClusterRoleBinding(clients.KubeClient, "knative-operator-post-install-job-role-binding",
 		OperatorNamespace, IsClusterRoleBindingReady)
 	testingUtil.AssertEqual(t, err, nil)
 
@@ -90,10 +82,6 @@ func VerifyOperatorInstallationBeta(t *testing.T, clients *test.Clients) {
 	testingUtil.AssertEqual(t, err, nil)
 
 	_, err = WaitForService(clients.KubeClient, "operator-webhook", OperatorNamespace)
-	testingUtil.AssertEqual(t, err, nil)
-
-	_, err = WaitForJob(clients.KubeClient, "storage-version-migration-operator", OperatorNamespace,
-		IsKnativeOperatorJobComplete)
 	testingUtil.AssertEqual(t, err, nil)
 }
 

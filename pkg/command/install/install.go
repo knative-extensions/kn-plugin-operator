@@ -65,11 +65,11 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Install Knative Operator or Knative components",
 		Example: `
   # Install Knative Serving under the namespace knative-serving
-  kn operation install -c serving --namespace knative-serving`,
+  kn-operator install -c serving --namespace knative-serving`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Fill in the default values for the empty fields
-			err := RunInstallationCommand(installFlags, p)
+			err := RunInstallationCommand(&installFlags, p)
 			if err != nil {
 				return err
 			}
@@ -96,7 +96,7 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	return installCmd
 }
 
-func RunInstallationCommand(installFlags installCmdFlags, p *pkg.OperatorParams) error {
+func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams) error {
 	// Fill in the default values for the empty fields
 	installFlags.fill_defaults()
 	p.KubeCfgPath = installFlags.KubeConfig
@@ -154,7 +154,7 @@ func getOperatorURL(version string) (string, error) {
 	return getBaseURL(version, "operator.yaml")
 }
 
-func getOverlayYamlContent(installFlags installCmdFlags, rootPath string) string {
+func getOverlayYamlContent(installFlags *installCmdFlags, rootPath string) string {
 	path := ""
 	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
 		path = rootPath + "/overlay/ks.yaml"
@@ -188,7 +188,7 @@ func versionWebhook(version string) bool {
 	return semver.Compare(targetVersion, "v1.3") >= 0
 }
 
-func getYamlValuesContent(installFlags installCmdFlags) string {
+func getYamlValuesContent(installFlags *installCmdFlags) string {
 	content := ""
 	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
 		content = fmt.Sprintf("#@data/values\n---\nname: %s\nnamespace: %s\nversion: '%s'",
@@ -203,10 +203,11 @@ func getYamlValuesContent(installFlags installCmdFlags) string {
 	} else if installFlags.Component == "" {
 		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s", installFlags.Namespace)
 	}
+
 	return content
 }
 
-func installKnativeComponent(installFlags installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
 	client, err := p.NewKubeClient()
 	if err != nil {
 		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
@@ -224,7 +225,7 @@ func installKnativeComponent(installFlags installCmdFlags, rootPath string, p *p
 			Namespace: "default",
 			Version:   common.Latest,
 		}
-		err = installOperator(operatorInstallFlags, rootPath, p)
+		err = installOperator(&operatorInstallFlags, rootPath, p)
 		if err != nil {
 			return err
 		}
@@ -244,7 +245,7 @@ func installKnativeComponent(installFlags installCmdFlags, rootPath string, p *p
 	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)
 }
 
-func installOperator(installFlags installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+func installOperator(installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
 	err := createNamspaceIfNecessary(installFlags.Namespace, p)
 	if err != nil {
 		return err
@@ -291,7 +292,7 @@ func createNamspaceIfNecessary(namespace string, p *pkg.OperatorParams) error {
 	return nil
 }
 
-func applyOverlayValuesOnTemplate(yamlTemplateString string, installFlags installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+func applyOverlayValuesOnTemplate(yamlTemplateString string, installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
 	overlayContent := getOverlayYamlContent(installFlags, rootPath)
 	yamlValuesContent := getYamlValuesContent(installFlags)
 

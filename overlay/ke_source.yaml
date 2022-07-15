@@ -11,7 +11,7 @@ metadata:
 #@overlay/match missing_ok=True
 spec:
   #@overlay/match missing_ok=True
-  ingress:
+  source:
     #@overlay/match missing_ok=True
     github:
       #@overlay/match missing_ok=True

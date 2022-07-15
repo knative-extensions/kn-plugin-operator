@@ -43,7 +43,7 @@ func newEventingSourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Enable the eventing source for Knative Eventing",
 		Example: `
   # Enable the eventing source github for Knative Serving
-  kn operation enable eventing-source --github --namespace knative-eventing`,
+  kn-operator enable eventing-source --github --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if eventingSourceCmdFlags.Namespace == "" {
 				eventingSourceCmdFlags.Namespace = common.DefaultKnativeEventingNamespace

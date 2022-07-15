@@ -24,10 +24,12 @@ import (
 func NewEnableCommand(p *pkg.OperatorParams) *cobra.Command {
 	var enableCmd = &cobra.Command{
 		Use:   "enable",
-		Short: "Enable the ingress for Knative Serving",
+		Short: "Enable the ingress for Knative Serving and the eventing sources for Knative Eventing",
 		Example: `
   # Enable the ingress istio for Knative Serving
-  kn operation enable ingress --istio --namespace knative-serving`,
+  kn-operator enable ingress --istio --namespace knative-serving
+  # Enable the eventing source github for Knative Eventing
+  kn-operator enable eventing-source --github --namespace knative-eventing`,
 	}
 
 	enableCmd.AddCommand(newIngressCommand(p))

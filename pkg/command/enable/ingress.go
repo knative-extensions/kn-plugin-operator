@@ -41,7 +41,11 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Enable the ingress for Knative Serving",
 		Example: `
   # Enable the ingress istio for Knative Serving
-  kn operation enable ingress --istio --namespace knative-serving`,
+  kn-operator enable ingress --istio --namespace knative-serving
+  # Enable the ingress kourier for Knative Serving
+  kn-operator enable ingress --kourier --namespace knative-serving
+  # Enable the ingress contour for Knative Serving
+  kn-operator enable ingress --contour --namespace knative-serving`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := validateIngressFlags(ingressCmdFlags)
 			if err != nil {
@@ -62,7 +66,7 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			ingress := "istio"
+			ingress := "Istio"
 			if ingressCmdFlags.Kourier {
 				ingress = "Kourier"
 			}
@@ -127,6 +131,7 @@ func enableIngress(ingressCMDFlags ingressFlags, rootPath string, p *pkg.Operato
 func getOverlayYamlContent(rootPath string) string {
 	path := rootPath + "/overlay/ks_ingress.yaml"
 	overlayContent, _ := common.ReadFile(path)
+
 	return overlayContent
 }
 

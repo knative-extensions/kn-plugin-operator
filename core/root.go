@@ -31,13 +31,13 @@ func NewOperationCommand() *cobra.Command {
 	p := &pkg.OperatorParams{}
 	p.Initialize()
 	rootCmd := &cobra.Command{
-		Use:   "kn operation",
+		Use:   "kn operator",
 		Short: "A plugin of kn client to operate Knative components",
-		Long: `kn operation: a plugin of kn client to operate Knative components.
+		Long: `kn operator: a plugin of kn client to operate Knative components.
 For example:
-kn operation install
-kn operation install -c serving
-kn operation install -c eventing
+kn operator install
+kn operator install -c serving
+kn operator install -c eventing
 `,
 	}
 

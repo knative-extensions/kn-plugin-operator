@@ -16,7 +16,9 @@ package install
 
 import (
 	"fmt"
+	"math"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -107,7 +109,8 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 	}
 
 	if installFlags.Component != "" {
-		if exists, ns, _, err := checkIfKnativeInstalled(p, installFlags.Component); err != nil {
+		currentVersion := ""
+		if exists, ns, version, err := checkIfKnativeInstalled(p, installFlags.Component); err != nil {
 			return err
 		} else if exists {
 			// Check if the namespace is consistent
@@ -115,12 +118,22 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 				return fmt.Errorf("The namespace %s you specified is not consistent with the existing namespace for Knative Component %s",
 					installFlags.Namespace, ns)
 			}
+			currentVersion = version
 		}
 		// Install serving or eventing
-		err = installKnativeComponent(installFlags, rootPath, p)
+		versions, err := generateVersionStages(currentVersion, installFlags.Version)
 		if err != nil {
 			return err
 		}
+
+		for _, v := range versions {
+			installFlags.Version = v
+			err = installKnativeComponent(installFlags, rootPath, p)
+			if err != nil {
+				return err
+			}
+		}
+
 	} else {
 		if exists, ns, _, err := checkIfOperatorInstalled(p); err != nil {
 			return err
@@ -275,7 +288,14 @@ func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *
 		return err
 	}
 
-	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)
+	err = applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)
+	if err != nil {
+		return err
+	}
+
+	// Make sure all the deployment resources are up and running
+
+	return nil
 }
 
 func installOperator(installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
@@ -333,4 +353,67 @@ func applyOverlayValuesOnTemplate(yamlTemplateString string, installFlags *insta
 		return err
 	}
 	return nil
+}
+
+func generateVersionStages(source, target string) ([]string, error) {
+	stringArray := ""
+	targetVersion := target
+	if targetVersion == common.Latest || targetVersion == common.Nightly {
+		targetVersion = common.LatestVersion
+	}
+
+	if !strings.HasPrefix(targetVersion, "v") {
+		targetVersion = fmt.Sprintf("v%s", targetVersion)
+	}
+
+	sourceVersion := source
+	if !strings.HasPrefix(sourceVersion, "v") {
+		sourceVersion = fmt.Sprintf("v%s", sourceVersion)
+	}
+
+	sourceMajor := strings.Split(sourceVersion, ".")[0]
+	targetMajor := strings.Split(targetVersion, ".")[0]
+	if targetMajor != sourceMajor {
+		return nil, fmt.Errorf("Unable to migrate from the source version %s to the target version %s", sourceVersion,
+			targetVersion)
+	}
+	sourceMinor, err := strconv.Atoi(strings.Split(sourceVersion, ".")[1])
+	if err != nil {
+		return nil, fmt.Errorf("minor number of the current version %v should be an integer", sourceVersion)
+	}
+	targetMinor, err := strconv.Atoi(strings.Split(targetVersion, ".")[1])
+	if err != nil {
+		return nil, fmt.Errorf("minor number of the target version %v should be an integer", targetVersion)
+	}
+	if math.Abs(float64(targetMinor-sourceMinor)) < 2 {
+		stringArray = targetVersion
+		return strings.Split(stringArray, ","), nil
+	}
+
+	if targetMinor > sourceMinor {
+		minorStart := sourceMinor + 1
+		stringArray = targetMajor + "." + fmt.Sprintf("%d", minorStart) + ".0"
+		for i := 1; i < targetMinor-sourceMinor; i++ {
+			minor := sourceMinor + i + 1
+			if minor != targetMinor {
+				stringArray = stringArray + "," + targetMajor + "." + fmt.Sprintf("%d", minor) + ".0"
+			} else {
+				stringArray = stringArray + "," + targetVersion
+			}
+		}
+		return strings.Split(stringArray, ","), nil
+
+	} else {
+		minorStart := sourceMinor - 1
+		stringArray = targetMajor + "." + fmt.Sprintf("%d", minorStart) + ".0"
+		for i := 1; i < sourceMinor-targetMinor; i++ {
+			minor := sourceMinor - i - 1
+			if minor != targetMinor {
+				stringArray = stringArray + "," + targetMajor + "." + fmt.Sprintf("%d", minor) + ".0"
+			} else {
+				stringArray = stringArray + "," + targetVersion
+			}
+		}
+		return strings.Split(stringArray, ","), nil
+	}
 }

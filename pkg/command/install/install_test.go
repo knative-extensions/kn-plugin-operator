@@ -321,3 +321,60 @@ func TestVersionWebhook(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateVersionStages(t *testing.T) {
+	for _, tt := range []struct {
+		name           string
+		source         string
+		target         string
+		expectedResult []string
+		expectedErr    error
+	}{{
+		name:           "Target version is later than source version",
+		source:         "1.3.1",
+		target:         "1.6.0",
+		expectedResult: []string{"v1.4.0", "v1.5.0", "v1.6.0"},
+		expectedErr:    nil,
+	}, {
+		name:           "Target version is earlier than source version",
+		source:         "1.6.1",
+		target:         "1.3.1",
+		expectedResult: []string{"v1.5.0", "v1.4.0", "v1.3.1"},
+		expectedErr:    nil,
+	}, {
+		name:           "Target version is earlier than source version with prefix",
+		source:         "v1.6.1",
+		target:         "v1.2.1",
+		expectedResult: []string{"v1.5.0", "v1.4.0", "v1.3.0", "v1.2.1"},
+		expectedErr:    nil,
+	}, {
+		name:           "Target version has a different major version from the source version",
+		source:         "2.6.1",
+		target:         "1.3.1",
+		expectedResult: nil,
+		expectedErr: fmt.Errorf("Unable to migrate from the source version %s to the target version %s", "v2.6.1",
+			"v1.3.1"),
+	}, {
+		name:           "Minor version of source version is non integer",
+		source:         "1.a.1",
+		target:         "1.2.1",
+		expectedResult: nil,
+		expectedErr:    fmt.Errorf("minor number of the current version v1.a.1 should be an integer"),
+	}, {
+		name:           "Minor version of target version is non integer",
+		source:         "1.6.1",
+		target:         "1.q.1",
+		expectedResult: nil,
+		expectedErr:    fmt.Errorf("minor number of the target version v1.q.1 should be an integer"),
+	}} {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := generateVersionStages(tt.source, tt.target)
+			if tt.expectedErr == nil {
+				testingUtil.AssertEqual(t, err, nil)
+			} else {
+				testingUtil.AssertEqual(t, err.Error(), tt.expectedErr.Error())
+			}
+			testingUtil.AssertDeepEqual(t, result, tt.expectedResult)
+		})
+	}
+}

@@ -107,12 +107,31 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 	}
 
 	if installFlags.Component != "" {
+		if exists, ns, _, err := checkIfKnativeInstalled(p, installFlags.Component); err != nil {
+			return err
+		} else if exists {
+			// Check if the namespace is consistent
+			if strings.EqualFold(ns, installFlags.Namespace) {
+				return fmt.Errorf("The namespace %s you specified is not consistent with the existing namespace for Knative Component %s",
+					installFlags.Namespace, ns)
+			}
+		}
 		// Install serving or eventing
 		err = installKnativeComponent(installFlags, rootPath, p)
 		if err != nil {
 			return err
 		}
 	} else {
+		if exists, ns, _, err := checkIfOperatorInstalled(p); err != nil {
+			return err
+		} else if exists {
+			// Check if the namespace is consistent
+			if strings.EqualFold(ns, installFlags.Namespace) {
+				return fmt.Errorf("The namespace %s you specified is not consistent with the existing namespace for Knative Operator %s",
+					installFlags.Namespace, ns)
+			}
+		}
+
 		// Install the Knative Operator
 		err = installOperator(installFlags, rootPath, p)
 		if err != nil {
@@ -207,18 +226,32 @@ func getYamlValuesContent(installFlags *installCmdFlags) string {
 	return content
 }
 
-func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+func checkIfKnativeInstalled(p *pkg.OperatorParams, component string) (bool, string, string, error) {
 	client, err := p.NewKubeClient()
 	if err != nil {
-		return fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+		return false, "", "", fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
 	}
-
 	deploy := common.Deployment{
 		Client: client,
 	}
 
+	return deploy.CheckIfKnativeInstalled(component)
+}
+
+func checkIfOperatorInstalled(p *pkg.OperatorParams) (bool, string, string, error) {
+	client, err := p.NewKubeClient()
+	if err != nil {
+		return false, "", "", fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set\n")
+	}
+	deploy := common.Deployment{
+		Client: client,
+	}
+	return deploy.CheckIfOperatorInstalled()
+}
+
+func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
 	// Check if the knative operator is installed
-	if exists, err := deploy.CheckIfOperatorInstalled(); err != nil {
+	if exists, _, _, err := checkIfOperatorInstalled(p); err != nil {
 		return err
 	} else if !exists {
 		operatorInstallFlags := installCmdFlags{
@@ -231,7 +264,7 @@ func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *
 		}
 	}
 
-	err = createNamspaceIfNecessary(installFlags.Namespace, p)
+	err := createNamspaceIfNecessary(installFlags.Namespace, p)
 	if err != nil {
 		return err
 	}

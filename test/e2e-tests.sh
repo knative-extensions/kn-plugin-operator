@@ -209,24 +209,24 @@ echo ">> Remove the toleration configuration for with Knative Serving"
 echo ">> Verify the toleration configuration deletion for Knative Serving Custom resource"
 go_test_e2e -tags=servingtolerationremove -timeout=20m ./test/e2e || failed=1
 
-echo ">> Delete the image of the deployment for Knative Seving"
-./kn-operator remove images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
-  --imageKey ${SERVING_IMAGE_KEY} || fail_test "Failed to delete the image of the deployment for Knative Serving"
-
 echo ">> Delete the image of all deployments for Knative Seving"
 ./kn-operator remove images -c serving -n ${SERVING_NAMESPACE} \
   --imageKey default || fail_test "Failed to delete the image of all deployments for Knative Serving"
 
+echo ">> Delete the image of the deployment for Knative Seving"
+./kn-operator remove images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
+  --imageKey ${SERVING_IMAGE_KEY} || fail_test "Failed to delete the image of the deployment for Knative Serving"
+
 echo ">> Verify the image deletion for Knative Seving"
 go_test_e2e -tags=servingimagedelete -timeout=20m ./test/e2e || failed=1
 
-echo ">> Remove the number of replicas for Knative Serving"
-./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller || fail_test "Failed to remove the number of replias for Knative Serving"
-
-./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Serving"
-
-echo ">> Verify the number of replicas for Knative Serving after removal"
-go_test_e2e -tags=servingharemove -timeout=20m ./test/e2e || failed=1
+#echo ">> Remove the number of replicas for Knative Serving"
+#./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller || fail_test "Failed to remove the number of replias for Knative Serving"
+#
+#./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Serving"
+#
+#echo ">> Verify the number of replicas for Knative Serving after removal"
+#go_test_e2e -tags=servingharemove -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove the environment variables for the container in the deployment of Knative Serving"
 ./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \

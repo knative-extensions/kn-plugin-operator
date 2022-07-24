@@ -342,6 +342,24 @@ func TestGenerateVersionStages(t *testing.T) {
 		expectedResult: []string{"1.5.1"},
 		expectedErr:    nil,
 	}, {
+		name:           "Target version is latest",
+		source:         "",
+		target:         "latest",
+		expectedResult: []string{"latest"},
+		expectedErr:    nil,
+	}, {
+		name:           "Target version is latest with the current version",
+		source:         "1.4.0",
+		target:         "latest",
+		expectedResult: []string{"1.5.0", "1.6.0", "latest"},
+		expectedErr:    nil,
+	}, {
+		name:           "Target version is latest",
+		source:         "1.6.0",
+		target:         "latest",
+		expectedResult: []string{"latest"},
+		expectedErr:    nil,
+	}, {
 		name:           "Target version is later than source version",
 		source:         "1.4.0",
 		target:         "1.3.1",

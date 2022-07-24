@@ -344,11 +344,13 @@ func ensureKnativeComponentReady(installFlags *installCmdFlags, p *pkg.OperatorP
 			return err
 		}
 	} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
+		fmt.Println("check all eventing deploys")
 		err := WaitForKnativeDeploymentState(client, installFlags.Namespace, installFlags.Version, EventingKeyDeployments,
 			IsKnativeDeploymentReady)
 		if err != nil {
 			return err
 		}
+		fmt.Println("check cr eventing")
 		_, err = WaitForKnativeEventingState(operatorClient.OperatorV1beta1().KnativeEventings(installFlags.Namespace), common.KnativeEventingName,
 			installFlags.Version, IsKnativeEventingReady)
 
@@ -473,6 +475,9 @@ func generateVersionStages(source, target string) ([]string, error) {
 			if minor != targetMinor {
 				stringArray = stringArray + "," + targetMajor + "." + fmt.Sprintf("%d", minor) + ".0"
 			} else {
+				if target == common.Latest || target == common.Nightly {
+					stringArray = stringArray + "," + targetMajor + "." + fmt.Sprintf("%d", minor) + ".0"
+				}
 				stringArray = stringArray + "," + target
 			}
 		}
@@ -501,6 +506,8 @@ func WaitForKnativeDeploymentState(client kubernetes.Interface, namespace string
 	defer span.End()
 
 	waitErr := wait.PollImmediate(Interval, Timeout, func() (bool, error) {
+		fmt.Println("the ns is ")
+		fmt.Println(namespace)
 		dpList, err := client.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 		return inState(dpList, expectedDeployments, version, err)
 	})
@@ -513,6 +520,14 @@ func IsKnativeDeploymentReady(dpList *v1.DeploymentList, expectedDeployments []s
 	if err != nil {
 		return false, err
 	}
+	fmt.Println("err is empty")
+	fmt.Println("expectedDeployments is ")
+	fmt.Println(expectedDeployments)
+	fmt.Println("version is")
+	fmt.Println(version)
+
+	fmt.Println("dpList is")
+	fmt.Println(dpList.Items)
 
 	findDeployment := func(name string, deployments []v1.Deployment) *v1.Deployment {
 		for _, deployment := range deployments {
@@ -534,6 +549,8 @@ func IsKnativeDeploymentReady(dpList *v1.DeploymentList, expectedDeployments []s
 
 	isReady := func(d *v1.Deployment) bool {
 		for key, val := range d.GetObjectMeta().GetLabels() {
+			fmt.Println("check deploy")
+			fmt.Println(d.Name)
 			// Check if the version matches. As long as we find a value equals to the version, we can determine
 			// the deployment is for the specific version. The key "networking.knative.dev/ingress-provider" is
 			// used to indicate the network ingress resource.
@@ -559,6 +576,13 @@ func IsKnativeDeploymentReady(dpList *v1.DeploymentList, expectedDeployments []s
 					// matches the version.
 					return isStatusReady(d.Status)
 				}
+			}
+
+			// If spec.version is set to latest and operator bundles a directory called latest, it is possible that both
+			// the version and the existing version are latest. In this case, the knative component to be installed is the
+			// same as the existing one, and we will check the status of the deployment.
+			if version == common.Latest {
+				return isStatusReady(d.Status)
 			}
 		}
 		return false
@@ -600,6 +624,9 @@ func WaitForKnativeServingState(clients operatorv1beta1.KnativeServingInterface,
 
 // IsKnativeServingReady will check the status conditions of the KnativeServing and return true if the KnativeServing is ready.
 func IsKnativeServingReady(s *v1beta1.KnativeServing, version string, err error) (bool, error) {
+	if version == common.Latest || version == common.Nightly {
+		return s.Status.IsReady(), err
+	}
 	return s.Status.IsReady() && version == s.Status.Version, err
 }
 
@@ -626,5 +653,8 @@ func WaitForKnativeEventingState(clients operatorv1beta1.KnativeEventingInterfac
 
 // IsKnativeEventingReady will check the status conditions of the KnativeEventing and return true if the KnativeEventing is ready.
 func IsKnativeEventingReady(s *v1beta1.KnativeEventing, version string, err error) (bool, error) {
+	if version == common.Latest || version == common.Nightly {
+		return s.Status.IsReady(), err
+	}
 	return s.Status.IsReady() && version == s.Status.Version, err
 }

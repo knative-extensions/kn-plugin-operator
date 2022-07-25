@@ -96,7 +96,7 @@ func testCommonSpec() base.CommonSpec {
 	}
 }
 
-func TestRemoveReplicasFieldst(t *testing.T) {
+func TestRemoveReplicasFields(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
 		haCMDFlags     HAFlags
@@ -110,9 +110,7 @@ func TestRemoveReplicasFieldst(t *testing.T) {
 		},
 		input: testCommonSpec(),
 		expectedResult: base.CommonSpec{
-			HighAvailability: &base.HighAvailability{
-				Replicas: nil,
-			},
+			HighAvailability: nil,
 			DeploymentOverride: []base.DeploymentOverride{
 				{
 					Name:     "net-istio-controller",

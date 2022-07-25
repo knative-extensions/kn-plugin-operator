@@ -220,13 +220,13 @@ echo ">> Delete the image of the deployment for Knative Seving"
 echo ">> Verify the image deletion for Knative Seving"
 go_test_e2e -tags=servingimagedelete -timeout=20m ./test/e2e || failed=1
 
-#echo ">> Remove the number of replicas for Knative Serving"
-#./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller || fail_test "Failed to remove the number of replias for Knative Serving"
-#
-#./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Serving"
-#
-#echo ">> Verify the number of replicas for Knative Serving after removal"
-#go_test_e2e -tags=servingharemove -timeout=20m ./test/e2e || failed=1
+echo ">> Remove the number of replicas for Knative Serving"
+./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller || fail_test "Failed to remove the number of replias for Knative Serving"
+
+./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Serving"
+
+echo ">> Verify the number of replicas for Knative Serving after removal"
+go_test_e2e -tags=servingharemove -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove the environment variables for the container in the deployment of Knative Serving"
 ./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
@@ -431,13 +431,13 @@ echo ">> Delete the image of all deployments for Knative Eventing"
 echo ">> Verify the image deletion for Knative Eventing"
 go_test_e2e -tags=eventingimagedelete -timeout=20m ./test/e2e || failed=1
 
-#echo ">> Remove the number of replicas for Knative Eventing"
-#./kn-operator remove replicas -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller || fail_test "Failed to remove the number of replias for Knative Eventing"
-#
-#./kn-operator remove replicas -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Eventing"
-#
-#echo ">> Verify the number of replicas for Knative Eventing after removal"
-#go_test_e2e -tags=eventingharemove -timeout=20m ./test/e2e || failed=1
+echo ">> Remove the number of replicas for Knative Eventing"
+./kn-operator remove replicas -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller || fail_test "Failed to remove the number of replias for Knative Eventing"
+
+./kn-operator remove replicas -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Eventing"
+
+echo ">> Verify the number of replicas for Knative Eventing after removal"
+go_test_e2e -tags=eventingharemove -timeout=20m ./test/e2e || failed=1
 
 echo ">> Remove the environment variables for the container in the deployment of Knative Eventing"
 ./kn-operator remove envvars -c eventing -n ${EVENTING_NAMESPACE} --deployName eventing-controller --container eventing-controller \

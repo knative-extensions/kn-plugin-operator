@@ -416,7 +416,7 @@ func VerifyHAsDelete(t *testing.T, spec base.CommonSpec, haFlags configure.HAFla
 		testingUtil.AssertEqual(t, deploy == nil, false)
 		testingUtil.AssertEqual(t, deploy.Replicas == nil, true)
 	} else {
-		testingUtil.AssertEqual(t, spec.HighAvailability.Replicas == nil, true)
+		testingUtil.AssertEqual(t, spec.HighAvailability == nil, true)
 	}
 }
 

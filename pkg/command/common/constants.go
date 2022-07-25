@@ -28,6 +28,7 @@ const (
 	YttMatchingTag                  = "#@overlay/match missing_ok=True"
 	YttReplaceTag                   = "#@overlay/replace or_add=True"
 	Space                           = " "
+	LatestVersion                   = "1.6"
 )
 
 // Spaces returns series of spaces based on the input number

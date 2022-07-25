@@ -344,13 +344,11 @@ func ensureKnativeComponentReady(installFlags *installCmdFlags, p *pkg.OperatorP
 			return err
 		}
 	} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
-		fmt.Println("check all eventing deploys")
 		err := WaitForKnativeDeploymentState(client, installFlags.Namespace, installFlags.Version, EventingKeyDeployments,
 			IsKnativeDeploymentReady)
 		if err != nil {
 			return err
 		}
-		fmt.Println("check cr eventing")
 		_, err = WaitForKnativeEventingState(operatorClient.OperatorV1beta1().KnativeEventings(installFlags.Namespace), common.KnativeEventingName,
 			installFlags.Version, IsKnativeEventingReady)
 
@@ -506,8 +504,6 @@ func WaitForKnativeDeploymentState(client kubernetes.Interface, namespace string
 	defer span.End()
 
 	waitErr := wait.PollImmediate(Interval, Timeout, func() (bool, error) {
-		fmt.Println("the ns is ")
-		fmt.Println(namespace)
 		dpList, err := client.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 		return inState(dpList, expectedDeployments, version, err)
 	})
@@ -520,14 +516,6 @@ func IsKnativeDeploymentReady(dpList *v1.DeploymentList, expectedDeployments []s
 	if err != nil {
 		return false, err
 	}
-	fmt.Println("err is empty")
-	fmt.Println("expectedDeployments is ")
-	fmt.Println(expectedDeployments)
-	fmt.Println("version is")
-	fmt.Println(version)
-
-	fmt.Println("dpList is")
-	fmt.Println(dpList.Items)
 
 	findDeployment := func(name string, deployments []v1.Deployment) *v1.Deployment {
 		for _, deployment := range deployments {
@@ -549,8 +537,6 @@ func IsKnativeDeploymentReady(dpList *v1.DeploymentList, expectedDeployments []s
 
 	isReady := func(d *v1.Deployment) bool {
 		for key, val := range d.GetObjectMeta().GetLabels() {
-			fmt.Println("check deploy")
-			fmt.Println(d.Name)
 			// Check if the version matches. As long as we find a value equals to the version, we can determine
 			// the deployment is for the specific version. The key "networking.knative.dev/ingress-provider" is
 			// used to indicate the network ingress resource.

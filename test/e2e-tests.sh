@@ -74,75 +74,75 @@ go_test_e2e -tags=beta -timeout=20m ./test/e2e || failed=1
 echo ">> Install Knative Serving"
 ./kn-operator install -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to install Knative Serving"
 
-echo ">> Configure the label for Knative Serving"
-./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving"
-
-./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving"
-
-echo ">> Configure the annotation for Knative Serving"
-./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving"
-
-./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving"
-
-echo ">> Configure the nodeSelector for Knative Serving"
-./kn-operator configure nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving"
-
-./kn-operator configure nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving"
-
-echo ">> Verify the label configuration of Knative Serving"
-go_test_e2e -tags=servinglabelconfig -timeout=20m ./test/e2e || failed=1
-
-echo ">> Configure the label for Knative Serving's service"
-./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving's service"
-
-./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
-
-echo ">> Configure the annotation for Knative Serving's service"
-./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving's service"
-
-./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
-
-echo ">> Configure the selector for Knative Serving's service"
-./kn-operator configure selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving's service"
-
-./kn-operator configure selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
-
-echo ">> Verify the label configuration of Knative Serving's service"
-go_test_e2e -tags=servingservicelabelconfig -timeout=20m ./test/e2e || failed=1
-
-echo ">> Configure the resource with Knative Serving"
-./kn-operator configure resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --container activator --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
-  --requestCPU 1024m || fail_test "Failed to configure Knative Serving"
-
-echo ">> Verify the resource configuration of Knative Serving Custom resource"
-go_test_e2e -tags=servingresourceconfig -timeout=20m ./test/e2e || failed=1
-
-echo ">> Configure the ConfigMaps for Knative Serving"
-./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Serving"
-
-./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network \
-  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure the ConfigMap for Knative Serving"
-
-./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-deployment \
-  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Serving"
-
-echo ">> Verify the configuration for config maps in Knative Serving"
-go_test_e2e -tags=servingconfigmap -timeout=20m ./test/e2e || failed=1
-
+#echo ">> Configure the label for Knative Serving"
+#./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving"
+#
+#./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving"
+#
+#echo ">> Configure the annotation for Knative Serving"
+#./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving"
+#
+#./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving"
+#
+#echo ">> Configure the nodeSelector for Knative Serving"
+#./kn-operator configure nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving"
+#
+#./kn-operator configure nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving"
+#
+#echo ">> Verify the label configuration of Knative Serving"
+#go_test_e2e -tags=servinglabelconfig -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Configure the label for Knative Serving's service"
+#./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving's service"
+#
+#./kn-operator configure labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
+#
+#echo ">> Configure the annotation for Knative Serving's service"
+#./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving's service"
+#
+#./kn-operator configure annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
+#
+#echo ">> Configure the selector for Knative Serving's service"
+#./kn-operator configure selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure Knative Serving's service"
+#
+#./kn-operator configure selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure Knative Serving's service"
+#
+#echo ">> Verify the label configuration of Knative Serving's service"
+#go_test_e2e -tags=servingservicelabelconfig -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Configure the resource with Knative Serving"
+#./kn-operator configure resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --container activator --limitMemory 1001M --limitCPU 2048m --requestMemory 999M \
+#  --requestCPU 1024m || fail_test "Failed to configure Knative Serving"
+#
+#echo ">> Verify the resource configuration of Knative Serving Custom resource"
+#go_test_e2e -tags=servingresourceconfig -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Configure the ConfigMaps for Knative Serving"
+#./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Serving"
+#
+#./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network \
+#  --key ${TEST_KEY_ADDITIONAL} --value ${TEST_VALUE_ADDITIONAL} || fail_test "Failed to configure the ConfigMap for Knative Serving"
+#
+#./kn-operator configure configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-deployment \
+#  --key ${TEST_KEY} --value ${TEST_VALUE} || fail_test "Failed to configure the ConfigMap for Knative Serving"
+#
+#echo ">> Verify the configuration for config maps in Knative Serving"
+#go_test_e2e -tags=servingconfigmap -timeout=20m ./test/e2e || failed=1
+#
 echo ">> Configure the number of replicas for Knative Serving"
 ./kn-operator configure replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller \
   --replicas ${REPLICA_NUM} || fail_test "Failed to configure the number of replias for Knative Serving"
@@ -151,143 +151,143 @@ echo ">> Configure the number of replicas for Knative Serving"
 
 echo ">> Verify the number of replicas for Knative Serving"
 go_test_e2e -tags=servingha -timeout=20m ./test/e2e || failed=1
-
-echo ">> Configure the tolerations for Knative Serving"
-./kn-operator configure tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
-  --key ${TOLERATION_KEY} --operator ${OPERATION} --effect ${EFFECT} || fail_test "Failed to configure the tolerations for Knative Serving"
-
-./kn-operator configure tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
-  --key ${ADDITIONAL_TOLERATION_KEY} --operator ${ADDITIONAL_OPERATION} --value ${ADDITIONAL_TOLERATION_VALUE} --effect ${ADDITIONAL_EFFECT} || fail_test "Failed to configure the tolerations for Knative Serving"
-
-echo ">> Verify the tolerations for Knative Serving"
-go_test_e2e -tags=servingtolerations -timeout=20m ./test/e2e || failed=1
-
-echo ">> Configure the image of the deployment for Knative Seving"
-./kn-operator configure images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
-  --imageKey ${SERVING_IMAGE_KEY} --imageURL ${SERVING_IMAGE_URL} || fail_test "Failed to configure the image of the deployment for Knative Serving"
-
-echo ">> Configure the image of all deployments for Knative Seving"
-./kn-operator configure images -c serving -n ${SERVING_NAMESPACE} \
-  --imageKey default --imageURL ${DEFAULT_SERVING_IMAGE_URL} || fail_test "Failed to configure the image of all deployments for Knative Serving"
-
-echo ">> Verify the image configuration for Knative Seving"
-go_test_e2e -tags=servingimage -timeout=20m ./test/e2e || failed=1
-
-echo ">> Configure the environment variables for the container in the deployment of Knative Seving"
-./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
-  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
-
-./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
-  --name ${ADDITIONAL_ENV_NAME} --value ${ADDITIONAL_ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
-
-./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName activator --container activator \
-  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
-
-echo ">> Verify the env var configuration for Knative Serving"
-go_test_e2e -tags=servingenvvar -timeout=20m ./test/e2e || failed=1
-
-echo ">> Remove the resource configuration for with Knative Serving"
-./kn-operator remove resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --container activator || fail_test "Failed to remove the resource configuration for Knative Serving"
-
-echo ">> Verify the resource configuration deletion for Knative Serving Custom resource"
-go_test_e2e -tags=servingresourceremove -timeout=20m ./test/e2e || failed=1
-
-echo ">> Remove the configMap configuration for with Knative Serving"
-./kn-operator remove configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-deployment \
-  --key ${TEST_KEY} || fail_test "Failed to remove the configmap configuration for Knative Serving"
-
-./kn-operator remove configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network || fail_test "Failed to delete the ConfigMap configuration for Knative Serving"
-
-echo ">> Verify the configMap configuration deletion for Knative Serving Custom resource"
-go_test_e2e -tags=servingcmrremove -timeout=20m ./test/e2e || failed=1
-
-echo ">> Remove the toleration configuration for with Knative Serving"
-./kn-operator remove tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
-  --key ${TOLERATION_KEY} || fail_test "Failed to remove the toleration configuration for Knative Serving"
-
-echo ">> Verify the toleration configuration deletion for Knative Serving Custom resource"
-go_test_e2e -tags=servingtolerationremove -timeout=20m ./test/e2e || failed=1
-
-echo ">> Delete the image of all deployments for Knative Seving"
-./kn-operator remove images -c serving -n ${SERVING_NAMESPACE} \
-  --imageKey default || fail_test "Failed to delete the image of all deployments for Knative Serving"
-
-echo ">> Delete the image of the deployment for Knative Seving"
-./kn-operator remove images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
-  --imageKey ${SERVING_IMAGE_KEY} || fail_test "Failed to delete the image of the deployment for Knative Serving"
-
-echo ">> Verify the image deletion for Knative Seving"
-go_test_e2e -tags=servingimagedelete -timeout=20m ./test/e2e || failed=1
-
-#echo ">> Remove the number of replicas for Knative Serving"
-#./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller || fail_test "Failed to remove the number of replias for Knative Serving"
 #
-#./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Serving"
+#echo ">> Configure the tolerations for Knative Serving"
+#./kn-operator configure tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
+#  --key ${TOLERATION_KEY} --operator ${OPERATION} --effect ${EFFECT} || fail_test "Failed to configure the tolerations for Knative Serving"
 #
-#echo ">> Verify the number of replicas for Knative Serving after removal"
-#go_test_e2e -tags=servingharemove -timeout=20m ./test/e2e || failed=1
+#./kn-operator configure tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
+#  --key ${ADDITIONAL_TOLERATION_KEY} --operator ${ADDITIONAL_OPERATION} --value ${ADDITIONAL_TOLERATION_VALUE} --effect ${ADDITIONAL_EFFECT} || fail_test "Failed to configure the tolerations for Knative Serving"
+#
+#echo ">> Verify the tolerations for Knative Serving"
+#go_test_e2e -tags=servingtolerations -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Configure the image of the deployment for Knative Seving"
+#./kn-operator configure images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
+#  --imageKey ${SERVING_IMAGE_KEY} --imageURL ${SERVING_IMAGE_URL} || fail_test "Failed to configure the image of the deployment for Knative Serving"
+#
+#echo ">> Configure the image of all deployments for Knative Seving"
+#./kn-operator configure images -c serving -n ${SERVING_NAMESPACE} \
+#  --imageKey default --imageURL ${DEFAULT_SERVING_IMAGE_URL} || fail_test "Failed to configure the image of all deployments for Knative Serving"
+#
+#echo ">> Verify the image configuration for Knative Seving"
+#go_test_e2e -tags=servingimage -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Configure the environment variables for the container in the deployment of Knative Seving"
+#./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+#  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
+#
+#./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+#  --name ${ADDITIONAL_ENV_NAME} --value ${ADDITIONAL_ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
+#
+#./kn-operator configure envvars -c serving -n ${SERVING_NAMESPACE} --deployName activator --container activator \
+#  --name ${ENV_NAME} --value ${ENV_VALUE} || fail_test "Failed to configure the env var for Knative Serving"
+#
+#echo ">> Verify the env var configuration for Knative Serving"
+#go_test_e2e -tags=servingenvvar -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Remove the resource configuration for with Knative Serving"
+#./kn-operator remove resources -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --container activator || fail_test "Failed to remove the resource configuration for Knative Serving"
+#
+#echo ">> Verify the resource configuration deletion for Knative Serving Custom resource"
+#go_test_e2e -tags=servingresourceremove -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Remove the configMap configuration for with Knative Serving"
+#./kn-operator remove configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-deployment \
+#  --key ${TEST_KEY} || fail_test "Failed to remove the configmap configuration for Knative Serving"
+#
+#./kn-operator remove configmaps -c serving -n ${SERVING_NAMESPACE} --cmName config-network || fail_test "Failed to delete the ConfigMap configuration for Knative Serving"
+#
+#echo ">> Verify the configMap configuration deletion for Knative Serving Custom resource"
+#go_test_e2e -tags=servingcmrremove -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Remove the toleration configuration for with Knative Serving"
+#./kn-operator remove tolerations -c serving -n ${SERVING_NAMESPACE} --deployName autoscaler \
+#  --key ${TOLERATION_KEY} || fail_test "Failed to remove the toleration configuration for Knative Serving"
+#
+#echo ">> Verify the toleration configuration deletion for Knative Serving Custom resource"
+#go_test_e2e -tags=servingtolerationremove -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Delete the image of all deployments for Knative Seving"
+#./kn-operator remove images -c serving -n ${SERVING_NAMESPACE} \
+#  --imageKey default || fail_test "Failed to delete the image of all deployments for Knative Serving"
+#
+#echo ">> Delete the image of the deployment for Knative Seving"
+#./kn-operator remove images -c serving -n ${SERVING_NAMESPACE} --deployName controller \
+#  --imageKey ${SERVING_IMAGE_KEY} || fail_test "Failed to delete the image of the deployment for Knative Serving"
+#
+#echo ">> Verify the image deletion for Knative Seving"
+#go_test_e2e -tags=servingimagedelete -timeout=20m ./test/e2e || failed=1
 
-echo ">> Remove the environment variables for the container in the deployment of Knative Serving"
-./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
-  --name ${ENV_NAME}|| fail_test "Failed to delete the env var for Knative Serving"
+echo ">> Remove the number of replicas for Knative Serving"
+./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} --deployName controller || fail_test "Failed to remove the number of replias for Knative Serving"
 
-./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
-  --name ${ADDITIONAL_ENV_NAME}|| fail_test "Failed to delete the env var for Knative Serving"
+./kn-operator remove replicas -c serving -n ${SERVING_NAMESPACE} || fail_test "Failed to remove the number of replias for Knative Serving"
 
-./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName activator --container activator \
-  --name ${ENV_NAME} || fail_test "Failed to delete the env var for Knative Serving"
+echo ">> Verify the number of replicas for Knative Serving after removal"
+go_test_e2e -tags=servingharemove -timeout=20m ./test/e2e || failed=1
 
-echo ">> Verify the environment variables deletion for Knative Serving Custom resource"
-go_test_e2e -tags=servingenvvarsremove -timeout=20m ./test/e2e || failed=1
-
-echo ">> Remove the label for Knative Serving"
-./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
-
-./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
-
-echo ">> Remove the annotation for Knative Serving"
-./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
-
-./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
-
-echo ">> Remove the nodeSelector for Knative Serving"
-./kn-operator remove nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
-
-./kn-operator remove nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
-  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
-
-echo ">> Verify the label, annotation and node selector deletion of Knative Serving"
-go_test_e2e -tags=servinglabeldelete -timeout=20m ./test/e2e || failed=1
-
-echo ">> Remove the label for Knative Serving's service"
-./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
-
-./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
-
-echo ">> Remove the annotation for Knative Serving's service"
-./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
-
-./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
-
-echo ">> Remove the selector for Knative Serving's service"
-./kn-operator remove selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
-
-./kn-operator remove selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
-  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
-
-echo ">> Verify the label, annotation selector deletion of Knative Serving's service"
-go_test_e2e -tags=servingservicelabeldelete -timeout=20m ./test/e2e || failed=1
+#echo ">> Remove the environment variables for the container in the deployment of Knative Serving"
+#./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+#  --name ${ENV_NAME}|| fail_test "Failed to delete the env var for Knative Serving"
+#
+#./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName controller --container controller \
+#  --name ${ADDITIONAL_ENV_NAME}|| fail_test "Failed to delete the env var for Knative Serving"
+#
+#./kn-operator remove envvars -c serving -n ${SERVING_NAMESPACE} --deployName activator --container activator \
+#  --name ${ENV_NAME} || fail_test "Failed to delete the env var for Knative Serving"
+#
+#echo ">> Verify the environment variables deletion for Knative Serving Custom resource"
+#go_test_e2e -tags=servingenvvarsremove -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Remove the label for Knative Serving"
+#./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
+#
+#./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
+#
+#echo ">> Remove the annotation for Knative Serving"
+#./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
+#
+#./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
+#
+#echo ">> Remove the nodeSelector for Knative Serving"
+#./kn-operator remove nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving"
+#
+#./kn-operator remove nodeSelectors -c serving -n ${SERVING_NAMESPACE} --deployName activator \
+#  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving"
+#
+#echo ">> Verify the label, annotation and node selector deletion of Knative Serving"
+#go_test_e2e -tags=servinglabeldelete -timeout=20m ./test/e2e || failed=1
+#
+#echo ">> Remove the label for Knative Serving's service"
+#./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
+#
+#./kn-operator remove labels -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
+#
+#echo ">> Remove the annotation for Knative Serving's service"
+#./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
+#
+#./kn-operator remove annotations -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
+#
+#echo ">> Remove the selector for Knative Serving's service"
+#./kn-operator remove selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY} || fail_test "Failed to remove Knative Serving's service"
+#
+#./kn-operator remove selectors -c serving -n ${SERVING_NAMESPACE} --serviceName activator-service \
+#  --key ${TEST_KEY_ADDITIONAL} || fail_test "Failed to remove Knative Serving's service"
+#
+#echo ">> Verify the label, annotation selector deletion of Knative Serving's service"
+#go_test_e2e -tags=servingservicelabeldelete -timeout=20m ./test/e2e || failed=1
 
 echo ">> Install Knative Eventing"
 ./kn-operator install -c eventing -n ${EVENTING_NAMESPACE} || fail_test "Failed to install Knative Eventing"

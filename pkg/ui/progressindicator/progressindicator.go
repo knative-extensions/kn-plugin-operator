@@ -23,8 +23,8 @@ import (
 
 var (
 	DefaultRefreshRate = time.Millisecond * 300
-	DefaultCharset     = spinner.CharSets[35]
-	DefaultColor       = "green"
+	DefaultCharset     = spinner.CharSets[38]
+	DefaultColor       = "blue"
 )
 
 // ProgressIndicator is used to indicator the progress of the running command.

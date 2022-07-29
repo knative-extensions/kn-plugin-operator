@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"knative.dev/kn-plugin-operator/pkg/ui/progressindicator"
+
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
 	v1 "k8s.io/api/apps/v1"
@@ -121,6 +123,9 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 }
 
 func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams) error {
+	pi := progressindicator.New().SetText("Installing...")
+	pi.Start()
+	defer pi.Stop()
 	// Fill in the default values for the empty fields
 	installFlags.fill_defaults()
 	p.KubeCfgPath = installFlags.KubeConfig
@@ -139,6 +144,11 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 	}
 
 	if installFlags.Component != "" {
+		component := common.EventingComponent
+		if strings.EqualFold(installFlags.Component, common.ServingComponent) {
+			component = common.ServingComponent
+		}
+
 		currentVersion := ""
 		if exists, ns, version, err := deploy.CheckIfKnativeInstalled(installFlags.Component); err != nil {
 			return err
@@ -157,6 +167,12 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 		}
 
 		for _, v := range versions {
+			text := fmt.Sprintf("Installing Knative %s, Version %s...", component, v)
+			if currentVersion != "" {
+				text = fmt.Sprintf("Migrating Knative %s to Version %s...", component, v)
+			}
+			pi.SetText(text)
+
 			installFlags.Version = v
 			err = installKnativeComponent(installFlags, rootPath, p)
 			if err != nil {
@@ -176,12 +192,15 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 		}
 
 		// Install the Knative Operator
+		text := fmt.Sprintf("Installing Knative Operator, Version %s...", installFlags.Version)
+		pi.SetText(text)
 		err = installOperator(installFlags, rootPath, p)
 		if err != nil {
 			return err
 		}
 	}
 
+	pi.Stop()
 	return nil
 }
 

@@ -185,7 +185,7 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 			return err
 		} else if exists {
 			// Check if the namespace is consistent
-			if strings.EqualFold(ns, installFlags.Namespace) {
+			if !strings.EqualFold(ns, installFlags.Namespace) {
 				return fmt.Errorf("The namespace %s you specified is not consistent with the existing namespace for Knative Operator %s",
 					installFlags.Namespace, ns)
 			}

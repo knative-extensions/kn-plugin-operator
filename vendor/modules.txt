@@ -514,10 +514,10 @@ k8s.io/utils/integer
 k8s.io/utils/internal/third_party/forked/golang/net
 k8s.io/utils/net
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20220728013938-9dabf7cf62e3
+# knative.dev/hack v0.0.0-20220815132133-e9a8475f4329
 ## explicit; go 1.17
 knative.dev/hack
-# knative.dev/operator v0.33.1-0.20220802191820-bef2ecf84757
+# knative.dev/operator v0.33.1-0.20220819094949-44f993d6f218
 ## explicit; go 1.18
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
@@ -527,7 +527,7 @@ knative.dev/operator/pkg/client/clientset/versioned/scheme
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20220802185824-a01dfedb0486
+# knative.dev/pkg v0.0.0-20220818004048-4a03844c0b15
 ## explicit; go 1.18
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck

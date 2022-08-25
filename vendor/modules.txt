@@ -517,7 +517,7 @@ k8s.io/utils/trace
 # knative.dev/hack v0.0.0-20220823140917-8d1e4ccf9dc3
 ## explicit; go 1.17
 knative.dev/hack
-# knative.dev/operator v0.33.1-0.20220823201419-a2b24d2bd53b
+# knative.dev/operator v0.33.1-0.20220825135319-2cd27fd25493
 ## explicit; go 1.18
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base

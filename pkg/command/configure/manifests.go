@@ -15,15 +15,22 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
+
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_custom_manifests.yaml
+var servingManifestsOverlay string
+
+//go:embed overlay/ke_custom_manifests.yaml
+var eventingManifestsOverlay string
 
 type manifestsFlags struct {
 	File              string
@@ -49,12 +56,7 @@ func newManifestsCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureManifests(manifestsCMDFlags, rootPath, p)
+			err := configureManifests(manifestsCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -113,7 +115,7 @@ func UpdateOperatorForCustomManifests(manifestsCMDFlags manifestsFlags, p *pkg.O
 	return nil
 }
 
-func configureManifests(manifestsCMDFlags manifestsFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureManifests(manifestsCMDFlags manifestsFlags, p *pkg.OperatorParams) error {
 	if !manifestsCMDFlags.Accessible {
 		if err := UpdateOperatorForCustomManifests(manifestsCMDFlags, p); err != nil {
 			return err
@@ -130,20 +132,19 @@ func configureManifests(manifestsCMDFlags manifestsFlags, rootPath string, p *pk
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentManifest(rootPath, manifestsCMDFlags)
+	overlayContent := getOverlayYamlContentManifest(manifestsCMDFlags)
 	valuesYaml := getYamlValuesContentManifests(manifestsCMDFlags)
-	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
+	if err = common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getOverlayYamlContentManifest(rootPath string, manifestsCMDFlags manifestsFlags) string {
-	path := rootPath + "/overlay/ks_custom_manifests.yaml"
+func getOverlayYamlContentManifest(manifestsCMDFlags manifestsFlags) string {
+	baseOverlayContent := servingManifestsOverlay
 	if strings.EqualFold(manifestsCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_custom_manifests.yaml"
+		baseOverlayContent = eventingManifestsOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	resourceContent := getManifestsConfiguration(manifestsCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

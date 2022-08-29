@@ -157,8 +157,7 @@ func TestGetOverlayYamlContent(t *testing.T) {
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.installFlags.fill_defaults()
-			rootPath := "testdata"
-			result := getOverlayYamlContent(&tt.installFlags, rootPath)
+			result := getOverlayYamlContent(&tt.installFlags)
 			expectedResult, err := common.ReadFile(tt.expectedFile)
 			testingUtil.AssertEqual(t, err == nil, true)
 			testingUtil.AssertEqual(t, result, expectedResult)

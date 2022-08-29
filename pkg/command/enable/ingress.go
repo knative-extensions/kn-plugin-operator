@@ -15,8 +15,8 @@
 package enable
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 
@@ -24,6 +24,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
 	"knative.dev/kn-plugin-operator/pkg"
 )
+
+//go:embed overlay/ks_ingress.yaml
+var overlayContent string
 
 type ingressFlags struct {
 	Istio     bool
@@ -56,12 +59,7 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
 				ingressCmdFlags.Namespace = common.DefaultKnativeServingNamespace
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = enableIngress(ingressCmdFlags, rootPath, p)
+			err = enableIngress(ingressCmdFlags, p)
 			if err != nil {
 				return err
 			}
@@ -112,27 +110,19 @@ func validateIngressFlags(ingressCMDFlags ingressFlags) error {
 	return nil
 }
 
-func enableIngress(ingressCMDFlags ingressFlags, rootPath string, p *pkg.OperatorParams) error {
+func enableIngress(ingressCMDFlags ingressFlags, p *pkg.OperatorParams) error {
 	// Generate the CR template
 	yamlTemplateString, err := common.GenerateOperatorCRString(common.ServingComponent, ingressCMDFlags.Namespace, p)
 	if err != nil {
 		return err
 	}
 
-	overlayContent := getOverlayYamlContent(rootPath)
 	valuesYaml := getYamlValuesContent(ingressCMDFlags)
 
-	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
+	if err = common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
 	}
 	return nil
-}
-
-func getOverlayYamlContent(rootPath string) string {
-	path := rootPath + "/overlay/ks_ingress.yaml"
-	overlayContent, _ := common.ReadFile(path)
-
-	return overlayContent
 }
 
 func getYamlValuesContent(ingressCMDFlags ingressFlags) string {

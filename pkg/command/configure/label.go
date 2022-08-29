@@ -15,15 +15,22 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
+
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_deploy_label.yaml
+var servingLabelOverlay string
+
+//go:embed overlay/ke_deploy_label.yaml
+var eventingLabelOverlay string
 
 var deploymentLabelCMDFlags common.KeyValueFlags
 
@@ -40,12 +47,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureLabels(deploymentLabelCMDFlags, rootPath, p)
+			err := configureLabels(deploymentLabelCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -95,7 +97,7 @@ func validateLabelsAnnotationsFlags(deploymentLabelCMDFlags common.KeyValueFlags
 	return nil
 }
 
-func configureLabels(deploymentLabelCMDFlags common.KeyValueFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureLabels(deploymentLabelCMDFlags common.KeyValueFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -105,7 +107,7 @@ func configureLabels(deploymentLabelCMDFlags common.KeyValueFlags, rootPath stri
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentLabel(rootPath, deploymentLabelCMDFlags)
+	overlayContent := getOverlayYamlContentLabel(deploymentLabelCMDFlags)
 	valuesYaml := getYamlValuesContent(deploymentLabelCMDFlags)
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
@@ -113,12 +115,11 @@ func configureLabels(deploymentLabelCMDFlags common.KeyValueFlags, rootPath stri
 	return nil
 }
 
-func getOverlayYamlContentLabel(rootPath string, deploymentLabelCMDFlags common.KeyValueFlags) string {
-	path := rootPath + "/overlay/ks_deploy_label.yaml"
+func getOverlayYamlContentLabel(deploymentLabelCMDFlags common.KeyValueFlags) string {
+	baseOverlayContent := servingLabelOverlay
 	if strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_deploy_label.yaml"
+		baseOverlayContent = eventingLabelOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	resourceContent := getLabelConfiguration(deploymentLabelCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

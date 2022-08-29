@@ -15,15 +15,22 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
+
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_envvar.yaml
+var servingEnvVarOverlay string
+
+//go:embed overlay/ke_envvar.yaml
+var eventingEnvVarOverlay string
 
 type EnvVarFlags struct {
 	EnvName       string
@@ -49,12 +56,7 @@ func newEnvVarCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureEnvVars(envVarFlags, rootPath, p)
+			err := configureEnvVars(envVarFlags, p)
 			if err != nil {
 				return err
 			}
@@ -99,7 +101,7 @@ func validateEnvVarsFlags(envVarFlags EnvVarFlags) error {
 	return nil
 }
 
-func configureEnvVars(envVarFlags EnvVarFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureEnvVars(envVarFlags EnvVarFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(envVarFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -109,7 +111,7 @@ func configureEnvVars(envVarFlags EnvVarFlags, rootPath string, p *pkg.OperatorP
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentEnvvar(rootPath, envVarFlags)
+	overlayContent := getOverlayYamlContentEnvvar(envVarFlags)
 	valuesYaml := getYamlValuesContentEnvvars(envVarFlags)
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
@@ -117,12 +119,11 @@ func configureEnvVars(envVarFlags EnvVarFlags, rootPath string, p *pkg.OperatorP
 	return nil
 }
 
-func getOverlayYamlContentEnvvar(rootPath string, envVarFlags EnvVarFlags) string {
-	path := rootPath + "/overlay/ks_envvar.yaml"
+func getOverlayYamlContentEnvvar(envVarFlags EnvVarFlags) string {
+	baseOverlayContent := servingEnvVarOverlay
 	if strings.EqualFold(envVarFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_envvar.yaml"
+		baseOverlayContent = eventingEnvVarOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	return baseOverlayContent
 }
 

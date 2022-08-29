@@ -56,12 +56,18 @@ var operatorOverlay string
 //go:embed overlay/operator_crds.yaml
 var operatorCRDsOverlay string
 
+//go:embed overlay/ks_ingress.yaml
+var servingWithIngressOverlay string
+
 type installCmdFlags struct {
 	Component      string
 	IstioNamespace string
 	Namespace      string
 	KubeConfig     string
 	Version        string
+	Istio          bool
+	Kourier        bool
+	Contour        bool
 }
 
 var (
@@ -92,6 +98,13 @@ func (flags *installCmdFlags) fill_defaults() {
 		} else if flags.Component == "" {
 			flags.Namespace = common.DefaultNamespace
 		}
+	}
+
+	// Set the default ingress istio to true
+	if strings.EqualFold(flags.Component, common.ServingComponent) && !flags.Kourier && !flags.Contour && !flags.Istio {
+		flags.Istio = true
+		flags.Kourier = false
+		flags.Contour = false
 	}
 }
 
@@ -133,6 +146,9 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	installCmd.Flags().StringVarP(&installFlags.Component, "component", "c", "", "The name of the Knative Component to install")
 	installCmd.Flags().StringVarP(&installFlags.Version, "version", "v", common.Latest, "The version of the the Knative Operator or the Knative component")
 	installCmd.Flags().StringVar(&installFlags.IstioNamespace, "istio-namespace", "", "The namespace of istio")
+	installCmd.Flags().BoolVar(&installFlags.Istio, "istio", false, "The flag to enable the ingress istio")
+	installCmd.Flags().BoolVar(&installFlags.Kourier, "kourier", false, "The flag to enable the ingress kourier")
+	installCmd.Flags().BoolVar(&installFlags.Contour, "contour", false, "The flag to enable the ingress contour")
 
 	return installCmd
 }
@@ -141,8 +157,15 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 	pi := progressindicator.New().SetText("Installing...")
 	pi.Start()
 	defer pi.Stop()
+
+	err := validateIngressFlags(installFlags)
+	if err != nil {
+		return err
+	}
+
 	// Fill in the default values for the empty fields
 	installFlags.fill_defaults()
+
 	p.KubeCfgPath = installFlags.KubeConfig
 
 	client, err := p.NewKubeClient()
@@ -214,6 +237,31 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 	return nil
 }
 
+func validateIngressFlags(installFlags *installCmdFlags) error {
+	count := 0
+
+	if installFlags.Istio {
+		count++
+	}
+
+	if installFlags.Kourier {
+		count++
+	}
+
+	if installFlags.Contour {
+		count++
+	}
+
+	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
+		if count > 1 {
+			return fmt.Errorf("You can specify only one ingress for Knative Serving.")
+		}
+	} else if count > 0 {
+		return fmt.Errorf("You can only specify the ingress for Knative Serving.")
+	}
+	return nil
+}
+
 func getBaseURL(version, base string) (string, error) {
 	versionSanitized := strings.ToLower(version)
 	URL := "https://github.com/knative/operator/releases/latest/download/" + base
@@ -248,9 +296,13 @@ func getOperatorURL(version string) (string, error) {
 func getOverlayYamlContent(installFlags *installCmdFlags) string {
 	overlayContent := ""
 	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
-		overlayContent = servingOverlay
-		if installFlags.IstioNamespace != common.DefaultIstioNamespace {
-			overlayContent = servingIstioOverlay
+		if installFlags.Istio {
+			overlayContent = servingOverlay
+			if installFlags.IstioNamespace != common.DefaultIstioNamespace {
+				overlayContent = servingIstioOverlay
+			}
+		} else {
+			overlayContent = servingWithIngressOverlay
 		}
 	} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
 		overlayContent = eventingOverlay
@@ -292,6 +344,22 @@ func getYamlValuesContent(installFlags *installCmdFlags) string {
 	} else if installFlags.Component == "" {
 		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s", installFlags.Namespace)
 	}
+
+	if !strings.EqualFold(installFlags.Component, common.ServingComponent) || installFlags.Istio {
+		return content
+	}
+
+	ingressClass := "istio.ingress.networking.knative.dev"
+	if installFlags.Kourier {
+		ingressClass = "kourier.ingress.networking.knative.dev"
+	}
+
+	if installFlags.Contour {
+		ingressClass = "contour.ingress.networking.knative.dev"
+	}
+
+	content = fmt.Sprintf("%s\nkourier: %t\nistio: %t\ncontour: %t\ningressClass: %s",
+		content, installFlags.Kourier, installFlags.Istio, installFlags.Contour, ingressClass)
 
 	return content
 }

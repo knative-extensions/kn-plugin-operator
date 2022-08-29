@@ -225,8 +225,7 @@ spec:
         cpu: #@ data.values.limitCPU`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContentResource(rootPath, tt.resourcesCMDFlags)
+			result := getOverlayYamlContentResource(tt.resourcesCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

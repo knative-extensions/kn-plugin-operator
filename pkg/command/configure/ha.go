@@ -15,15 +15,22 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
+
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_replica.yaml
+var servingHAOverlay string
+
+//go:embed overlay/ke_replica.yaml
+var eventingHAOverlay string
 
 type HAFlags struct {
 	Replicas   string
@@ -47,12 +54,7 @@ func newHACommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureHAs(haCMDFlags, rootPath, p)
+			err := configureHAs(haCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -87,7 +89,7 @@ func validateHAsFlags(haCMDFlags HAFlags) error {
 	return nil
 }
 
-func configureHAs(haCMDFlags HAFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureHAs(haCMDFlags HAFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(haCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -97,7 +99,7 @@ func configureHAs(haCMDFlags HAFlags, rootPath string, p *pkg.OperatorParams) er
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentHA(rootPath, haCMDFlags)
+	overlayContent := getOverlayYamlContentHA(haCMDFlags)
 	valuesYaml := getYamlValuesContentHAs(haCMDFlags)
 
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
@@ -106,12 +108,11 @@ func configureHAs(haCMDFlags HAFlags, rootPath string, p *pkg.OperatorParams) er
 	return nil
 }
 
-func getOverlayYamlContentHA(rootPath string, haCMDFlags HAFlags) string {
-	path := rootPath + "/overlay/ks_replica.yaml"
+func getOverlayYamlContentHA(haCMDFlags HAFlags) string {
+	baseOverlayContent := servingHAOverlay
 	if strings.EqualFold(haCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_replica.yaml"
+		baseOverlayContent = eventingHAOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	haContent := getHAConfiguration(haCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, haContent)
 	return baseOverlayContent

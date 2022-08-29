@@ -162,8 +162,7 @@ spec:
       test-key: #@ data.values.value`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContentLabel(rootPath, tt.deploymentLabelCMDFlags)
+			result := getOverlayYamlContentLabel(tt.deploymentLabelCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

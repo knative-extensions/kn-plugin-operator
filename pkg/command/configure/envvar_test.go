@@ -202,8 +202,7 @@ spec:
 `,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContentEnvvar(rootPath, tt.envVarFlags)
+			result := getOverlayYamlContentEnvvar(tt.envVarFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

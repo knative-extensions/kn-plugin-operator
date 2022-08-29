@@ -130,8 +130,7 @@ spec:
     replicas: #@ data.values.replicas`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContentHA(rootPath, tt.haCMDFlags)
+			result := getOverlayYamlContentHA(tt.haCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

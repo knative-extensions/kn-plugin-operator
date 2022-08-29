@@ -15,8 +15,8 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,6 +24,12 @@ import (
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_cm_base.yaml
+var servingCMOverlay string
+
+//go:embed overlay/ke_cm_base.yaml
+var eventingCMOverlay string
 
 var cmsCMDFlags common.CMsFlags
 
@@ -40,12 +46,7 @@ func newConfigmapsCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureCMs(cmsCMDFlags, rootPath, p)
+			err := configureCMs(cmsCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -84,7 +85,7 @@ func validateCMsFlags(cmsCMDFlags common.CMsFlags) error {
 	return nil
 }
 
-func configureCMs(cmsCMDFlags common.CMsFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureCMs(cmsCMDFlags common.CMsFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(cmsCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -94,7 +95,7 @@ func configureCMs(cmsCMDFlags common.CMsFlags, rootPath string, p *pkg.OperatorP
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentCM(rootPath, cmsCMDFlags)
+	overlayContent := getOverlayYamlContentCM(cmsCMDFlags)
 	valuesYaml := getYamlValuesContentCMs(cmsCMDFlags)
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
@@ -102,12 +103,11 @@ func configureCMs(cmsCMDFlags common.CMsFlags, rootPath string, p *pkg.OperatorP
 	return nil
 }
 
-func getOverlayYamlContentCM(rootPath string, cmsCMDFlags common.CMsFlags) string {
-	path := rootPath + "/overlay/ks_cm_base.yaml"
+func getOverlayYamlContentCM(cmsCMDFlags common.CMsFlags) string {
+	baseOverlayContent := servingCMOverlay
 	if strings.EqualFold(cmsCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_cm_base.yaml"
+		baseOverlayContent = eventingCMOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	resourceContent := getCMConfiguration(cmsCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

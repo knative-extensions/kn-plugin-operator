@@ -219,8 +219,7 @@ spec:
       queue-sidecar-image: #@ data.values.imageValue`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContentImage(rootPath, tt.imageCMDFlags)
+			result := getOverlayYamlContentImage(tt.imageCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

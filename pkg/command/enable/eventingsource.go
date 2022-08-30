@@ -15,14 +15,17 @@
 package enable
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ke_source.yaml
+var sourceOverlayContent string
 
 type eventingSourceFlags struct {
 	Ceph      bool
@@ -49,12 +52,7 @@ func newEventingSourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 				eventingSourceCmdFlags.Namespace = common.DefaultKnativeEventingNamespace
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = enableEventingSource(eventingSourceCmdFlags, rootPath, p)
+			err := enableEventingSource(eventingSourceCmdFlags, p)
 			if err != nil {
 				return err
 			}
@@ -76,26 +74,19 @@ func newEventingSourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	return enableEventingSourceCmd
 }
 
-func enableEventingSource(eventingSourceCmdFlags eventingSourceFlags, rootPath string, p *pkg.OperatorParams) error {
+func enableEventingSource(eventingSourceCmdFlags eventingSourceFlags, p *pkg.OperatorParams) error {
 	// Generate the CR template
 	yamlTemplateString, err := common.GenerateOperatorCRString(common.EventingComponent, eventingSourceCmdFlags.Namespace, p)
 	if err != nil {
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentSource(rootPath)
 	valuesYaml := getYamlValuesContentSource(eventingSourceCmdFlags)
 
-	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
+	if err = common.ApplyManifests(yamlTemplateString, sourceOverlayContent, valuesYaml, p); err != nil {
 		return err
 	}
 	return nil
-}
-
-func getOverlayYamlContentSource(rootPath string) string {
-	path := rootPath + "/overlay/ke_source.yaml"
-	overlayContent, _ := common.ReadFile(path)
-	return overlayContent
 }
 
 func getYamlValuesContentSource(eventingSourceCmdFlags eventingSourceFlags) string {

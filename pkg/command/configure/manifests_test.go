@@ -164,8 +164,7 @@ spec:
   - URL: #@ data.values.manifestsPath`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContentManifest(rootPath, tt.manifestsCMDFlags)
+			result := getOverlayYamlContentManifest(tt.manifestsCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

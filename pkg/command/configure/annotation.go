@@ -15,8 +15,8 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,6 +24,12 @@ import (
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_deploy_label.yaml
+var servingAnnotationOverlay string
+
+//go:embed overlay/ke_deploy_label.yaml
+var eventingAnnotationOverlay string
 
 var annotationCMDFlags common.KeyValueFlags
 
@@ -42,12 +48,7 @@ func newAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureAnnotations(annotationCMDFlags, rootPath, p)
+			err := configureAnnotations(annotationCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -68,7 +69,7 @@ func newAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 	return configureLabelsCmd
 }
 
-func configureAnnotations(annotationCMDFlags common.KeyValueFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureAnnotations(annotationCMDFlags common.KeyValueFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(annotationCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -78,20 +79,19 @@ func configureAnnotations(annotationCMDFlags common.KeyValueFlags, rootPath stri
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentAnnotation(rootPath, annotationCMDFlags)
+	annotationOverlayContent := getOverlayYamlContentAnnotation(annotationCMDFlags)
 	valuesYaml := getYamlValuesContent(annotationCMDFlags)
-	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
+	if err := common.ApplyManifests(yamlTemplateString, annotationOverlayContent, valuesYaml, p); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getOverlayYamlContentAnnotation(rootPath string, annotationCMDFlags common.KeyValueFlags) string {
-	path := rootPath + "/overlay/ks_deploy_label.yaml"
+func getOverlayYamlContentAnnotation(annotationCMDFlags common.KeyValueFlags) string {
+	baseOverlayContent := servingAnnotationOverlay
 	if strings.EqualFold(annotationCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_deploy_label.yaml"
+		baseOverlayContent = eventingAnnotationOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	resourceContent := getAnnotationConfiguration(annotationCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

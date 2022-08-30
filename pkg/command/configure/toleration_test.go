@@ -97,8 +97,7 @@ spec:
       effect: #@ data.values.effect`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContent(rootPath, tt.tolerationsCMDFlags)
+			result := getOverlayYamlContent(tt.tolerationsCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

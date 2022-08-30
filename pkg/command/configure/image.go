@@ -15,15 +15,22 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
+
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_image.yaml
+var servingImageOverlay string
+
+//go:embed overlay/ke_image.yaml
+var eventingImageOverlay string
 
 type ImageFlags struct {
 	ImageUrl   string
@@ -48,12 +55,7 @@ func newImageCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureImages(imageCMDFlags, rootPath, p)
+			err := configureImages(imageCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -89,7 +91,7 @@ func validateImagesFlags(imageCMDFlags ImageFlags) error {
 	return nil
 }
 
-func configureImages(imageCMDFlags ImageFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureImages(imageCMDFlags ImageFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(imageCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -99,7 +101,7 @@ func configureImages(imageCMDFlags ImageFlags, rootPath string, p *pkg.OperatorP
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentImage(rootPath, imageCMDFlags)
+	overlayContent := getOverlayYamlContentImage(imageCMDFlags)
 	valuesYaml := getYamlValuesContentImages(imageCMDFlags)
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
@@ -107,12 +109,12 @@ func configureImages(imageCMDFlags ImageFlags, rootPath string, p *pkg.OperatorP
 	return nil
 }
 
-func getOverlayYamlContentImage(rootPath string, imageCMDFlags ImageFlags) string {
-	path := rootPath + "/overlay/ks_image.yaml"
+func getOverlayYamlContentImage(imageCMDFlags ImageFlags) string {
+	baseOverlayContent := servingImageOverlay
 	if strings.EqualFold(imageCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_image.yaml"
+		baseOverlayContent = eventingImageOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
+
 	resourceContent := getImageConfiguration(imageCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

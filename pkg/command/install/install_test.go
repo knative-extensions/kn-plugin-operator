@@ -99,6 +99,7 @@ func TestFillDefaultsForInstallCmdFlags(t *testing.T) {
 			IstioNamespace: common.DefaultIstioNamespace,
 			Namespace:      common.DefaultKnativeServingNamespace,
 			Version:        common.Latest,
+			Istio:          true,
 		},
 	}, {
 		name: "Empty namespace and version for eventing",
@@ -130,6 +131,20 @@ func TestGetOverlayYamlContent(t *testing.T) {
 		},
 		expectedFile: "testdata/overlay/ks.yaml",
 	}, {
+		name: "Knative Serving with Kourier",
+		installFlags: installCmdFlags{
+			Component: "serving",
+			Kourier:   true,
+		},
+		expectedFile: "testdata/overlay/ks_ingress.yaml",
+	}, {
+		name: "Knative Serving with Istio",
+		installFlags: installCmdFlags{
+			Component: "serving",
+			Istio:     true,
+		},
+		expectedFile: "testdata/overlay/ks.yaml",
+	}, {
 		name: "Knative Serving with istio namespace",
 		installFlags: installCmdFlags{
 			Component:      "serving",
@@ -157,8 +172,7 @@ func TestGetOverlayYamlContent(t *testing.T) {
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.installFlags.fill_defaults()
-			rootPath := "testdata"
-			result := getOverlayYamlContent(&tt.installFlags, rootPath)
+			result := getOverlayYamlContent(&tt.installFlags)
 			expectedResult, err := common.ReadFile(tt.expectedFile)
 			testingUtil.AssertEqual(t, err == nil, true)
 			testingUtil.AssertEqual(t, result, expectedResult)
@@ -213,6 +227,34 @@ version: 'latest'`,
 		installFlags: installCmdFlags{
 			Version:   "1.0",
 			Component: "serving",
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: knative-serving
+version: '1.0'`,
+	}, {
+		name: "Knative Serving with ingress and version",
+		installFlags: installCmdFlags{
+			Version:   "1.0",
+			Component: "serving",
+			Kourier:   true,
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: knative-serving
+version: '1.0'
+kourier: true
+istio: false
+contour: false
+ingressClass: kourier.ingress.networking.knative.dev`,
+	}, {
+		name: "Knative Serving with istio and version",
+		installFlags: installCmdFlags{
+			Version:   "1.0",
+			Component: "serving",
+			Istio:     true,
 		},
 		expectedResult: `#@data/values
 ---

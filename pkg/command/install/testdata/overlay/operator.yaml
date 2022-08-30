@@ -89,6 +89,16 @@ subjects:
     name: knative-operator
     namespace: #@ data.values.namespace
 
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata":{"name":"knative-eventing-operator-aggregated-stable"}}),expects="0+"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+subjects:
+  #@overlay/match by=overlay.subset({"kind":"ServiceAccount", "name":"knative-operator"}),expects=1
+  - kind: ServiceAccount
+    name: knative-operator
+    namespace: #@ data.values.namespace
+
 #@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata":{"name":"knative-serving-operator"}}),expects="0+"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -109,6 +119,16 @@ subjects:
     name: knative-operator
     namespace: #@ data.values.namespace
 
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata":{"name":"knative-serving-operator-aggregated-stable"}}),expects="0+"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+subjects:
+  #@overlay/match by=overlay.subset({"kind":"ServiceAccount", "name":"knative-operator"}),expects=1
+  - kind: ServiceAccount
+    name: knative-operator
+    namespace: #@ data.values.namespace
+
 #@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata":{"name":"operator-webhook"}}),expects="0+"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -118,3 +138,27 @@ subjects:
   - kind: ServiceAccount
     name: operator-webhook
     namespace: #@ data.values.namespace
+
+#@overlay/match by=overlay.subset({"kind": "ServiceAccount", "metadata":{"name":"knative-operator-post-install-job"}}),expects="0+"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: #@ data.values.namespace
+
+#@overlay/match by=overlay.subset({"kind":"ClusterRoleBinding", "metadata":{"name":"knative-operator-post-install-job-role-binding"}}),expects="0+"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+subjects:
+  #@overlay/match by=overlay.subset({"kind":"ServiceAccount", "name":"knative-operator-post-install-job"}),expects=1
+  - kind: ServiceAccount
+    name: knative-operator-post-install-job
+    namespace: #@ data.values.namespace
+
+#@overlay/match by=overlay.subset({"kind":"Job", "metadata":{"generateName":"storage-version-migration-operator-"}}),expects="0+"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: #@ data.values.namespace

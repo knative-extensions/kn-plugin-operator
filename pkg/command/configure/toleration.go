@@ -15,8 +15,8 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,6 +24,12 @@ import (
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_toleration.yaml
+var servingTolerationOverlay string
+
+//go:embed overlay/ke_toleration.yaml
+var eventingTolerationOverlay string
 
 type TolerationsFlags struct {
 	Key        string
@@ -58,12 +64,7 @@ func newTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureTolerations(tolerationsCMDFlags, rootPath, p)
+			err := configureTolerations(tolerationsCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -110,7 +111,7 @@ func validateTolerationsFlags(tolerationsCMDFlags TolerationsFlags) error {
 	return nil
 }
 
-func configureTolerations(tolerationsCMDFlags TolerationsFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureTolerations(tolerationsCMDFlags TolerationsFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(tolerationsCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -120,21 +121,20 @@ func configureTolerations(tolerationsCMDFlags TolerationsFlags, rootPath string,
 		return err
 	}
 
-	overlayContent := getOverlayYamlContent(rootPath, tolerationsCMDFlags)
+	overlayContent := getOverlayYamlContent(tolerationsCMDFlags)
 	valuesYaml := getYamlValuesContentTolerations(tolerationsCMDFlags)
 
-	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
+	if err = common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getOverlayYamlContent(rootPath string, tolerationsCMDFlags TolerationsFlags) string {
-	path := rootPath + "/overlay/ks_toleration.yaml"
+func getOverlayYamlContent(tolerationsCMDFlags TolerationsFlags) string {
+	baseOverlayContent := servingTolerationOverlay
 	if strings.EqualFold(tolerationsCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_toleration.yaml"
+		baseOverlayContent = eventingTolerationOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	resourceContent := getTolerationConfiguration(tolerationsCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

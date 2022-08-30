@@ -15,15 +15,22 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc" // from https://github.com/kubernetes/client-go/issues/345
+
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_deploy_label.yaml
+var servingNodeSelectorOverlay string
+
+//go:embed overlay/ke_deploy_label.yaml
+var eventingNodeSelectorOverlay string
 
 var nodeSelectorCMDFlags common.KeyValueFlags
 
@@ -40,12 +47,7 @@ func newNodeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureNodeSelectors(nodeSelectorCMDFlags, rootPath, p)
+			err := configureNodeSelectors(nodeSelectorCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -75,7 +77,7 @@ func validateNodeSelectorFlags(keyValuesCMDFlags common.KeyValueFlags) error {
 	return nil
 }
 
-func configureNodeSelectors(nodeSelectorCMDFlags common.KeyValueFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureNodeSelectors(nodeSelectorCMDFlags common.KeyValueFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(nodeSelectorCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -85,7 +87,7 @@ func configureNodeSelectors(nodeSelectorCMDFlags common.KeyValueFlags, rootPath 
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentNodeSelector(rootPath, nodeSelectorCMDFlags)
+	overlayContent := getOverlayYamlContentNodeSelector(nodeSelectorCMDFlags)
 	valuesYaml := getYamlValuesContent(nodeSelectorCMDFlags)
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
 		return err
@@ -93,12 +95,11 @@ func configureNodeSelectors(nodeSelectorCMDFlags common.KeyValueFlags, rootPath 
 	return nil
 }
 
-func getOverlayYamlContentNodeSelector(rootPath string, nodeSelectorCMDFlags common.KeyValueFlags) string {
-	path := rootPath + "/overlay/ks_deploy_label.yaml"
+func getOverlayYamlContentNodeSelector(nodeSelectorCMDFlags common.KeyValueFlags) string {
+	baseOverlayContent := servingNodeSelectorOverlay
 	if strings.EqualFold(nodeSelectorCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_deploy_label.yaml"
+		baseOverlayContent = eventingNodeSelectorOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	resourceContent := getNodeSelectorConfiguration(nodeSelectorCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

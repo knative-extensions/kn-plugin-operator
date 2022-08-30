@@ -168,8 +168,7 @@ spec:
       test-key: #@ data.values.value`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
-			rootPath := "testdata/"
-			result := getOverlayYamlContentCM(rootPath, tt.cmsCMDFlags)
+			result := getOverlayYamlContentCM(tt.cmsCMDFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
 		})
 	}

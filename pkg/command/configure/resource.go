@@ -15,8 +15,8 @@
 package configure
 
 import (
+	_ "embed"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,6 +24,12 @@ import (
 	"knative.dev/kn-plugin-operator/pkg"
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 )
+
+//go:embed overlay/ks_resource_base.yaml
+var servingResourceOverlay string
+
+//go:embed overlay/ke_resource_base.yaml
+var eventingResourceOverlay string
 
 type ResourcesFlags struct {
 	LimitCPU      string
@@ -51,12 +57,7 @@ func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 				return err
 			}
 
-			rootPath, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-
-			err = configureResources(resourcesCMDFlags, rootPath, p)
+			err := configureResources(resourcesCMDFlags, p)
 			if err != nil {
 				return err
 			}
@@ -117,7 +118,7 @@ func validateResourcesFlags(resourcesCMDFlags ResourcesFlags) error {
 	return nil
 }
 
-func configureResources(resourcesCMDFlags ResourcesFlags, rootPath string, p *pkg.OperatorParams) error {
+func configureResources(resourcesCMDFlags ResourcesFlags, p *pkg.OperatorParams) error {
 	component := common.ServingComponent
 	if strings.EqualFold(resourcesCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
@@ -127,7 +128,7 @@ func configureResources(resourcesCMDFlags ResourcesFlags, rootPath string, p *pk
 		return err
 	}
 
-	overlayContent := getOverlayYamlContentResource(rootPath, resourcesCMDFlags)
+	overlayContent := getOverlayYamlContentResource(resourcesCMDFlags)
 	valuesYaml := getYamlValuesContentResources(resourcesCMDFlags)
 
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, valuesYaml, p); err != nil {
@@ -136,12 +137,11 @@ func configureResources(resourcesCMDFlags ResourcesFlags, rootPath string, p *pk
 	return nil
 }
 
-func getOverlayYamlContentResource(rootPath string, resourcesCMDFlags ResourcesFlags) string {
-	path := rootPath + "/overlay/ks_resource_base.yaml"
+func getOverlayYamlContentResource(resourcesCMDFlags ResourcesFlags) string {
+	baseOverlayContent := servingResourceOverlay
 	if strings.EqualFold(resourcesCMDFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke_resource_base.yaml"
+		baseOverlayContent = eventingResourceOverlay
 	}
-	baseOverlayContent, _ := common.ReadFile(path)
 	resourceContent := getResourceConfiguration(resourcesCMDFlags)
 	baseOverlayContent = fmt.Sprintf("%s\n%s", baseOverlayContent, resourceContent)
 	return baseOverlayContent

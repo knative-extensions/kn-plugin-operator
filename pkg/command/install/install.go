@@ -16,9 +16,9 @@ package install
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -41,12 +41,33 @@ import (
 	"knative.dev/pkg/test/logging"
 )
 
+//go:embed overlay/ks.yaml
+var servingOverlay string
+
+//go:embed overlay/ke.yaml
+var eventingOverlay string
+
+//go:embed overlay/ks_istio_ns.yaml
+var servingIstioOverlay string
+
+//go:embed overlay/operator.yaml
+var operatorOverlay string
+
+//go:embed overlay/operator_crds.yaml
+var operatorCRDsOverlay string
+
+//go:embed overlay/ks_ingress.yaml
+var servingWithIngressOverlay string
+
 type installCmdFlags struct {
 	Component      string
 	IstioNamespace string
 	Namespace      string
 	KubeConfig     string
 	Version        string
+	Istio          bool
+	Kourier        bool
+	Contour        bool
 }
 
 var (
@@ -77,6 +98,13 @@ func (flags *installCmdFlags) fill_defaults() {
 		} else if flags.Component == "" {
 			flags.Namespace = common.DefaultNamespace
 		}
+	}
+
+	// Set the default ingress istio to true
+	if strings.EqualFold(flags.Component, common.ServingComponent) && !flags.Kourier && !flags.Contour && !flags.Istio {
+		flags.Istio = true
+		flags.Kourier = false
+		flags.Contour = false
 	}
 }
 
@@ -118,6 +146,9 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	installCmd.Flags().StringVarP(&installFlags.Component, "component", "c", "", "The name of the Knative Component to install")
 	installCmd.Flags().StringVarP(&installFlags.Version, "version", "v", common.Latest, "The version of the the Knative Operator or the Knative component")
 	installCmd.Flags().StringVar(&installFlags.IstioNamespace, "istio-namespace", "", "The namespace of istio")
+	installCmd.Flags().BoolVar(&installFlags.Istio, "istio", false, "The flag to enable the ingress istio")
+	installCmd.Flags().BoolVar(&installFlags.Kourier, "kourier", false, "The flag to enable the ingress kourier")
+	installCmd.Flags().BoolVar(&installFlags.Contour, "contour", false, "The flag to enable the ingress contour")
 
 	return installCmd
 }
@@ -126,14 +157,16 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 	pi := progressindicator.New().SetText("Installing...")
 	pi.Start()
 	defer pi.Stop()
-	// Fill in the default values for the empty fields
-	installFlags.fill_defaults()
-	p.KubeCfgPath = installFlags.KubeConfig
 
-	rootPath, err := os.Getwd()
+	err := validateIngressFlags(installFlags)
 	if err != nil {
 		return err
 	}
+
+	// Fill in the default values for the empty fields
+	installFlags.fill_defaults()
+
+	p.KubeCfgPath = installFlags.KubeConfig
 
 	client, err := p.NewKubeClient()
 	if err != nil {
@@ -174,7 +207,7 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 			pi.SetText(text)
 
 			installFlags.Version = v
-			err = installKnativeComponent(installFlags, rootPath, p)
+			err = installKnativeComponent(installFlags, p)
 			if err != nil {
 				return err
 			}
@@ -194,13 +227,38 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 		// Install the Knative Operator
 		text := fmt.Sprintf("Installing Knative Operator, Version %s...", installFlags.Version)
 		pi.SetText(text)
-		err = installOperator(installFlags, rootPath, p)
+		err = installOperator(installFlags, p)
 		if err != nil {
 			return err
 		}
 	}
 
 	pi.Stop()
+	return nil
+}
+
+func validateIngressFlags(installFlags *installCmdFlags) error {
+	count := 0
+
+	if installFlags.Istio {
+		count++
+	}
+
+	if installFlags.Kourier {
+		count++
+	}
+
+	if installFlags.Contour {
+		count++
+	}
+
+	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
+		if count > 1 {
+			return fmt.Errorf("You can specify only one ingress for Knative Serving.")
+		}
+	} else if count > 0 {
+		return fmt.Errorf("You can only specify the ingress for Knative Serving.")
+	}
 	return nil
 }
 
@@ -235,26 +293,28 @@ func getOperatorURL(version string) (string, error) {
 	return getBaseURL(version, "operator.yaml")
 }
 
-func getOverlayYamlContent(installFlags *installCmdFlags, rootPath string) string {
-	path := ""
+func getOverlayYamlContent(installFlags *installCmdFlags) string {
+	overlayContent := ""
 	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
-		path = rootPath + "/overlay/ks.yaml"
-		if installFlags.IstioNamespace != common.DefaultIstioNamespace {
-			path = rootPath + "/overlay/ks_istio_ns.yaml"
+		if installFlags.Istio {
+			overlayContent = servingOverlay
+			if installFlags.IstioNamespace != common.DefaultIstioNamespace {
+				overlayContent = servingIstioOverlay
+			}
+		} else {
+			overlayContent = servingWithIngressOverlay
 		}
 	} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
-		path = rootPath + "/overlay/ke.yaml"
+		overlayContent = eventingOverlay
 	} else if installFlags.Component == "" {
-		path = rootPath + "/overlay/operator.yaml"
+		overlayContent = operatorOverlay
 	}
 
-	if path == "" {
+	if overlayContent == "" {
 		return ""
 	}
-	overlayContent, _ := common.ReadFile(path)
 	if installFlags.Component == "" && (strings.EqualFold(installFlags.Version, common.Latest) || strings.EqualFold(installFlags.Version, common.Nightly) || versionWebhook(installFlags.Version)) {
-		crdOverlay, _ := common.ReadFile(rootPath + "/overlay/operator_crds.yaml")
-		overlayContent = fmt.Sprintf("%s\n%s", overlayContent, crdOverlay)
+		overlayContent = fmt.Sprintf("%s\n%s", overlayContent, operatorCRDsOverlay)
 	}
 
 	return overlayContent
@@ -285,6 +345,22 @@ func getYamlValuesContent(installFlags *installCmdFlags) string {
 		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s", installFlags.Namespace)
 	}
 
+	if !strings.EqualFold(installFlags.Component, common.ServingComponent) || installFlags.Istio {
+		return content
+	}
+
+	ingressClass := "istio.ingress.networking.knative.dev"
+	if installFlags.Kourier {
+		ingressClass = "kourier.ingress.networking.knative.dev"
+	}
+
+	if installFlags.Contour {
+		ingressClass = "contour.ingress.networking.knative.dev"
+	}
+
+	content = fmt.Sprintf("%s\nkourier: %t\nistio: %t\ncontour: %t\ningressClass: %s",
+		content, installFlags.Kourier, installFlags.Istio, installFlags.Contour, ingressClass)
+
 	return content
 }
 
@@ -299,7 +375,7 @@ func checkIfOperatorInstalled(p *pkg.OperatorParams) (bool, string, string, erro
 	return deploy.CheckIfOperatorInstalled()
 }
 
-func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+func installKnativeComponent(installFlags *installCmdFlags, p *pkg.OperatorParams) error {
 	// Check if the knative operator is installed
 	if exists, _, _, err := checkIfOperatorInstalled(p); err != nil {
 		return err
@@ -308,7 +384,7 @@ func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *
 			Namespace: "default",
 			Version:   common.Latest,
 		}
-		err = installOperator(&operatorInstallFlags, rootPath, p)
+		err = installOperator(&operatorInstallFlags, p)
 		if err != nil {
 			return err
 		}
@@ -325,7 +401,7 @@ func installKnativeComponent(installFlags *installCmdFlags, rootPath string, p *
 		return err
 	}
 
-	err = applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)
+	err = applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, p)
 	if err != nil {
 		return err
 	}
@@ -379,7 +455,7 @@ func ensureKnativeComponentReady(installFlags *installCmdFlags, p *pkg.OperatorP
 	return nil
 }
 
-func installOperator(installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
+func installOperator(installFlags *installCmdFlags, p *pkg.OperatorParams) error {
 	err := createNamspaceIfNecessary(installFlags.Namespace, p)
 	if err != nil {
 		return err
@@ -407,7 +483,7 @@ func installOperator(installFlags *installCmdFlags, rootPath string, p *pkg.Oper
 		yamlTemplateString = fmt.Sprintf("%s\n%s", yamlTemplateString, yamlTemplateStringPostInstall)
 	}
 
-	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, rootPath, p)
+	return applyOverlayValuesOnTemplate(yamlTemplateString, installFlags, p)
 }
 
 func createNamspaceIfNecessary(namespace string, p *pkg.OperatorParams) error {
@@ -426,8 +502,8 @@ func createNamspaceIfNecessary(namespace string, p *pkg.OperatorParams) error {
 	return nil
 }
 
-func applyOverlayValuesOnTemplate(yamlTemplateString string, installFlags *installCmdFlags, rootPath string, p *pkg.OperatorParams) error {
-	overlayContent := getOverlayYamlContent(installFlags, rootPath)
+func applyOverlayValuesOnTemplate(yamlTemplateString string, installFlags *installCmdFlags, p *pkg.OperatorParams) error {
+	overlayContent := getOverlayYamlContent(installFlags)
 	yamlValuesContent := getYamlValuesContent(installFlags)
 
 	if err := common.ApplyManifests(yamlTemplateString, overlayContent, yamlValuesContent, p); err != nil {

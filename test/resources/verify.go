@@ -115,7 +115,7 @@ func VerifyKnativeServingTolerationDeletion(t *testing.T, clients operatorv1beta
 	VerifyDeploymentOverrideTolerationDeletion(t, ks.Spec.DeploymentOverride, tolerationsFlags)
 }
 
-func VerifyDeploymentOverrideTolerationDeletion(t *testing.T, deploymentOverride []base.DeploymentOverride, tolerationsFlags remove.TolerationsFlags) {
+func VerifyDeploymentOverrideTolerationDeletion(t *testing.T, deploymentOverride []base.WorkloadOverride, tolerationsFlags remove.TolerationsFlags) {
 	deploy := findDeployment(tolerationsFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)
 	testingUtil.AssertEqual(t, findTolerationKey(deploy.Tolerations, tolerationsFlags.Key), false)
@@ -127,7 +127,7 @@ func VerifyKnativeServingResouceDeletion(t *testing.T, clients operatorv1beta1.K
 	VerifyDeploymentOverrideResourceDeletion(t, ks.Spec.DeploymentOverride, resourcesFlags)
 }
 
-func VerifyDeploymentOverrideResourceDeletion(t *testing.T, deploymentOverride []base.DeploymentOverride, resourcesFlags configure.ResourcesFlags) {
+func VerifyDeploymentOverrideResourceDeletion(t *testing.T, deploymentOverride []base.WorkloadOverride, resourcesFlags configure.ResourcesFlags) {
 	deploy := findDeployment(resourcesFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)
 	testingUtil.AssertEqual(t, findContainer(deploy.Resources, resourcesFlags.Container), false)
@@ -151,7 +151,7 @@ func findTolerationKey(tolerations []corev1.Toleration, key string) bool {
 	return false
 }
 
-func VerifyDeploymentOverride(t *testing.T, deploymentOverride []base.DeploymentOverride, resourcesFlags configure.ResourcesFlags) {
+func VerifyDeploymentOverride(t *testing.T, deploymentOverride []base.WorkloadOverride, resourcesFlags configure.ResourcesFlags) {
 	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
 
 	deploy := findDeployment(resourcesFlags.DeployName, deploymentOverride)
@@ -218,7 +218,7 @@ func VerifyKnativeEventingServiceLabelsDelete(t *testing.T, clients operatorv1be
 	VerifyServiceLabelsDelete(t, ks.Spec.ServiceOverride, deployLabelFlags)
 }
 
-func VerifyDeploymentLabelsDelete(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags common.KeyValueFlags) {
+func VerifyDeploymentLabelsDelete(t *testing.T, deploymentOverride []base.WorkloadOverride, deployLabelFlags common.KeyValueFlags) {
 	deploy := findDeployment(deployLabelFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)
 
@@ -232,7 +232,7 @@ func VerifyDeploymentLabelsDelete(t *testing.T, deploymentOverride []base.Deploy
 	testingUtil.AssertEqual(t, result, false)
 }
 
-func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.DeploymentOverride, deployLabelFlags common.KeyValueFlags) {
+func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.WorkloadOverride, deployLabelFlags common.KeyValueFlags) {
 	testingUtil.AssertEqual(t, len(deploymentOverride), 1)
 
 	deploy := findDeployment(deployLabelFlags.DeployName, deploymentOverride)
@@ -248,7 +248,7 @@ func VerifyDeploymentLabels(t *testing.T, deploymentOverride []base.DeploymentOv
 	testingUtil.AssertEqual(t, result, true)
 }
 
-func findDeployment(name string, deploymentOverride []base.DeploymentOverride) *base.DeploymentOverride {
+func findDeployment(name string, deploymentOverride []base.WorkloadOverride) *base.WorkloadOverride {
 	for _, deploy := range deploymentOverride {
 		if deploy.Name == name {
 			return &deploy
@@ -257,7 +257,7 @@ func findDeployment(name string, deploymentOverride []base.DeploymentOverride) *
 	return nil
 }
 
-func findKeyValue(t *testing.T, key, expectedValue, indicator string, deploy *base.DeploymentOverride) bool {
+func findKeyValue(t *testing.T, key, expectedValue, indicator string, deploy *base.WorkloadOverride) bool {
 	if indicator == "label" {
 		if data, ok := deploy.Labels[key]; ok && expectedValue == data {
 			return true
@@ -432,7 +432,7 @@ func VerifyKnativeEventingTolerations(t *testing.T, clients operatorv1beta1.Knat
 	VerifyTolerations(t, ke.Spec.DeploymentOverride, tolerationsFlags)
 }
 
-func VerifyTolerations(t *testing.T, deploymentOverride []base.DeploymentOverride, tolerationsFlags configure.TolerationsFlags) {
+func VerifyTolerations(t *testing.T, deploymentOverride []base.WorkloadOverride, tolerationsFlags configure.TolerationsFlags) {
 	deploy := findDeployment(tolerationsFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)
 	toleration := findToleration(tolerationsFlags.Key, deploy.Tolerations)
@@ -543,7 +543,7 @@ func VerifyKnativeServingEnvVarsDeletion(t *testing.T, clients operatorv1beta1.K
 	VerifyEnvVarsDelete(t, ks.Spec.DeploymentOverride, envVarFlags)
 }
 
-func VerifyEnvVars(t *testing.T, deploymentOverride []base.DeploymentOverride, envVarFlags configure.EnvVarFlags) {
+func VerifyEnvVars(t *testing.T, deploymentOverride []base.WorkloadOverride, envVarFlags configure.EnvVarFlags) {
 	deploy := findDeployment(envVarFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)
 	envVar := findEnvVar(envVarFlags.ContainerName, deploy.Env)
@@ -551,7 +551,7 @@ func VerifyEnvVars(t *testing.T, deploymentOverride []base.DeploymentOverride, e
 	testingUtil.AssertEqual(t, includeEnvVar(envVarFlags.EnvName, envVarFlags.EnvValue, envVar.EnvVars), true)
 }
 
-func VerifyEnvVarsDelete(t *testing.T, deploymentOverride []base.DeploymentOverride, envVarFlags configure.EnvVarFlags) {
+func VerifyEnvVarsDelete(t *testing.T, deploymentOverride []base.WorkloadOverride, envVarFlags configure.EnvVarFlags) {
 	deploy := findDeployment(envVarFlags.DeployName, deploymentOverride)
 	testingUtil.AssertEqual(t, deploy == nil, false)
 	envVar := findEnvVar(envVarFlags.ContainerName, deploy.Env)

@@ -86,8 +86,8 @@ func TestValidateLabelAnnotationsFlags(t *testing.T) {
 	}
 }
 
-func testDeploymentForLabels() []base.DeploymentOverride {
-	return []base.DeploymentOverride{
+func testDeploymentForLabels() []base.WorkloadOverride {
+	return []base.WorkloadOverride{
 		{
 			Name: "net-istio-controller",
 			Labels: map[string]string{"test-key": "v0.13.0",
@@ -105,8 +105,8 @@ func TestRemoveLabelsDeployFields(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
 		labelCMDFlags  common.KeyValueFlags
-		input          []base.DeploymentOverride
-		expectedResult []base.DeploymentOverride
+		input          []base.WorkloadOverride
+		expectedResult []base.WorkloadOverride
 	}{{
 		name: "Label flags with correct component and namespace",
 		labelCMDFlags: common.KeyValueFlags{
@@ -115,7 +115,7 @@ func TestRemoveLabelsDeployFields(t *testing.T) {
 			DeployName: "net-istio-controller",
 		},
 		input: testDeploymentForLabels(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 			},
@@ -134,7 +134,7 @@ func TestRemoveLabelsDeployFields(t *testing.T) {
 			Key:        "test-key",
 		},
 		input: testDeploymentForLabels(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name:   "net-istio-controller",
 				Labels: map[string]string{"test-key-1": "test-val-1"},

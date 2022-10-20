@@ -91,14 +91,14 @@ func deleteTolerations(tolerationsCMDFlags TolerationsFlags, p *pkg.OperatorPara
 		return err
 	}
 
-	deploymentOverrides, err := ksCR.GetDeployments(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeployments(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace)
 	if err != nil {
 		return err
 	}
 
-	deploymentOverrides = removeTolerationsFields(deploymentOverrides, tolerationsCMDFlags)
+	workloadOverrides = removeTolerationsFields(workloadOverrides, tolerationsCMDFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace, deploymentOverrides)
+		return ksCR.UpdateDeployments(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace, workloadOverrides)
 	})
 
 	if err != nil {
@@ -108,22 +108,22 @@ func deleteTolerations(tolerationsCMDFlags TolerationsFlags, p *pkg.OperatorPara
 	return nil
 }
 
-func removeTolerationsFields(deploymentOverrides []base.DeploymentOverride, tolerationsCMDFlags TolerationsFlags) []base.DeploymentOverride {
+func removeTolerationsFields(workloadOverrides []base.WorkloadOverride, tolerationsCMDFlags TolerationsFlags) []base.WorkloadOverride {
 	if tolerationsCMDFlags.DeployName == "" {
 		// If no deploy is specified, we will iterate all the deployments to remove all toleration configurations.
-		for i := range deploymentOverrides {
-			deploymentOverrides[i].Tolerations = nil
+		for i := range workloadOverrides {
+			workloadOverrides[i].Tolerations = nil
 		}
 	} else if tolerationsCMDFlags.Key == "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == tolerationsCMDFlags.DeployName {
-				deploymentOverrides[i].Tolerations = nil
+				workloadOverrides[i].Tolerations = nil
 			}
 		}
 	} else if tolerationsCMDFlags.Key != "" {
 		deployIndex := -1
 		var tolerations []corev1.Toleration
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == tolerationsCMDFlags.DeployName {
 				tolerationsBack := make([]corev1.Toleration, 0, len(deploy.Tolerations))
 				deployIndex = i
@@ -138,9 +138,9 @@ func removeTolerationsFields(deploymentOverrides []base.DeploymentOverride, tole
 		}
 
 		if deployIndex != -1 {
-			deploymentOverrides[deployIndex].Tolerations = tolerations
+			workloadOverrides[deployIndex].Tolerations = tolerations
 		}
 	}
 
-	return deploymentOverrides
+	return workloadOverrides
 }

@@ -93,14 +93,14 @@ func deleteLabels(labelCMDFlags common.KeyValueFlags, p *pkg.OperatorParams) err
 	}
 
 	if labelCMDFlags.DeployName != "" {
-		deploymentOverrides, err := ksCR.GetDeployments(labelCMDFlags.Component, labelCMDFlags.Namespace)
+		workloadOverrides, err := ksCR.GetDeployments(labelCMDFlags.Component, labelCMDFlags.Namespace)
 		if err != nil {
 			return err
 		}
 
-		deploymentOverrides = removeLabelsDeployFields(deploymentOverrides, labelCMDFlags)
+		workloadOverrides = removeLabelsDeployFields(workloadOverrides, labelCMDFlags)
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return ksCR.UpdateDeployments(labelCMDFlags.Component, labelCMDFlags.Namespace, deploymentOverrides)
+			return ksCR.UpdateDeployments(labelCMDFlags.Component, labelCMDFlags.Namespace, workloadOverrides)
 		}); err != nil {
 			return err
 		}
@@ -120,28 +120,28 @@ func deleteLabels(labelCMDFlags common.KeyValueFlags, p *pkg.OperatorParams) err
 	return nil
 }
 
-func removeLabelsDeployFields(deploymentOverrides []base.DeploymentOverride, labelCMDFlags common.KeyValueFlags) []base.DeploymentOverride {
+func removeLabelsDeployFields(workOverrides []base.WorkloadOverride, labelCMDFlags common.KeyValueFlags) []base.WorkloadOverride {
 	if labelCMDFlags.Key == "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workOverrides {
 			if deploy.Name == labelCMDFlags.DeployName {
-				deploymentOverrides[i].Labels = nil
+				workOverrides[i].Labels = nil
 			}
 		}
 	} else if labelCMDFlags.Key != "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workOverrides {
 			if deploy.Name == labelCMDFlags.DeployName {
 				labels := make(map[string]string)
-				for key, value := range deploymentOverrides[i].Labels {
+				for key, value := range workOverrides[i].Labels {
 					if key != labelCMDFlags.Key {
 						labels[key] = value
 					}
 				}
-				deploymentOverrides[i].Labels = labels
+				workOverrides[i].Labels = labels
 			}
 		}
 	}
 
-	return deploymentOverrides
+	return workOverrides
 }
 
 func removeLabelsServiceFields(serviceOverrides []base.ServiceOverride, labelCMDFlags common.KeyValueFlags) []base.ServiceOverride {

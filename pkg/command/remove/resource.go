@@ -91,14 +91,14 @@ func removeResources(resourcesCMDFlags ResourcesFlags, p *pkg.OperatorParams) er
 		return err
 	}
 
-	deploymentOverrides, err := ksCR.GetDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace)
 	if err != nil {
 		return err
 	}
 
-	deploymentOverrides = removeResourcesFields(deploymentOverrides, resourcesCMDFlags)
+	workloadOverrides = removeResourcesFields(workloadOverrides, resourcesCMDFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace, deploymentOverrides)
+		return ksCR.UpdateDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace, workloadOverrides)
 	})
 
 	if err != nil {
@@ -108,23 +108,23 @@ func removeResources(resourcesCMDFlags ResourcesFlags, p *pkg.OperatorParams) er
 	return nil
 }
 
-func removeResourcesFields(deploymentOverrides []base.DeploymentOverride, resourcesCMDFlags ResourcesFlags) []base.DeploymentOverride {
+func removeResourcesFields(workloadOverrides []base.WorkloadOverride, resourcesCMDFlags ResourcesFlags) []base.WorkloadOverride {
 	if resourcesCMDFlags.DeployName == "" {
 		// If no deploy is specified, we will iterate all the deployments to remove all resource configurations.
-		for i := range deploymentOverrides {
-			deploymentOverrides[i].Resources = nil
+		for i := range workloadOverrides {
+			workloadOverrides[i].Resources = nil
 		}
 	} else if resourcesCMDFlags.Container == "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == resourcesCMDFlags.DeployName {
-				deploymentOverrides[i].Resources = nil
+				workloadOverrides[i].Resources = nil
 			}
 		}
 	} else if resourcesCMDFlags.Container != "" {
 		deployIndex := -1
 		containerIndex := -1
 		var resourceRequirementsOverrides []base.ResourceRequirementsOverride
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == resourcesCMDFlags.DeployName {
 				deployIndex = i
 				for j, resource := range deploy.Resources {
@@ -140,9 +140,9 @@ func removeResourcesFields(deploymentOverrides []base.DeploymentOverride, resour
 
 		if containerIndex != -1 {
 			modifiedOverrides := append(resourceRequirementsOverrides[:containerIndex], resourceRequirementsOverrides[containerIndex+1:]...)
-			deploymentOverrides[deployIndex].Resources = modifiedOverrides
+			workloadOverrides[deployIndex].Resources = modifiedOverrides
 		}
 	}
 
-	return deploymentOverrides
+	return workloadOverrides
 }

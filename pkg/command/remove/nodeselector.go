@@ -85,44 +85,44 @@ func deleteNodeSelectors(nodeSelectorFlags common.KeyValueFlags, p *pkg.Operator
 		return err
 	}
 
-	deploymentOverrides, err := ksCR.GetDeployments(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeployments(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace)
 	if err != nil {
 		return err
 	}
 
-	deploymentOverrides = removeNodeSelectorsDeployFields(deploymentOverrides, nodeSelectorFlags)
+	workloadOverrides = removeNodeSelectorsDeployFields(workloadOverrides, nodeSelectorFlags)
 	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace, deploymentOverrides)
+		return ksCR.UpdateDeployments(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace, workloadOverrides)
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func removeNodeSelectorsDeployFields(deploymentOverrides []base.DeploymentOverride, nodeSelectorFlags common.KeyValueFlags) []base.DeploymentOverride {
+func removeNodeSelectorsDeployFields(workloadOverrides []base.WorkloadOverride, nodeSelectorFlags common.KeyValueFlags) []base.WorkloadOverride {
 	if nodeSelectorFlags.DeployName == "" {
-		for i := range deploymentOverrides {
-			deploymentOverrides[i].NodeSelector = nil
+		for i := range workloadOverrides {
+			workloadOverrides[i].NodeSelector = nil
 		}
 	} else if nodeSelectorFlags.Key == "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == nodeSelectorFlags.DeployName {
-				deploymentOverrides[i].NodeSelector = nil
+				workloadOverrides[i].NodeSelector = nil
 			}
 		}
 	} else if nodeSelectorFlags.Key != "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == nodeSelectorFlags.DeployName {
 				nodeSelector := make(map[string]string)
-				for key, value := range deploymentOverrides[i].NodeSelector {
+				for key, value := range workloadOverrides[i].NodeSelector {
 					if key != nodeSelectorFlags.Key {
 						nodeSelector[key] = value
 					}
 				}
-				deploymentOverrides[i].NodeSelector = nodeSelector
+				workloadOverrides[i].NodeSelector = nodeSelector
 			}
 		}
 	}
 
-	return deploymentOverrides
+	return workloadOverrides
 }

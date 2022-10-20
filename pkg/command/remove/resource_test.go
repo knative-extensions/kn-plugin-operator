@@ -89,8 +89,8 @@ func TestValidateResourcesFlags(t *testing.T) {
 	}
 }
 
-func testDeploymentOverride() []base.DeploymentOverride {
-	return []base.DeploymentOverride{
+func testWorkloadOverride() []base.WorkloadOverride {
+	return []base.WorkloadOverride{
 		{
 			Name: "net-istio-controller",
 			Resources: []base.ResourceRequirementsOverride{{
@@ -138,16 +138,16 @@ func TestRemoveResourcesFields(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
 		resourcesFlags ResourcesFlags
-		input          []base.DeploymentOverride
-		expectedResult []base.DeploymentOverride
+		input          []base.WorkloadOverride
+		expectedResult []base.WorkloadOverride
 	}{{
 		name: "Resource flags with correct component and namespace",
 		resourcesFlags: ResourcesFlags{
 			Component: "eventing",
 			Namespace: "test-eventing",
 		},
-		input: testDeploymentOverride(),
-		expectedResult: []base.DeploymentOverride{
+		input: testWorkloadOverride(),
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 			},
@@ -162,8 +162,8 @@ func TestRemoveResourcesFields(t *testing.T) {
 			Namespace:  "test-eventing",
 			DeployName: "net-istio-controller",
 		},
-		input: testDeploymentOverride(),
-		expectedResult: []base.DeploymentOverride{
+		input: testWorkloadOverride(),
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 			},
@@ -196,8 +196,8 @@ func TestRemoveResourcesFields(t *testing.T) {
 			DeployName: "net-istio-controller",
 			Container:  "controller",
 		},
-		input: testDeploymentOverride(),
-		expectedResult: []base.DeploymentOverride{
+		input: testWorkloadOverride(),
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 				Resources: []base.ResourceRequirementsOverride{{

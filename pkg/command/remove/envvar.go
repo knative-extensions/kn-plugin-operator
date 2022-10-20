@@ -101,14 +101,14 @@ func removeEnvVars(envVarFlags EnvVarFlags, p *pkg.OperatorParams) error {
 		return err
 	}
 
-	deploymentOverrides, err := ksCR.GetDeployments(envVarFlags.Component, envVarFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeployments(envVarFlags.Component, envVarFlags.Namespace)
 	if err != nil {
 		return err
 	}
 
-	deploymentOverrides = removeEnvVarsFields(deploymentOverrides, envVarFlags)
+	workloadOverrides = removeEnvVarsFields(workloadOverrides, envVarFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(envVarFlags.Component, envVarFlags.Namespace, deploymentOverrides)
+		return ksCR.UpdateDeployments(envVarFlags.Component, envVarFlags.Namespace, workloadOverrides)
 	})
 
 	if err != nil {
@@ -118,36 +118,36 @@ func removeEnvVars(envVarFlags EnvVarFlags, p *pkg.OperatorParams) error {
 	return nil
 }
 
-func removeEnvVarsFields(deploymentOverrides []base.DeploymentOverride, envVarFlags EnvVarFlags) []base.DeploymentOverride {
+func removeEnvVarsFields(workloadOverrides []base.WorkloadOverride, envVarFlags EnvVarFlags) []base.WorkloadOverride {
 	if envVarFlags.DeployName == "" {
-		for i := range deploymentOverrides {
-			deploymentOverrides[i].Env = nil
+		for i := range workloadOverrides {
+			workloadOverrides[i].Env = nil
 		}
 	} else {
 		if envVarFlags.ContainerName == "" {
-			for i := range deploymentOverrides {
-				if deploymentOverrides[i].Name == envVarFlags.DeployName {
-					deploymentOverrides[i].Env = nil
+			for i := range workloadOverrides {
+				if workloadOverrides[i].Name == envVarFlags.DeployName {
+					workloadOverrides[i].Env = nil
 				}
 			}
 		} else {
 			if envVarFlags.EnvName == "" {
-				for i := range deploymentOverrides {
-					if deploymentOverrides[i].Name == envVarFlags.DeployName {
-						env := make([]base.EnvRequirementsOverride, 0, len(deploymentOverrides[i].Env))
-						for _, val := range deploymentOverrides[i].Env {
+				for i := range workloadOverrides {
+					if workloadOverrides[i].Name == envVarFlags.DeployName {
+						env := make([]base.EnvRequirementsOverride, 0, len(workloadOverrides[i].Env))
+						for _, val := range workloadOverrides[i].Env {
 							if val.Container != envVarFlags.ContainerName {
 								env = append(env, val)
 							}
 						}
-						deploymentOverrides[i].Env = env
+						workloadOverrides[i].Env = env
 					}
 				}
 			} else {
-				for i := range deploymentOverrides {
-					if deploymentOverrides[i].Name == envVarFlags.DeployName {
-						env := make([]base.EnvRequirementsOverride, 0, len(deploymentOverrides[i].Env))
-						for _, val := range deploymentOverrides[i].Env {
+				for i := range workloadOverrides {
+					if workloadOverrides[i].Name == envVarFlags.DeployName {
+						env := make([]base.EnvRequirementsOverride, 0, len(workloadOverrides[i].Env))
+						for _, val := range workloadOverrides[i].Env {
 							if val.Container == envVarFlags.ContainerName {
 								vars := make([]corev1.EnvVar, 0, len(val.EnvVars))
 								for _, envVal := range val.EnvVars {
@@ -159,12 +159,12 @@ func removeEnvVarsFields(deploymentOverrides []base.DeploymentOverride, envVarFl
 							}
 							env = append(env, val)
 						}
-						deploymentOverrides[i].Env = env
+						workloadOverrides[i].Env = env
 					}
 				}
 			}
 		}
 	}
 
-	return deploymentOverrides
+	return workloadOverrides
 }

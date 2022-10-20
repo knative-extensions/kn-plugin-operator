@@ -107,8 +107,8 @@ func TestValidateEnvVarsFlags(t *testing.T) {
 	}
 }
 
-func testDeploymentForEnvVars() []base.DeploymentOverride {
-	return []base.DeploymentOverride{
+func testDeploymentForEnvVars() []base.WorkloadOverride {
+	return []base.WorkloadOverride{
 		{
 			Name: "net-istio-controller",
 			Env: []base.EnvRequirementsOverride{{
@@ -160,8 +160,8 @@ func TestRemoveEnvVarsFields(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
 		envVarFlags    EnvVarFlags
-		input          []base.DeploymentOverride
-		expectedResult []base.DeploymentOverride
+		input          []base.WorkloadOverride
+		expectedResult []base.WorkloadOverride
 	}{{
 		name: "Env Vars flags with correct component and namespace",
 		envVarFlags: EnvVarFlags{
@@ -169,7 +169,7 @@ func TestRemoveEnvVarsFields(t *testing.T) {
 			Namespace: "test-eventing",
 		},
 		input: testDeploymentForEnvVars(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 				Env:  nil,
@@ -187,7 +187,7 @@ func TestRemoveEnvVarsFields(t *testing.T) {
 			DeployName: "net-istio-controller",
 		},
 		input: testDeploymentForEnvVars(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 				Env:  nil,
@@ -224,7 +224,7 @@ func TestRemoveEnvVarsFields(t *testing.T) {
 			ContainerName: "controller",
 		},
 		input: testDeploymentForEnvVars(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 				Env: []base.EnvRequirementsOverride{{
@@ -271,7 +271,7 @@ func TestRemoveEnvVarsFields(t *testing.T) {
 			EnvName:       "METRICS_DOMAIN",
 		},
 		input: testDeploymentForEnvVars(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 				Env: []base.EnvRequirementsOverride{{

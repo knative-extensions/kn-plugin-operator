@@ -77,8 +77,8 @@ func TestValidateNodeSelectorFlags(t *testing.T) {
 	}
 }
 
-func testDeploymentForNodeSelectors() []base.DeploymentOverride {
-	return []base.DeploymentOverride{
+func testDeploymentForNodeSelectors() []base.WorkloadOverride {
+	return []base.WorkloadOverride{
 		{
 			Name: "net-istio-controller",
 			NodeSelector: map[string]string{"test-key": "v0.13.0",
@@ -96,8 +96,8 @@ func TestRemoveNodeSelectorsDeployFields(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
 		labelCMDFlags  common.KeyValueFlags
-		input          []base.DeploymentOverride
-		expectedResult []base.DeploymentOverride
+		input          []base.WorkloadOverride
+		expectedResult []base.WorkloadOverride
 	}{{
 		name: "Node selector flags with correct component and namespace",
 		labelCMDFlags: common.KeyValueFlags{
@@ -106,7 +106,7 @@ func TestRemoveNodeSelectorsDeployFields(t *testing.T) {
 			DeployName: "net-istio-controller",
 		},
 		input: testDeploymentForNodeSelectors(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 			},
@@ -125,7 +125,7 @@ func TestRemoveNodeSelectorsDeployFields(t *testing.T) {
 			Key:        "test-key",
 		},
 		input: testDeploymentForNodeSelectors(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name:         "net-istio-controller",
 				NodeSelector: map[string]string{"test-key-1": "test-val-1"},

@@ -83,7 +83,7 @@ func testCommonSpec() base.CommonSpec {
 		HighAvailability: &base.HighAvailability{
 			Replicas: &replica,
 		},
-		DeploymentOverride: []base.DeploymentOverride{
+		Workloads: []base.WorkloadOverride{
 			{
 				Name:     "net-istio-controller",
 				Replicas: &replica,
@@ -111,7 +111,7 @@ func TestRemoveReplicasFields(t *testing.T) {
 		input: testCommonSpec(),
 		expectedResult: base.CommonSpec{
 			HighAvailability: nil,
-			DeploymentOverride: []base.DeploymentOverride{
+			Workloads: []base.WorkloadOverride{
 				{
 					Name:     "net-istio-controller",
 					Replicas: nil,
@@ -134,7 +134,7 @@ func TestRemoveReplicasFields(t *testing.T) {
 			HighAvailability: &base.HighAvailability{
 				Replicas: &replica,
 			},
-			DeploymentOverride: []base.DeploymentOverride{
+			Workloads: []base.WorkloadOverride{
 				{
 					Name:     "net-istio-controller",
 					Replicas: nil,

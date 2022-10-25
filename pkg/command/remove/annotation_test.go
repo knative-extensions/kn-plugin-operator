@@ -22,8 +22,8 @@ import (
 	"knative.dev/operator/pkg/apis/operator/base"
 )
 
-func testDeploymentForAnnotations() []base.DeploymentOverride {
-	return []base.DeploymentOverride{
+func testDeploymentForAnnotations() []base.WorkloadOverride {
+	return []base.WorkloadOverride{
 		{
 			Name: "net-istio-controller",
 			Annotations: map[string]string{"test-key": "v0.13.0",
@@ -41,8 +41,8 @@ func TestRemoveAnnotationsDeployFields(t *testing.T) {
 	for _, tt := range []struct {
 		name           string
 		labelCMDFlags  common.KeyValueFlags
-		input          []base.DeploymentOverride
-		expectedResult []base.DeploymentOverride
+		input          []base.WorkloadOverride
+		expectedResult []base.WorkloadOverride
 	}{{
 		name: "Label flags with correct component and namespace",
 		labelCMDFlags: common.KeyValueFlags{
@@ -51,7 +51,7 @@ func TestRemoveAnnotationsDeployFields(t *testing.T) {
 			DeployName: "net-istio-controller",
 		},
 		input: testDeploymentForAnnotations(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 			},
@@ -70,7 +70,7 @@ func TestRemoveAnnotationsDeployFields(t *testing.T) {
 			Key:        "test-key",
 		},
 		input: testDeploymentForAnnotations(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name:        "net-istio-controller",
 				Annotations: map[string]string{"test-key-1": "test-val-1"},

@@ -107,6 +107,7 @@ func removeEnvVars(envVarFlags EnvVarFlags, p *pkg.OperatorParams) error {
 	}
 
 	workloadOverrides = removeEnvVarsFields(workloadOverrides, envVarFlags)
+
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		return ksCR.UpdateDeployments(envVarFlags.Component, envVarFlags.Namespace, workloadOverrides)
 	})

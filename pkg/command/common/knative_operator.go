@@ -152,13 +152,13 @@ func (ko *KnativeOperatorCR) GetDeployments(component, namespace string) ([]base
 		if err != nil {
 			return workloadOverrides, err
 		}
-		workloadOverrides = ks.Spec.Workloads
+		workloadOverrides = ks.Spec.DeploymentOverride
 	} else if strings.EqualFold(component, EventingComponent) {
 		ke, err := ko.GetKnativeEventingInCluster(namespace)
 		if err != nil {
 			return workloadOverrides, err
 		}
-		workloadOverrides = ke.Spec.Workloads
+		workloadOverrides = ke.Spec.DeploymentOverride
 	}
 
 	return workloadOverrides, nil
@@ -188,7 +188,7 @@ func (ko *KnativeOperatorCR) UpdateDeployments(component, namespace string, work
 	if err != nil {
 		return err
 	}
-	commonSpec.Workloads = workloadOverrides
+	commonSpec.DeploymentOverride = workloadOverrides
 	return ko.UpdateCommonSpec(component, namespace, commonSpec)
 }
 

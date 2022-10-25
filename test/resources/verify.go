@@ -88,31 +88,31 @@ func VerifyOperatorInstallationBeta(t *testing.T, clients *test.Clients) {
 func VerifyKnativeServingExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, resourcesFlags configure.ResourcesFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentOverride(t, ks.Spec.Workloads, resourcesFlags)
+	VerifyDeploymentOverride(t, ks.Spec.DeploymentOverride, resourcesFlags)
 }
 
 func VerifyKnativeEventingExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, resourcesFlags configure.ResourcesFlags) {
 	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentOverride(t, ke.Spec.Workloads, resourcesFlags)
+	VerifyDeploymentOverride(t, ke.Spec.DeploymentOverride, resourcesFlags)
 }
 
 func VerifyKnativeEventingResouceDeletion(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, resourcesFlags configure.ResourcesFlags) {
 	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentOverrideResourceDeletion(t, ke.Spec.Workloads, resourcesFlags)
+	VerifyDeploymentOverrideResourceDeletion(t, ke.Spec.DeploymentOverride, resourcesFlags)
 }
 
 func VerifyKnativeEventingTolerationDeletion(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, tolerationsFlags remove.TolerationsFlags) {
 	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentOverrideTolerationDeletion(t, ke.Spec.Workloads, tolerationsFlags)
+	VerifyDeploymentOverrideTolerationDeletion(t, ke.Spec.DeploymentOverride, tolerationsFlags)
 }
 
 func VerifyKnativeServingTolerationDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, tolerationsFlags remove.TolerationsFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentOverrideTolerationDeletion(t, ks.Spec.Workloads, tolerationsFlags)
+	VerifyDeploymentOverrideTolerationDeletion(t, ks.Spec.DeploymentOverride, tolerationsFlags)
 }
 
 func VerifyDeploymentOverrideTolerationDeletion(t *testing.T, workloadOverride []base.WorkloadOverride, tolerationsFlags remove.TolerationsFlags) {
@@ -124,7 +124,7 @@ func VerifyDeploymentOverrideTolerationDeletion(t *testing.T, workloadOverride [
 func VerifyKnativeServingResouceDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, resourcesFlags configure.ResourcesFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentOverrideResourceDeletion(t, ks.Spec.Workloads, resourcesFlags)
+	VerifyDeploymentOverrideResourceDeletion(t, ks.Spec.DeploymentOverride, resourcesFlags)
 }
 
 func VerifyDeploymentOverrideResourceDeletion(t *testing.T, workloadOverride []base.WorkloadOverride, resourcesFlags configure.ResourcesFlags) {
@@ -173,13 +173,13 @@ func VerifyDeploymentOverride(t *testing.T, workloadOverride []base.WorkloadOver
 func VerifyKnativeServingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentLabels(t, ks.Spec.Workloads, deployLabelFlags)
+	VerifyDeploymentLabels(t, ks.Spec.DeploymentOverride, deployLabelFlags)
 }
 
 func VerifyKnativeEventingLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentLabels(t, ks.Spec.Workloads, deployLabelFlags)
+	VerifyDeploymentLabels(t, ks.Spec.DeploymentOverride, deployLabelFlags)
 }
 
 func VerifyKnativeServingServiceLabelsExistence(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
@@ -197,13 +197,13 @@ func VerifyKnativeEventingServiceLabelsExistence(t *testing.T, clients operatorv
 func VerifyKnativeServingLabelsDelete(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentLabelsDelete(t, ks.Spec.Workloads, deployLabelFlags)
+	VerifyDeploymentLabelsDelete(t, ks.Spec.DeploymentOverride, deployLabelFlags)
 }
 
 func VerifyKnativeEventingLabelsDelete(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, deployLabelFlags common.KeyValueFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyDeploymentLabelsDelete(t, ks.Spec.Workloads, deployLabelFlags)
+	VerifyDeploymentLabelsDelete(t, ks.Spec.DeploymentOverride, deployLabelFlags)
 }
 
 func VerifyKnativeServingServiceLabelsDelete(t *testing.T, clients operatorv1beta1.KnativeServingInterface, deployLabelFlags common.KeyValueFlags) {
@@ -400,7 +400,7 @@ func VerifyKnativeEventingHAsDelete(t *testing.T, clients operatorv1beta1.Knativ
 
 func VerifyHAs(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
 	if haFlags.DeployName != "" {
-		deploy := findDeployment(haFlags.DeployName, spec.Workloads)
+		deploy := findDeployment(haFlags.DeployName, spec.DeploymentOverride)
 		testingUtil.AssertEqual(t, deploy == nil, false)
 		stringValue := strconv.Itoa(int(*deploy.Replicas))
 		testingUtil.AssertEqual(t, stringValue, haFlags.Replicas)
@@ -412,7 +412,7 @@ func VerifyHAs(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
 
 func VerifyHAsDelete(t *testing.T, spec base.CommonSpec, haFlags configure.HAFlags) {
 	if haFlags.DeployName != "" {
-		deploy := findDeployment(haFlags.DeployName, spec.Workloads)
+		deploy := findDeployment(haFlags.DeployName, spec.DeploymentOverride)
 		testingUtil.AssertEqual(t, deploy == nil, false)
 		testingUtil.AssertEqual(t, deploy.Replicas == nil, true)
 	} else {
@@ -423,13 +423,13 @@ func VerifyHAsDelete(t *testing.T, spec base.CommonSpec, haFlags configure.HAFla
 func VerifyKnativeServingTolerations(t *testing.T, clients operatorv1beta1.KnativeServingInterface, tolerationsFlags configure.TolerationsFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyTolerations(t, ks.Spec.Workloads, tolerationsFlags)
+	VerifyTolerations(t, ks.Spec.DeploymentOverride, tolerationsFlags)
 }
 
 func VerifyKnativeEventingTolerations(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, tolerationsFlags configure.TolerationsFlags) {
 	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyTolerations(t, ke.Spec.Workloads, tolerationsFlags)
+	VerifyTolerations(t, ke.Spec.DeploymentOverride, tolerationsFlags)
 }
 
 func VerifyTolerations(t *testing.T, workloadOverride []base.WorkloadOverride, tolerationsFlags configure.TolerationsFlags) {
@@ -522,25 +522,25 @@ func VerifyImagesDelete(t *testing.T, registry base.Registry, imageFlags configu
 func VerifyKnativeEventingEnvVars(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, envVarFlags configure.EnvVarFlags) {
 	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyEnvVars(t, ke.Spec.Workloads, envVarFlags)
+	VerifyEnvVars(t, ke.Spec.DeploymentOverride, envVarFlags)
 }
 
 func VerifyKnativeServingEnvVars(t *testing.T, clients operatorv1beta1.KnativeServingInterface, envVarFlags configure.EnvVarFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyEnvVars(t, ks.Spec.Workloads, envVarFlags)
+	VerifyEnvVars(t, ks.Spec.DeploymentOverride, envVarFlags)
 }
 
 func VerifyKnativeEventingEnvVarsDeletion(t *testing.T, clients operatorv1beta1.KnativeEventingInterface, envVarFlags configure.EnvVarFlags) {
 	ke, err := clients.Get(context.TODO(), "knative-eventing", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyEnvVarsDelete(t, ke.Spec.Workloads, envVarFlags)
+	VerifyEnvVarsDelete(t, ke.Spec.DeploymentOverride, envVarFlags)
 }
 
 func VerifyKnativeServingEnvVarsDeletion(t *testing.T, clients operatorv1beta1.KnativeServingInterface, envVarFlags configure.EnvVarFlags) {
 	ks, err := clients.Get(context.TODO(), "knative-serving", metav1.GetOptions{})
 	testingUtil.AssertEqual(t, err, nil)
-	VerifyEnvVarsDelete(t, ks.Spec.Workloads, envVarFlags)
+	VerifyEnvVarsDelete(t, ks.Spec.DeploymentOverride, envVarFlags)
 }
 
 func VerifyEnvVars(t *testing.T, workloadOverride []base.WorkloadOverride, envVarFlags configure.EnvVarFlags) {

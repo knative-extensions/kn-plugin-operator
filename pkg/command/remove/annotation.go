@@ -71,14 +71,14 @@ func deleteAnnotations(annotationCMDFlags common.KeyValueFlags, p *pkg.OperatorP
 	}
 
 	if annotationCMDFlags.DeployName != "" {
-		deploymentOverrides, err := ksCR.GetDeployments(annotationCMDFlags.Component, annotationCMDFlags.Namespace)
+		wordloads, err := ksCR.GetDeployments(annotationCMDFlags.Component, annotationCMDFlags.Namespace)
 		if err != nil {
 			return err
 		}
 
-		deploymentOverrides = removeAnnotationsDeployFields(deploymentOverrides, annotationCMDFlags)
+		wordloads = removeAnnotationsDeployFields(wordloads, annotationCMDFlags)
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return ksCR.UpdateDeployments(annotationCMDFlags.Component, annotationCMDFlags.Namespace, deploymentOverrides)
+			return ksCR.UpdateDeployments(annotationCMDFlags.Component, annotationCMDFlags.Namespace, wordloads)
 		}); err != nil {
 			return err
 		}
@@ -98,28 +98,28 @@ func deleteAnnotations(annotationCMDFlags common.KeyValueFlags, p *pkg.OperatorP
 	return nil
 }
 
-func removeAnnotationsDeployFields(deploymentOverrides []base.DeploymentOverride, annotationCMDFlags common.KeyValueFlags) []base.DeploymentOverride {
+func removeAnnotationsDeployFields(workloadOverrides []base.WorkloadOverride, annotationCMDFlags common.KeyValueFlags) []base.WorkloadOverride {
 	if annotationCMDFlags.Key == "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == annotationCMDFlags.DeployName {
-				deploymentOverrides[i].Annotations = nil
+				workloadOverrides[i].Annotations = nil
 			}
 		}
 	} else if annotationCMDFlags.Key != "" {
-		for i, deploy := range deploymentOverrides {
+		for i, deploy := range workloadOverrides {
 			if deploy.Name == annotationCMDFlags.DeployName {
 				labels := make(map[string]string)
-				for key, value := range deploymentOverrides[i].Annotations {
+				for key, value := range workloadOverrides[i].Annotations {
 					if key != annotationCMDFlags.Key {
 						labels[key] = value
 					}
 				}
-				deploymentOverrides[i].Annotations = labels
+				workloadOverrides[i].Annotations = labels
 			}
 		}
 	}
 
-	return deploymentOverrides
+	return workloadOverrides
 }
 
 func removeAnnotationsServiceFields(serviceOverrides []base.ServiceOverride, annotationCMDFlags common.KeyValueFlags) []base.ServiceOverride {

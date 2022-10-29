@@ -104,11 +104,19 @@ func removeReplicasFields(commonSpec *base.CommonSpec, haCMDFlags HAFlags) *base
 		for i := range commonSpec.DeploymentOverride {
 			commonSpec.DeploymentOverride[i].Replicas = nil
 		}
+		for i := range commonSpec.Workloads {
+			commonSpec.Workloads[i].Replicas = nil
+		}
 		commonSpec.HighAvailability = nil
 	} else {
 		for i := range commonSpec.DeploymentOverride {
 			if commonSpec.DeploymentOverride[i].Name == haCMDFlags.DeployName {
 				commonSpec.DeploymentOverride[i].Replicas = nil
+			}
+		}
+		for i := range commonSpec.Workloads {
+			if commonSpec.Workloads[i].Name == haCMDFlags.DeployName {
+				commonSpec.Workloads[i].Replicas = nil
 			}
 		}
 	}

@@ -145,23 +145,23 @@ func (ko *KnativeOperatorCR) UpdateConfigMaps(component, namespace string, cmDat
 	return ko.UpdateCommonSpec(component, namespace, commonSpec)
 }
 
-func (ko *KnativeOperatorCR) GetDeployments(component, namespace string) ([]base.DeploymentOverride, error) {
-	var deploymentOverrides []base.DeploymentOverride
+func (ko *KnativeOperatorCR) GetDeployments(component, namespace string) ([]base.WorkloadOverride, error) {
+	var workloadOverrides []base.WorkloadOverride
 	if strings.EqualFold(component, ServingComponent) {
 		ks, err := ko.GetKnativeServingInCluster(namespace)
 		if err != nil {
-			return deploymentOverrides, err
+			return workloadOverrides, err
 		}
-		deploymentOverrides = ks.Spec.DeploymentOverride
+		workloadOverrides = ks.Spec.DeploymentOverride
 	} else if strings.EqualFold(component, EventingComponent) {
 		ke, err := ko.GetKnativeEventingInCluster(namespace)
 		if err != nil {
-			return deploymentOverrides, err
+			return workloadOverrides, err
 		}
-		deploymentOverrides = ke.Spec.DeploymentOverride
+		workloadOverrides = ke.Spec.DeploymentOverride
 	}
 
-	return deploymentOverrides, nil
+	return workloadOverrides, nil
 }
 
 func (ko *KnativeOperatorCR) GetServices(component, namespace string) ([]base.ServiceOverride, error) {
@@ -183,12 +183,12 @@ func (ko *KnativeOperatorCR) GetServices(component, namespace string) ([]base.Se
 	return serviceOverrides, nil
 }
 
-func (ko *KnativeOperatorCR) UpdateDeployments(component, namespace string, deployOverrides []base.DeploymentOverride) error {
+func (ko *KnativeOperatorCR) UpdateDeployments(component, namespace string, workloadOverrides []base.WorkloadOverride) error {
 	commonSpec, err := ko.GetCommonSpec(component, namespace)
 	if err != nil {
 		return err
 	}
-	commonSpec.DeploymentOverride = deployOverrides
+	commonSpec.DeploymentOverride = workloadOverrides
 	return ko.UpdateCommonSpec(component, namespace, commonSpec)
 }
 

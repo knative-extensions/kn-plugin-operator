@@ -88,8 +88,8 @@ func TestValidateTolerationsFlags(t *testing.T) {
 	}
 }
 
-func testDeploymentForToleration() []base.DeploymentOverride {
-	return []base.DeploymentOverride{
+func testDeploymentForToleration() []base.WorkloadOverride {
+	return []base.WorkloadOverride{
 		{
 			Name: "net-istio-controller",
 			Tolerations: []corev1.Toleration{{
@@ -125,8 +125,8 @@ func TestRemoveTolerationsFields(t *testing.T) {
 	for _, tt := range []struct {
 		name                string
 		tolerationsCMDFlags TolerationsFlags
-		input               []base.DeploymentOverride
-		expectedResult      []base.DeploymentOverride
+		input               []base.WorkloadOverride
+		expectedResult      []base.WorkloadOverride
 	}{{
 		name: "Toleration flags with correct component and namespace",
 		tolerationsCMDFlags: TolerationsFlags{
@@ -134,7 +134,7 @@ func TestRemoveTolerationsFields(t *testing.T) {
 			Namespace: "test-eventing",
 		},
 		input: testDeploymentForToleration(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 			},
@@ -150,7 +150,7 @@ func TestRemoveTolerationsFields(t *testing.T) {
 			DeployName: "net-istio-controller",
 		},
 		input: testDeploymentForToleration(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 			},
@@ -176,7 +176,7 @@ func TestRemoveTolerationsFields(t *testing.T) {
 			Key:        "test-key",
 		},
 		input: testDeploymentForToleration(),
-		expectedResult: []base.DeploymentOverride{
+		expectedResult: []base.WorkloadOverride{
 			{
 				Name: "net-istio-controller",
 				Tolerations: []corev1.Toleration{{

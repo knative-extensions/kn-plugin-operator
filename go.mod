@@ -9,12 +9,12 @@ require (
 	github.com/manifestival/client-go-client v0.5.0
 	github.com/spf13/cobra v1.3.0
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
-	k8s.io/api v0.25.2
-	k8s.io/apimachinery v0.25.2
-	k8s.io/client-go v0.25.2
-	knative.dev/hack v0.0.0-20221024013916-9d2ae47c16b2
-	knative.dev/operator v0.35.1-0.20221026144358-55f133c3265a
-	knative.dev/pkg v0.0.0-20221027173407-198b4637065d
+	k8s.io/api v0.25.4
+	k8s.io/apimachinery v0.25.4
+	k8s.io/client-go v0.25.4
+	knative.dev/hack v0.0.0-20230113013652-c7cfcb062de9
+	knative.dev/operator v0.35.1-0.20230128013447-064cb9634de9
+	knative.dev/pkg v0.0.0-20230117181655-247510c00e9d
 )
 
 require (
@@ -71,9 +71,9 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	istio.io/api v0.0.0-20220420164308-b6a03a9e477e // indirect
-	k8s.io/klog/v2 v2.70.2-0.20220707122935-0990e81f1a8f // indirect
+	k8s.io/klog/v2 v2.80.2-0.20221028030830-9ae4992afb54 // indirect
 	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
-	k8s.io/utils v0.0.0-20220728103510-ee6ede2d64ed // indirect
+	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2 // indirect
 	sigs.k8s.io/controller-runtime v0.7.2 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect

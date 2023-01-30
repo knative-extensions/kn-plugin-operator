@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Knative Authors
+Copyright 2022 The Knative Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package configmap exists to facilitate consuming Kubernetes ConfigMap
-// resources in various ways, including:
-//   - Watching them for changes over time, and
-//   - Loading them from a VolumeMount.
-package configmap
+package base
+
+// SecurityGuardConfiguration specifies options for the security guard component.
+type SecurityGuardConfiguration struct {
+	Enabled bool `json:"enabled"`
+}

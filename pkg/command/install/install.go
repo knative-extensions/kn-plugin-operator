@@ -71,8 +71,7 @@ type installCmdFlags struct {
 }
 
 var (
-	ServingKeyDeployments = []string{"activator", "autoscaler", "autoscaler-hpa", "controller", "domain-mapping",
-		"domainmapping-webhook", "webhook"}
+	ServingKeyDeployments  = []string{"activator", "autoscaler", "autoscaler-hpa", "controller", "webhook"}
 	EventingKeyDeployments = []string{"eventing-controller", "eventing-webhook", "imc-controller", "imc-dispatcher",
 		"mt-broker-controller", "mt-broker-filter", "mt-broker-ingress", "pingsource-mt-adapter"}
 	// Interval specifies the time between two polls.

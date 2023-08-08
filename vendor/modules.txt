@@ -183,18 +183,19 @@ go.uber.org/atomic
 # go.uber.org/multierr v1.8.0
 ## explicit; go 1.14
 go.uber.org/multierr
-# go.uber.org/zap v1.21.0
-## explicit; go 1.13
+# go.uber.org/zap v1.24.0
+## explicit; go 1.19
 go.uber.org/zap
 go.uber.org/zap/buffer
+go.uber.org/zap/internal
 go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/mod v0.9.0
+# golang.org/x/mod v0.12.0
 ## explicit; go 1.17
 golang.org/x/mod/semver
-# golang.org/x/net v0.12.0
+# golang.org/x/net v0.14.0
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
@@ -205,16 +206,16 @@ golang.org/x/net/idna
 ## explicit; go 1.17
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.10.0
+# golang.org/x/sys v0.11.0
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.10.0
+# golang.org/x/term v0.11.0
 ## explicit; go 1.17
 golang.org/x/term
-# golang.org/x/text v0.11.0
+# golang.org/x/text v0.12.0
 ## explicit; go 1.17
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
@@ -235,7 +236,10 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto/googleapis/api v0.0.0-20230525234020-1aefcd67740a
+# google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc
+## explicit; go 1.19
+google.golang.org/genproto/internal
+# google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc
 ## explicit; go 1.19
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
@@ -553,10 +557,10 @@ k8s.io/utils/internal/third_party/forked/golang/net
 k8s.io/utils/net
 k8s.io/utils/strings/slices
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20230712131415-ddae80293c43
+# knative.dev/hack v0.0.0-20230807013713-a75befb4fd4b
 ## explicit; go 1.18
 knative.dev/hack
-# knative.dev/operator v0.38.1
+# knative.dev/operator v0.38.1-0.20230808072433-9f229fb704c6
 ## explicit; go 1.19
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
@@ -566,7 +570,7 @@ knative.dev/operator/pkg/client/clientset/versioned/scheme
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20230718152110-aef227e72ead
+# knative.dev/pkg v0.0.0-20230808043333-ea6c1f29b641
 ## explicit; go 1.18
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck

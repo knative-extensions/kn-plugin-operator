@@ -31,7 +31,7 @@
 # project $PROJECT_ID, start knative in it, run the tests and delete the
 # cluster.
 
-export GO111MODULE=auto
+export GO111MODULE=on
 
 source "$(dirname "${BASH_SOURCE[0]}")/e2e-common.sh"
 
@@ -49,6 +49,7 @@ function test_setup() {
   ${OPERATOR_DIR}/test/upload-test-images.sh ${KNATIVE_DIR}/serving "test/test_images/pizzaplanetv1"
   ${OPERATOR_DIR}/test/upload-test-images.sh ${KNATIVE_DIR}/serving "test/test_images/pizzaplanetv2"
   ${OPERATOR_DIR}/test/upload-test-images.sh ${KNATIVE_DIR}/serving "test/test_images/autoscale"
+  ${OPERATOR_DIR}/test/upload-test-images.sh ${KNATIVE_DIR}/serving "test/test_images/helloworld"
 
   test_setup_logging
 
@@ -73,9 +74,9 @@ function create_test_namespace_serving() {
 }
 
 # Skip installing istio as an add-on.
-initialize "$@" --skip-istio-addon
+initialize --cluster-version=${K8S_CLUSTER_VERSION} "$@" --skip-istio-addon
 
-TIMEOUT=30m
+TIMEOUT=${TIMEOUT_CI}
 
 header "Running upgrade tests"
 

@@ -18,14 +18,14 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../vendor/knative.dev/hack/e2e-tests.sh"
 
 # The previous serving release, installed by the operator. This value should be in the semantic format of major.minor.
-readonly PREVIOUS_SERVING_RELEASE_VERSION="1.12"
+readonly PREVIOUS_SERVING_RELEASE_VERSION="1.13"
 # The previous eventing release, installed by the operator. This value should be in the semantic format of major.minor.
-readonly PREVIOUS_EVENTING_RELEASE_VERSION="1.12"
+readonly PREVIOUS_EVENTING_RELEASE_VERSION="1.13"
 # The target serving/eventing release to upgrade, installed by the operator. It can be a release available under
 # kodata or an incoming new release. This value should be in the semantic format of major.minor.
-readonly TARGET_RELEASE_VERSION="1.13"
+readonly TARGET_RELEASE_VERSION="latest"
 # This is the branch name of knative repos, where we run the upgrade tests.
-readonly KNATIVE_REPO_BRANCH="release-1.13"
+readonly KNATIVE_REPO_BRANCH="${PULL_BASE_REF}"
 # Namespaces used for tests
 # This environment variable TEST_NAMESPACE defines the namespace to install Knative Serving.
 export TEST_NAMESPACE="${TEST_NAMESPACE:-knative-operator-testing}"
@@ -38,6 +38,10 @@ export TEST_RESOURCE="knative"
 export TEST_EVENTING_MONITORING_NAMESPACE="knative-monitoring"
 export KO_FLAGS="${KO_FLAGS:-}"
 export INGRESS_CLASS=${INGRESS_CLASS:-istio.ingress.networking.knative.dev}
+export TIMEOUT_CI=30m
+
+# GKE cluster version
+readonly K8S_CLUSTER_VERSION=1.28
 
 # Boolean used to indicate whether to generate serving YAML based on the latest code in the branch KNATIVE_SERVING_REPO_BRANCH.
 GENERATE_SERVING_YAML=0

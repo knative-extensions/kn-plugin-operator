@@ -18,18 +18,19 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../vendor/knative.dev/hack/e2e-tests.sh"
 
 # The previous serving release, installed by the operator. This value should be in the semantic format of major.minor.
-readonly PREVIOUS_SERVING_RELEASE_VERSION="1.12"
+readonly PREVIOUS_SERVING_RELEASE_VERSION="1.13"
 # The previous eventing release, installed by the operator. This value should be in the semantic format of major.minor.
-readonly PREVIOUS_EVENTING_RELEASE_VERSION="1.12"
+readonly PREVIOUS_EVENTING_RELEASE_VERSION="1.13"
 # The target serving/eventing release to upgrade, installed by the operator. It can be a release available under
 # kodata or an incoming new release. This value should be in the semantic format of major.minor.
-readonly TARGET_RELEASE_VERSION="1.13"
+readonly TARGET_RELEASE_VERSION="1.14"
 # This is the branch name of knative repos, where we run the upgrade tests.
 readonly KNATIVE_REPO_BRANCH="release-1.13"
 # Namespaces used for tests
 # This environment variable TEST_NAMESPACE defines the namespace to install Knative Serving.
 export TEST_NAMESPACE="${TEST_NAMESPACE:-knative-operator-testing}"
 export SYSTEM_NAMESPACE=${TEST_NAMESPACE}
+export TEST_OPERATOR_NAMESPACE="knative-operator"
 # This environment variable TEST_EVENTING_NAMESPACE defines the namespace to install Knative Eventing.
 # It is different from the namespace to install Knative Serving.
 # We will use only one namespace, when Knative supports both components can coexist under one namespace.
@@ -38,6 +39,10 @@ export TEST_RESOURCE="knative"
 export TEST_EVENTING_MONITORING_NAMESPACE="knative-monitoring"
 export KO_FLAGS="${KO_FLAGS:-}"
 export INGRESS_CLASS=${INGRESS_CLASS:-istio.ingress.networking.knative.dev}
+export TIMEOUT_CI=30m
+
+# GKE cluster version
+readonly K8S_CLUSTER_VERSION=1.28
 
 # Boolean used to indicate whether to generate serving YAML based on the latest code in the branch KNATIVE_SERVING_REPO_BRANCH.
 GENERATE_SERVING_YAML=0
@@ -122,6 +127,8 @@ function install_istio() {
 }
 
 function create_namespace() {
+  echo ">> Creating test namespaces for knative operator"
+  kubectl get ns ${TEST_OPERATOR_NAMESPACE} || kubectl create namespace ${TEST_OPERATOR_NAMESPACE}
   echo ">> Creating test namespaces for knative serving and eventing"
   # All the custom resources and Knative Serving resources are created under this TEST_NAMESPACE.
   kubectl get ns ${TEST_NAMESPACE} || kubectl create namespace ${TEST_NAMESPACE}
@@ -168,7 +175,7 @@ function install_operator() {
   header "Installing Knative operator"
   # Deploy the operator
   ko apply ${KO_FLAGS} -f config/
-  wait_until_pods_running default || fail_test "Operator did not come up"
+  wait_until_pods_running ${TEST_OPERATOR_NAMESPACE} || fail_test "Operator did not come up"
 }
 
 # Uninstalls Knative Serving from the current cluster.

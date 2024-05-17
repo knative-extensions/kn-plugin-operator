@@ -1,4 +1,6 @@
 # kn-plugin-operator
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fknative-extensions%2Fkn-plugin-operator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fknative-extensions%2Fkn-plugin-operator?ref=badge_shield)
+
 
 `kn-plugin-operator` is a plugin of Knative Client, for managing Knative with Knative Operator from the
 command line.
@@ -54,3 +56,7 @@ kn operator -h
 
 You can use the built binary to run the commands. You can also use the bash scripts directly to run your commands.
 All the bash scripts are available under the directory [scripts](scripts/).
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fknative-extensions%2Fkn-plugin-operator.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fknative-extensions%2Fkn-plugin-operator?ref=badge_large)

@@ -5,14 +5,14 @@ github.com/BurntSushi/toml/internal
 # github.com/briandowns/spinner v1.18.1
 ## explicit; go 1.14
 github.com/briandowns/spinner
-# github.com/davecgh/go-spew v1.1.1
+# github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 ## explicit
 github.com/davecgh/go-spew/spew
 # github.com/emicklei/go-restful/v3 v3.11.0
 ## explicit; go 1.13
 github.com/emicklei/go-restful/v3
 github.com/emicklei/go-restful/v3/log
-# github.com/evanphx/json-patch v4.12.0+incompatible
+# github.com/evanphx/json-patch v5.6.0+incompatible
 ## explicit
 github.com/evanphx/json-patch
 # github.com/evanphx/json-patch/v5 v5.9.0
@@ -28,15 +28,15 @@ github.com/ghodss/yaml
 # github.com/go-logr/logr v1.4.1
 ## explicit; go 1.18
 github.com/go-logr/logr
-# github.com/go-openapi/jsonpointer v0.19.6
-## explicit; go 1.13
+# github.com/go-openapi/jsonpointer v0.20.2
+## explicit; go 1.19
 github.com/go-openapi/jsonpointer
-# github.com/go-openapi/jsonreference v0.20.2
-## explicit; go 1.13
+# github.com/go-openapi/jsonreference v0.20.4
+## explicit; go 1.19
 github.com/go-openapi/jsonreference
 github.com/go-openapi/jsonreference/internal
-# github.com/go-openapi/swag v0.22.3
-## explicit; go 1.18
+# github.com/go-openapi/swag v0.22.7
+## explicit; go 1.19
 github.com/go-openapi/swag
 # github.com/gogo/protobuf v1.3.2
 ## explicit; go 1.15
@@ -194,28 +194,28 @@ go.uber.org/zap/internal/exit
 go.uber.org/zap/internal/pool
 go.uber.org/zap/internal/stacktrace
 go.uber.org/zap/zapcore
-# golang.org/x/mod v0.17.0
+# golang.org/x/mod v0.19.0
 ## explicit; go 1.18
 golang.org/x/mod/semver
-# golang.org/x/net v0.24.0
+# golang.org/x/net v0.27.0
 ## explicit; go 1.18
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
-# golang.org/x/oauth2 v0.19.0
+# golang.org/x/oauth2 v0.21.0
 ## explicit; go 1.18
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.19.0
+# golang.org/x/sys v0.22.0
 ## explicit; go 1.18
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.19.0
+# golang.org/x/term v0.22.0
 ## explicit; go 1.18
 golang.org/x/term
-# golang.org/x/text v0.14.0
+# golang.org/x/text v0.16.0
 ## explicit; go 1.18
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
@@ -227,11 +227,11 @@ golang.org/x/time/rate
 # gomodules.xyz/jsonpatch/v2 v2.4.0
 ## explicit; go 1.20
 gomodules.xyz/jsonpatch/v2
-# google.golang.org/genproto/googleapis/api v0.0.0-20240314234333-6e1732d8331c
-## explicit; go 1.19
+# google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117
+## explicit; go 1.20
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
-# google.golang.org/protobuf v1.33.0
+# google.golang.org/protobuf v1.34.1
 ## explicit; go 1.17
 google.golang.org/protobuf/encoding/protojson
 google.golang.org/protobuf/encoding/prototext
@@ -240,6 +240,7 @@ google.golang.org/protobuf/internal/descfmt
 google.golang.org/protobuf/internal/descopts
 google.golang.org/protobuf/internal/detrand
 google.golang.org/protobuf/internal/editiondefaults
+google.golang.org/protobuf/internal/editionssupport
 google.golang.org/protobuf/internal/encoding/defval
 google.golang.org/protobuf/internal/encoding/json
 google.golang.org/protobuf/internal/encoding/messageset
@@ -552,11 +553,11 @@ k8s.io/utils/pointer
 k8s.io/utils/ptr
 k8s.io/utils/strings/slices
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20240426013324-abdcdea830f0
+# knative.dev/hack v0.0.0-20240704013904-b9799599afcf
 ## explicit; go 1.18
 knative.dev/hack
-# knative.dev/operator v0.41.0
-## explicit; go 1.21
+# knative.dev/operator v0.41.1-0.20240723170622-66cebf4bb9a6
+## explicit; go 1.22
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
 knative.dev/operator/pkg/apis/operator/v1beta1
@@ -565,8 +566,8 @@ knative.dev/operator/pkg/client/clientset/versioned/scheme
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20240429080158-b69fa2713537
-## explicit; go 1.21
+# knative.dev/pkg v0.0.0-20240716082220-4355f0c73608
+## explicit; go 1.22
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck
 knative.dev/pkg/apis/duck/ducktypes
@@ -576,6 +577,7 @@ knative.dev/pkg/environment
 knative.dev/pkg/kmap
 knative.dev/pkg/kmeta
 knative.dev/pkg/kmp
+knative.dev/pkg/ptr
 knative.dev/pkg/test
 knative.dev/pkg/test/environment
 knative.dev/pkg/test/ingress

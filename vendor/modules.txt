@@ -231,8 +231,8 @@ gomodules.xyz/jsonpatch/v2
 ## explicit; go 1.20
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
-# google.golang.org/protobuf v1.34.1
-## explicit; go 1.17
+# google.golang.org/protobuf v1.34.2
+## explicit; go 1.20
 google.golang.org/protobuf/encoding/protojson
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
@@ -553,10 +553,10 @@ k8s.io/utils/pointer
 k8s.io/utils/ptr
 k8s.io/utils/strings/slices
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20240719133331-9c9eed6f6679
+# knative.dev/hack v0.0.0-20240808014239-452e340cbb4b
 ## explicit; go 1.21
 knative.dev/hack
-# knative.dev/operator v0.42.0
+# knative.dev/operator v0.42.1-0.20240808015103-fc1b25265584
 ## explicit; go 1.22
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
@@ -566,7 +566,7 @@ knative.dev/operator/pkg/client/clientset/versioned/scheme
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20240716082220-4355f0c73608
+# knative.dev/pkg v0.0.0-20240808013630-0991b2f920f4
 ## explicit; go 1.22
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck

@@ -12,9 +12,9 @@ require (
 	k8s.io/api v0.29.2
 	k8s.io/apimachinery v0.29.2
 	k8s.io/client-go v0.29.2
-	knative.dev/hack v0.0.0-20240719133331-9c9eed6f6679
-	knative.dev/operator v0.42.0
-	knative.dev/pkg v0.0.0-20240716082220-4355f0c73608
+	knative.dev/hack v0.0.0-20240808014239-452e340cbb4b
+	knative.dev/operator v0.42.1-0.20240808015103-fc1b25265584
+	knative.dev/pkg v0.0.0-20240808013630-0991b2f920f4
 )
 
 require (
@@ -62,7 +62,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117 // indirect
-	google.golang.org/protobuf v1.34.1 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

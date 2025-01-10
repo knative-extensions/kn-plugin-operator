@@ -1,6 +1,6 @@
 module knative.dev/kn-plugin-operator
 
-go 1.22.0
+go 1.22.7
 
 require (
 	github.com/briandowns/spinner v1.18.1
@@ -8,22 +8,22 @@ require (
 	github.com/k14s/ytt v0.39.0
 	github.com/manifestival/client-go-client v0.5.0
 	github.com/spf13/cobra v1.3.0
-	golang.org/x/mod v0.21.0
-	k8s.io/api v0.30.3
-	k8s.io/apimachinery v0.30.3
-	k8s.io/client-go v0.30.3
-	knative.dev/hack v0.0.0-20241025103803-ef6e7e983a60
-	knative.dev/operator v0.43.1-0.20241027002604-3cd206c2bbaf
-	knative.dev/pkg v0.0.0-20241026180704-25f6002b00f3
+	golang.org/x/mod v0.22.0
+	k8s.io/api v0.31.4
+	k8s.io/apimachinery v0.31.4
+	k8s.io/client-go v0.31.4
+	knative.dev/hack v0.0.0-20250109131303-f8be0ccdff36
+	knative.dev/operator v0.43.1-0.20250109131810-7f4aba0751ac
+	knative.dev/pkg v0.0.0-20250110102817-b4ff2c14fbc2
 )
 
 require (
 	github.com/BurntSushi/toml v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.12.1 // indirect
-	github.com/evanphx/json-patch v5.9.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.9.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
@@ -51,18 +51,20 @@ require (
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/oauth2 v0.22.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/term v0.25.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/oauth2 v0.23.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/term v0.28.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142 // indirect
-	google.golang.org/protobuf v1.35.1 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20241015192408-796eee8c2d53 // indirect
+	google.golang.org/protobuf v1.36.2 // indirect
+	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

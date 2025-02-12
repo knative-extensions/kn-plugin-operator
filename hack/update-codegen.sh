@@ -19,3 +19,8 @@ set -Eeuo pipefail
 source "$(dirname "$0")/../vendor/knative.dev/hack/library.sh"
 
 header 'Updating codegen...'
+
+group "Update deps post-codegen"
+
+# Make sure our dependencies are up-to-date
+${REPO_ROOT_DIR}/hack/update-deps.sh

@@ -1,6 +1,13 @@
 module knative.dev/kn-plugin-operator
 
-go 1.22.7
+go 1.23.0
+
+replace (
+	k8s.io/api => k8s.io/api v0.31.4
+	k8s.io/apimachinery => k8s.io/apimachinery v0.31.4
+	k8s.io/client-go => k8s.io/client-go v0.31.4
+	k8s.io/code-generator => k8s.io/code-generator v0.31.4
+)
 
 require (
 	github.com/briandowns/spinner v1.18.1
@@ -8,10 +15,10 @@ require (
 	github.com/k14s/ytt v0.39.0
 	github.com/manifestival/client-go-client v0.5.0
 	github.com/spf13/cobra v1.3.0
-	golang.org/x/mod v0.22.0
-	k8s.io/api v0.31.4
-	k8s.io/apimachinery v0.31.4
-	k8s.io/client-go v0.31.4
+	golang.org/x/mod v0.23.0
+	k8s.io/api v0.32.2
+	k8s.io/apimachinery v0.32.2
+	k8s.io/client-go v1.5.2
 	knative.dev/hack v0.0.0-20250128013659-5f7f0f50e9de
 	knative.dev/operator v0.44.1-0.20250206023613-a0cc535e3eaa
 	knative.dev/pkg v0.0.0-20250211185550-c8bea7c326ff
@@ -74,6 +81,6 @@ require (
 	k8s.io/utils v0.0.0-20240921022957-49e7df575cb6 // indirect
 	sigs.k8s.io/controller-runtime v0.7.2 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.5.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )

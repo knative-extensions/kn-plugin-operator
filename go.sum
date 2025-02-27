@@ -1292,10 +1292,10 @@ k8s.io/utils v0.0.0-20240711033017-18e509b52bc8 h1:pUdcCO1Lk/tbT5ztQWOBi5HBgbBP1
 k8s.io/utils v0.0.0-20240711033017-18e509b52bc8/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 knative.dev/caching v0.0.0-20241022012359-41bbaf964d16 h1:vQ0y0mO1ALdOd/FPiw7gf1415mf41aWnLOVOtTr2/jQ=
 knative.dev/caching v0.0.0-20241022012359-41bbaf964d16/go.mod h1:qOvjasSUI+GyF4hsqJmIomblcgjkLzJhng8/zk0B9J4=
-knative.dev/hack v0.0.0-20241010131451-05b2fb30cb4d h1:aCfX7kwkvgGxXXGbso5tLqdwQmzBkJ9d+EIRwksKTvk=
-knative.dev/hack v0.0.0-20241010131451-05b2fb30cb4d/go.mod h1:R0ritgYtjLDO9527h5vb5X6gfvt5LCrJ55BNbVDsWiY=
-knative.dev/operator v0.43.0 h1:80PIcgtoTzjBF3jhshLnXlhSdD0lEVHc7F3mDjzrDE4=
-knative.dev/operator v0.43.0/go.mod h1:bAy0D5769aJvbjKcNIg4VRKk7oy4Xvs1gxMFoegLJZY=
+knative.dev/hack v0.0.0-20250220110655-b5e4ff820460 h1:N82WjXiv6RlXnA+qV4cA2tUbTnE3B6C3BWE+dcM/F9A=
+knative.dev/hack v0.0.0-20250220110655-b5e4ff820460/go.mod h1:R0ritgYtjLDO9527h5vb5X6gfvt5LCrJ55BNbVDsWiY=
+knative.dev/operator v0.43.2 h1:QsPVFiKhqwIYxnSGNIW/anEME4w0fEhD8VifH5aXa2E=
+knative.dev/operator v0.43.2/go.mod h1:vKN27BuPGIafr9fJy/MOoMACxV0oySI4lkWdldiHQK0=
 knative.dev/pkg v0.0.0-20241021183759-9b9d535af5ad h1:Nrjtr2H168rJeamH4QdyLMV1lEKHejNhaj1ymgQMfLk=
 knative.dev/pkg v0.0.0-20241021183759-9b9d535af5ad/go.mod h1:StJI72GWcm/iErmk4RqFJiOo8RLbVqPbHxUqeVwAzeo=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=

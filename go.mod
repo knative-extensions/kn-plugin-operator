@@ -12,9 +12,9 @@ require (
 	k8s.io/api v0.32.2
 	k8s.io/apimachinery v0.32.2
 	k8s.io/client-go v0.32.2
-	knative.dev/hack v0.0.0-20250217122557-ce4c934f30e5
-	knative.dev/operator v0.44.1-0.20250218124051-7709bf7dbee2
-	knative.dev/pkg v0.0.0-20250218011850-c925de2a3f07
+	knative.dev/hack v0.0.0-20250219013704-306ce745e077
+	knative.dev/operator v0.44.1-0.20250301231433-2f4a10ff2fc7
+	knative.dev/pkg v0.0.0-20250226145529-0372c089c78f
 )
 
 require (
@@ -32,7 +32,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.9 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/go-version v1.4.0 // indirect

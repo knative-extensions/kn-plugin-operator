@@ -21,5 +21,5 @@ source "$(dirname "${BASH_SOURCE[0]}")/../vendor/knative.dev/hack/e2e-tests.sh"
 function install_istio() {
   echo ">> Installing Istio"
   curl -sL https://istio.io/downloadIstioctl | sh -
-  $HOME/.istioctl/bin/istioctl install -y
+  $HOME/.istioctl/bin/istioctl install --set values.cni.cniBinDir=/home/kubernetes/bin -y
 }

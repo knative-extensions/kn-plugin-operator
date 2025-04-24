@@ -99,7 +99,7 @@ func uninstallKnativeServing(uninstallFlags uninstallCmdFlags, p *pkg.OperatorPa
 	}
 
 	if len(errstrings) != 0 {
-		return fmt.Errorf(strings.Join(errstrings, "\n"))
+		return fmt.Errorf("%s", strings.Join(errstrings, "\n"))
 	}
 	return nil
 }
@@ -124,7 +124,7 @@ func uninstallKnativeEventing(uninstallFlags uninstallCmdFlags, p *pkg.OperatorP
 	}
 
 	if len(errstrings) != 0 {
-		return fmt.Errorf(strings.Join(errstrings, "\n"))
+		return fmt.Errorf("%s", strings.Join(errstrings, "\n"))
 	}
 	return nil
 }

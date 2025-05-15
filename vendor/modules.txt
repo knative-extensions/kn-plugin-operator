@@ -194,7 +194,7 @@ go.uber.org/zap/zapcore
 # golang.org/x/mod v0.24.0
 ## explicit; go 1.23.0
 golang.org/x/mod/semver
-# golang.org/x/net v0.39.0
+# golang.org/x/net v0.40.0
 ## explicit; go 1.23.0
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
@@ -205,15 +205,15 @@ golang.org/x/net/internal/httpcommon
 ## explicit; go 1.18
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.32.0
+# golang.org/x/sys v0.33.0
 ## explicit; go 1.23.0
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.31.0
+# golang.org/x/term v0.32.0
 ## explicit; go 1.23.0
 golang.org/x/term
-# golang.org/x/text v0.24.0
+# golang.org/x/text v0.25.0
 ## explicit; go 1.23.0
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
@@ -573,10 +573,10 @@ k8s.io/utils/net
 k8s.io/utils/pointer
 k8s.io/utils/ptr
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20250424013725-c4037b0fe56b
+# knative.dev/hack v0.0.0-20250514121446-f525e187efdc
 ## explicit; go 1.21
 knative.dev/hack
-# knative.dev/operator v0.45.1-0.20250425130226-79547ff7a128
+# knative.dev/operator v0.45.1-0.20250514225846-9c6ec6334848
 ## explicit; go 1.24.0
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
@@ -586,7 +586,7 @@ knative.dev/operator/pkg/client/clientset/versioned/scheme
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20250424013628-d5e74d29daa3
+# knative.dev/pkg v0.0.0-20250515022847-873230f3a48e
 ## explicit; go 1.23.0
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck

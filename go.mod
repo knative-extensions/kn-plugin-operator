@@ -14,7 +14,7 @@ require (
 	k8s.io/client-go v0.33.1
 	knative.dev/hack v0.0.0-20250708013849-70d4b00da6ba
 	knative.dev/operator v0.46.0
-	knative.dev/pkg v0.0.0-20250716115900-19d3cc2da0b9
+	knative.dev/pkg v0.0.0-20250728131637-f6a99aca71fd
 )
 
 require (
@@ -60,7 +60,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.12.0 // indirect

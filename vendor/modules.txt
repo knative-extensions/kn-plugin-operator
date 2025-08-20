@@ -592,10 +592,10 @@ k8s.io/utils/net
 k8s.io/utils/pointer
 k8s.io/utils/ptr
 k8s.io/utils/trace
-# knative.dev/hack v0.0.0-20250708013849-70d4b00da6ba
+# knative.dev/hack v0.0.0-20250819212547-d496a6e708d3
 ## explicit; go 1.21
 knative.dev/hack
-# knative.dev/operator v0.46.1-0.20250814143543-650497b24937
+# knative.dev/operator v0.46.1-0.20250819135349-71f5980cb464
 ## explicit; go 1.24.0
 knative.dev/operator/pkg/apis/operator
 knative.dev/operator/pkg/apis/operator/base
@@ -605,7 +605,7 @@ knative.dev/operator/pkg/client/clientset/versioned/scheme
 knative.dev/operator/pkg/client/clientset/versioned/typed/operator/v1beta1
 knative.dev/operator/test
 knative.dev/operator/test/client
-# knative.dev/pkg v0.0.0-20250814150843-2e0e61e26e24
+# knative.dev/pkg v0.0.0-20250820014848-e9c87121ec4c
 ## explicit; go 1.24.0
 knative.dev/pkg/apis
 knative.dev/pkg/apis/duck

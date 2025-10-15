@@ -8,13 +8,13 @@ require (
 	github.com/k14s/ytt v0.39.0
 	github.com/manifestival/client-go-client v0.6.0
 	github.com/spf13/cobra v1.8.1
-	golang.org/x/mod v0.28.0
+	golang.org/x/mod v0.29.0
 	k8s.io/api v0.33.5
 	k8s.io/apimachinery v0.33.5
 	k8s.io/client-go v0.33.5
 	knative.dev/hack v0.0.0-20251013111017-49bc1be5f373
-	knative.dev/operator v0.46.1-0.20251013021416-a56f067519eb
-	knative.dev/pkg v0.0.0-20251013133020-188d03623185
+	knative.dev/operator v0.46.1-0.20251014135434-aab22f4a276f
+	knative.dev/pkg v0.0.0-20251014184739-27b61c2839a4
 )
 
 require (
@@ -58,11 +58,11 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/net v0.44.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/term v0.35.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/term v0.36.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250825161204-c5933d9347a5 // indirect

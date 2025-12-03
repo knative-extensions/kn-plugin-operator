@@ -44,7 +44,7 @@ func NewUninstallCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Uninstall Knative Operator or Knative components",
 		Example: `
   # Uninstall Knative Serving under the namespace knative-serving
-  kn operation uninstall -c serving --namespace knative-serving`,
+  kn operator uninstall -c serving --namespace knative-serving`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if strings.ToLower(uninstallFlags.Component) == common.ServingComponent {

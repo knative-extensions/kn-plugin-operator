@@ -28,7 +28,6 @@ func TestYamlGenaratorGenerateYamlOutput(t *testing.T) {
 	expectedYAMLTplData := `apiVersion: operator.knative.dev/v1beta1
 kind: KnativeServing
 metadata:
-  creationTimestamp: null
   name: knative-serving
   namespace: knative-serving
 spec:

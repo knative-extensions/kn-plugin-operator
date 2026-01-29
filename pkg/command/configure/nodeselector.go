@@ -41,7 +41,7 @@ func newNodeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the node selectors for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the nodeSelectors for Knative Serving and Eventing deployments
-  kn operation nodeSelectors --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing`,
+  kn operator configure nodeSelectors --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateNodeSelectorFlags(nodeSelectorCMDFlags); err != nil {
 				return err

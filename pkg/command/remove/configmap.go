@@ -36,7 +36,7 @@ func removeConfigMapsCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Delete the configmap configurations for Knative Serving and Eventing deployments",
 		Example: `
   # Delete the CM for Knative Serving and Eventing
-  kn operation remove configmaps --component eventing --cmName eventing-controller --key key --value value --namespace knative-eventing`,
+  kn operator remove configmaps --component eventing --cmName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCMsFlags(cmsCMDFlags); err != nil {
 				return err

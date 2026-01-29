@@ -36,9 +36,9 @@ func removeAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the annotations for Knative Serving and Eventing deployments or services",
 		Example: `
   # Remove the annotations for Knative Serving and Eventing services
-  kn operation remove annotations --component eventing --serviceName eventing-controller --key key --namespace knative-eventing
+  kn operator remove annotations --component eventing --serviceName eventing-controller --key key --namespace knative-eventing
   # Remove the annotations for Knative Serving and Eventing deployments
-  kn operation remove annotations --component eventing --deployName eventing-controller --key key --namespace knative-eventing`,
+  kn operator remove annotations --component eventing --deployName eventing-controller --key key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateLabelAnnotationsFlags(annotationCMDFlags); err != nil {
 				return err

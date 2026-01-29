@@ -40,9 +40,9 @@ func newAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the annotations for Knative Serving and Eventing deployments or services",
 		Example: `
   # Configure the annotations for Knative Serving and Eventing deployments
-  kn operation annotations --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing
+  kn operator configure annotations --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing
   # Configure the annotations for Knative Serving and Eventing services
-  kn operation annotations --component eventing --serviceName eventing-controller --key key --value value --namespace knative-eventing`,
+  kn operator configure annotations --component eventing --serviceName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateLabelsAnnotationsFlags(annotationCMDFlags); err != nil {
 				return err

@@ -49,7 +49,7 @@ func newImageCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the images for Knative",
 		Example: `
   # Configure the images for Knative
-  kn operation configure images --component eventing --deployName eventing-controller --imageKey key --imageURL value --namespace knative-eventing`,
+  kn operator configure images --component eventing --deployName eventing-controller --imageKey key --imageURL value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateImagesFlags(imageCMDFlags); err != nil {
 				return err

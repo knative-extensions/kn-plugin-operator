@@ -51,7 +51,7 @@ func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the resource for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the resource for Knative Serving and Eventing deployments
-  kn operation configure resources --component eventing --deployName eventing-controller --container eventing-controller --requestMemory 200Mi --requestCPU 200m --namespace knative-eventing`,
+  kn operator configure resources --component eventing --deployName eventing-controller --container eventing-controller --requestMemory 200Mi --requestCPU 200m --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateResourcesFlags(resourcesCMDFlags); err != nil {
 				return err

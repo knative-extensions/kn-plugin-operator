@@ -44,7 +44,7 @@ func removeImageCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the images for Knative",
 		Example: `
   # Delete the images for Knative
-  kn operation remove images --component eventing --deployName eventing-controller --imageKey key --namespace knative-eventing`,
+  kn operator remove images --component eventing --deployName eventing-controller --imageKey key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateImagesFlags(imageCMDFlags); err != nil {
 				return err

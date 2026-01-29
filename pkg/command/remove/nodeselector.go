@@ -36,7 +36,7 @@ func removeNodeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the node selectors for Knative Serving and Eventing deployments",
 		Example: `
   # Remove the node selectors for Knative Serving and Eventing deployments
-  kn operation remove nodeSelectors --component eventing --deployName eventing-controller --key key --namespace knative-eventing`,
+  kn operator remove nodeSelectors --component eventing --deployName eventing-controller --key key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateNodeSelectorFlags(nodeSelectorFlags); err != nil {
 				return err

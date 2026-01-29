@@ -58,7 +58,7 @@ func newTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the tolerations for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the tolerations for Knative Serving and Eventing deployments
-  kn operation configure tolerations --component eventing --deployName eventing-controller --key example-key --operator Exists --effect NoSchedule --namespace knative-eventing`,
+  kn operator configure tolerations --component eventing --deployName eventing-controller --key example-key --operator Exists --effect NoSchedule --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateTolerationsFlags(tolerationsCMDFlags); err != nil {
 				return err

@@ -50,7 +50,7 @@ func newManifestsCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the custom manifests for Knative",
 		Example: `
   # Configure the custom manifests for Knative
-  kn operation configure manifests --component eventing --namespace knative-eventing --operatorNamespace default --file filePath`,
+  kn operator configure manifests --component eventing --namespace knative-eventing --operatorNamespace default --file filePath`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateManifestsFlags(manifestsCMDFlags); err != nil {
 				return err

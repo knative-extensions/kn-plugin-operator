@@ -42,7 +42,7 @@ func removeHACommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the replica configuration for Knative Serving and Eventing deployments",
 		Example: `
   # Remove the replica configuration for Knative Serving and Eventing deployments
-  kn operation remove replicas --component eventing --deployName eventing-controller --namespace knative-eventing`,
+  kn operator remove replicas --component eventing --deployName eventing-controller --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateHAsFlags(haCMDFlags); err != nil {
 				return err

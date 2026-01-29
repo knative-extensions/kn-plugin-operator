@@ -36,9 +36,9 @@ func removeLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the labels for Knative Serving and Eventing deployments or services",
 		Example: `
   # Remove the labels for Knative Serving and Eventing services
-  kn operation remove labels --component eventing --serviceName eventing-controller --key key --namespace knative-eventing
+  kn operator remove labels --component eventing --serviceName eventing-controller --key key --namespace knative-eventing
   # Remove the labels for Knative Serving and Eventing deployments
-  kn operation remove labels --component eventing --deployName eventing-controller --key key --namespace knative-eventing`,
+  kn operator remove labels --component eventing --deployName eventing-controller --key key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateLabelAnnotationsFlags(deploymentLabelCMDFlags); err != nil {
 				return err

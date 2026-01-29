@@ -27,11 +27,11 @@ func NewRemoveCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the ingress for Knative Serving",
 		Example: `
   # Remove the configuration of the resources for Knative Serving
-  kn operation remove resources --component serving --namespace knative-serving
+  kn operator remove resources --component serving --namespace knative-serving
   # Remove the configuration of the resources for the container activator in the deployment activator
-  kn operation remove resources --component serving --deployName activator --namespace knative-serving
+  kn operator remove resources --component serving --deployName activator --namespace knative-serving
   # Remove the configuration of the resources for the deployment activator
-  kn operation remove resources --component serving --deployName activator --namespace knative-serving`,
+  kn operator remove resources --component serving --deployName activator --namespace knative-serving`,
 	}
 
 	removeCmd.AddCommand(removeResourcesCommand(p))

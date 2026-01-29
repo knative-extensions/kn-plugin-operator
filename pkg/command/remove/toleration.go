@@ -46,7 +46,7 @@ func removeTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the tolerations for Knative Serving and Eventing deployments",
 		Example: `
   # Remove the tolerations for Knative Serving and Eventing deployments
-  kn operation remove tolerations --component eventing --deployName eventing-controller --key example-key --namespace knative-eventing`,
+  kn operator remove tolerations --component eventing --deployName eventing-controller --key example-key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateTolerationsFlags(tolerationsCMDFlags); err != nil {
 				return err

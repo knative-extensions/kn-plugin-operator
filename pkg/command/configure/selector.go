@@ -41,7 +41,7 @@ func newSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the selectors for Knative Serving and Eventing services",
 		Example: `
   # Configure the selectors for Knative Serving and Eventing services
-  kn operation selectors --component eventing --serviceName eventing-controller --key key --value value --namespace knative-eventing`,
+  kn operator configure selectors --component eventing --serviceName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateSelectorFlags(nodeSelectorCMDFlags); err != nil {
 				return err

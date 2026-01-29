@@ -46,7 +46,7 @@ func removeEnvVarCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Delete the env vars for Knative",
 		Example: `
   # Delete the env vars for Knative
-  kn operation remove envvars --component eventing --deployName eventing-controller --container eventing-controller --name key --namespace knative-eventing`,
+  kn operator remove envvars --component eventing --deployName eventing-controller --container eventing-controller --name key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateEnvVarsFlags(envVarFlags); err != nil {
 				return err

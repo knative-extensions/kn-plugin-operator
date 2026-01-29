@@ -41,7 +41,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the labels for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the labels for Knative Serving and Eventing deployments
-  kn operation configure labels --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing`,
+  kn operator configure labels --component eventing --deployName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateLabelsAnnotationsFlags(deploymentLabelCMDFlags); err != nil {
 				return err

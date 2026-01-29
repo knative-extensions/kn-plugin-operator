@@ -40,7 +40,7 @@ func newConfigmapsCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the configmap for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the CM for Knative Serving and Eventing
-  kn operation configure configmaps --component eventing --cmName eventing-controller --key key --value value --namespace knative-eventing`,
+  kn operator configure configmaps --component eventing --cmName eventing-controller --key key --value value --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCMsFlags(cmsCMDFlags); err != nil {
 				return err

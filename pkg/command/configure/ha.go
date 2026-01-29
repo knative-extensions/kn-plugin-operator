@@ -48,7 +48,7 @@ func newHACommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Configure the number of replicas for Knative Serving and Eventing deployments",
 		Example: `
   # Configure the number of replicas for Knative Serving and Eventing deployments
-  kn operation configure replicas --component eventing --deployName eventing-controller --replicas 3 --namespace knative-eventing`,
+  kn operator configure replicas --component eventing --deployName eventing-controller --replicas 3 --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateHAsFlags(haCMDFlags); err != nil {
 				return err

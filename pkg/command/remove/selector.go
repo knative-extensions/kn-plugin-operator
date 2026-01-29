@@ -36,7 +36,7 @@ func removeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 		Short: "Remove the selectors for Knative Serving and Eventing service",
 		Example: `
   # Remove the selectors for Knative Serving and Eventing services
-  kn operation remove selectors --component eventing --serviceName eventing-controller --key key --namespace knative-eventing`,
+  kn operator remove selectors --component eventing --serviceName eventing-controller --key key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateSelectorFlags(selectorFlags); err != nil {
 				return err

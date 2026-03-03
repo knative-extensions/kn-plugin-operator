@@ -9,12 +9,12 @@ require (
 	github.com/manifestival/client-go-client v0.6.0
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/mod v0.33.0
-	k8s.io/api v0.35.1
-	k8s.io/apimachinery v0.35.1
-	k8s.io/client-go v0.35.1
+	k8s.io/api v0.35.2
+	k8s.io/apimachinery v0.35.2
+	k8s.io/client-go v0.35.2
 	knative.dev/hack v0.0.0-20260212092700-0126b283bf20
-	knative.dev/operator v0.48.1-0.20260218022156-3deb4ec1e4b6
-	knative.dev/pkg v0.0.0-20260221010456-9fb97f59fc24
+	knative.dev/operator v0.48.1-0.20260226133721-f9b286dc22b9
+	knative.dev/pkg v0.0.0-20260302190359-1f39e94ef003
 )
 
 require (
@@ -59,7 +59,7 @@ require (
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/net v0.50.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/term v0.40.0 // indirect

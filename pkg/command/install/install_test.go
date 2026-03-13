@@ -102,6 +102,19 @@ func TestFillDefaultsForInstallCmdFlags(t *testing.T) {
 			Istio:          true,
 		},
 	}, {
+		name: "Empty istio namespace, namespace and version for serving with GatewayAPI",
+		inputFlags: installCmdFlags{
+			Component:  "serving",
+			GatewayAPI: true,
+		},
+		expectedFlags: installCmdFlags{
+			Component:      "serving",
+			IstioNamespace: common.DefaultIstioNamespace,
+			Namespace:      common.DefaultKnativeServingNamespace,
+			Version:        common.Latest,
+			GatewayAPI:     true,
+		},
+	}, {
 		name: "Empty namespace and version for eventing",
 		inputFlags: installCmdFlags{
 			Component: "eventing",
@@ -151,6 +164,20 @@ func TestGetOverlayYamlContent(t *testing.T) {
 			IstioNamespace: "test",
 		},
 		expectedFile: "testdata/overlay/ks_istio_ns.yaml",
+	}, {
+		name: "Knative Serving with GatewayAPI",
+		installFlags: installCmdFlags{
+			Component:  "serving",
+			GatewayAPI: true,
+		},
+		expectedFile: "testdata/overlay/ks_ingress.yaml",
+	}, {
+		name: "Knative Serving with Contour",
+		installFlags: installCmdFlags{
+			Component: "serving",
+			Contour:   true,
+		},
+		expectedFile: "testdata/overlay/ks_ingress.yaml",
 	}, {
 		name: "Knative Eventing",
 		installFlags: installCmdFlags{
@@ -248,7 +275,42 @@ version: '1.0'
 kourier: true
 istio: false
 contour: false
+gatewayAPI: false
 ingressClass: kourier.ingress.networking.knative.dev`,
+	}, {
+		name: "Knative Serving with gateway-api and version",
+		installFlags: installCmdFlags{
+			Version:    "1.0",
+			Component:  "serving",
+			GatewayAPI: true,
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: knative-serving
+version: '1.0'
+kourier: false
+istio: false
+contour: false
+gatewayAPI: true
+ingressClass: gateway-api.ingress.networking.knative.dev`,
+	}, {
+		name: "Knative Serving with contour and version",
+		installFlags: installCmdFlags{
+			Version:   "1.0",
+			Component: "serving",
+			Contour:   true,
+		},
+		expectedResult: `#@data/values
+---
+name: knative-serving
+namespace: knative-serving
+version: '1.0'
+kourier: false
+istio: false
+contour: true
+gatewayAPI: false
+ingressClass: contour.ingress.networking.knative.dev`,
 	}, {
 		name: "Knative Serving with istio and version",
 		installFlags: installCmdFlags{
@@ -323,6 +385,74 @@ namespace: test`,
 			tt.installFlags.fill_defaults()
 			result := getYamlValuesContent(&tt.installFlags)
 			testingUtil.AssertEqual(t, result, tt.expectedResult)
+		})
+	}
+}
+
+func TestValidateIngressFlags(t *testing.T) {
+	for _, tt := range []struct {
+		name          string
+		installFlags  installCmdFlags
+		expectedError error
+	}{{
+		name: "Serving with only Istio enabled",
+		installFlags: installCmdFlags{
+			Component: "serving",
+			Istio:     true,
+		},
+		expectedError: nil,
+	}, {
+		name: "Serving with only GatewayAPI enabled",
+		installFlags: installCmdFlags{
+			Component:  "serving",
+			GatewayAPI: true,
+		},
+		expectedError: nil,
+	}, {
+		name: "Serving with GatewayAPI and Istio enabled",
+		installFlags: installCmdFlags{
+			Component:  "serving",
+			GatewayAPI: true,
+			Istio:      true,
+		},
+		expectedError: fmt.Errorf("You can specify only one ingress for Knative Serving."),
+	}, {
+		name: "Serving with GatewayAPI and Kourier enabled",
+		installFlags: installCmdFlags{
+			Component:  "serving",
+			GatewayAPI: true,
+			Kourier:    true,
+		},
+		expectedError: fmt.Errorf("You can specify only one ingress for Knative Serving."),
+	}, {
+		name: "Serving with GatewayAPI and Contour enabled",
+		installFlags: installCmdFlags{
+			Component:  "serving",
+			GatewayAPI: true,
+			Contour:    true,
+		},
+		expectedError: fmt.Errorf("You can specify only one ingress for Knative Serving."),
+	}, {
+		name: "Eventing with GatewayAPI enabled",
+		installFlags: installCmdFlags{
+			Component:  "eventing",
+			GatewayAPI: true,
+		},
+		expectedError: fmt.Errorf("You can only specify the ingress for Knative Serving."),
+	}, {
+		name: "No component with no ingress",
+		installFlags: installCmdFlags{
+			Component: "serving",
+		},
+		expectedError: nil,
+	}} {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateIngressFlags(&tt.installFlags)
+			if tt.expectedError == nil {
+				testingUtil.AssertEqual(t, err, nil)
+			} else {
+				testingUtil.AssertEqual(t, err.Error(), tt.expectedError.Error())
+			}
 		})
 	}
 }

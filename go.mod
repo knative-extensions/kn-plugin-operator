@@ -9,12 +9,12 @@ require (
 	github.com/manifestival/client-go-client v0.6.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/mod v0.35.0
-	k8s.io/api v0.35.3
-	k8s.io/apimachinery v0.35.3
-	k8s.io/client-go v0.35.3
+	k8s.io/api v0.35.4
+	k8s.io/apimachinery v0.35.4
+	k8s.io/client-go v0.35.4
 	knative.dev/hack v0.0.0-20260416140237-504af4d2178f
 	knative.dev/operator v0.48.1-0.20260416043135-9c66d7baea9e
-	knative.dev/pkg v0.0.0-20260416015135-a395c1078b3d
+	knative.dev/pkg v0.0.0-20260420135127-3cd6d6017a35
 )
 
 require (

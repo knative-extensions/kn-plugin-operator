@@ -1334,8 +1334,8 @@ knative.dev/caching v0.0.0-20260422140616-453ad996bbe2 h1:HXtegm/lH8phaAGKTnluec
 knative.dev/caching v0.0.0-20260422140616-453ad996bbe2/go.mod h1:SeXUtQmuH+GKPo0WdP7mdktlzqHt69kwvMfyi5Ag+0M=
 knative.dev/hack v0.0.0-20260421155212-aeb7b4a9bf96 h1:YrpWTCDRzoGz0Fe7AcLTsBY+D5vx0ijhuxEVl0z3Xyw=
 knative.dev/hack v0.0.0-20260421155212-aeb7b4a9bf96/go.mod h1:L5RzHgbvam0u8QFHfzCX6MKxu/a/gIGEdaRBqNiVbl0=
-knative.dev/operator v0.48.1-0.20260428171709-a4b68557b182 h1:BwWwO964KOtb49kkj2uQQJL12kLCYjXpcS9DrEOuB1w=
-knative.dev/operator v0.48.1-0.20260428171709-a4b68557b182/go.mod h1:kBNRzhJI8WTJFuiza7YH3NVc2ioLDzQb0FeTexApxh8=
+knative.dev/operator v0.48.1-0.20260428215611-1565cedb2cae h1:jt8qEUXL6+5h5n87g/s7yNjT0kgtQLuPAE6QyI/eCMg=
+knative.dev/operator v0.48.1-0.20260428215611-1565cedb2cae/go.mod h1:uk68t9hdsBDwn7WJbz/KsDQgTUGYT3JCzdhMziqujRM=
 knative.dev/pkg v0.0.0-20260422015212-ec452872dcc1 h1:bO5X2bugzMqoVltm2n16mHpAdpSR0HRWeAKzHUL2Cgk=
 knative.dev/pkg v0.0.0-20260422015212-ec452872dcc1/go.mod h1:EZeB2nBW4QcpZuCPB5a/UnoVIH2N+5z5fwNw1PUeqMg=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=

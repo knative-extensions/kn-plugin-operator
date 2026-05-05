@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Knative Authors
+Copyright 2026 The Knative Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,27 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package configure
 
-type CMsFlags struct {
-	Value     string
-	Key       string
-	Component string
-	Namespace string
-	CMName    string
-	CRName    string
-}
+import (
+	"strings"
 
-type KeyValueFlags struct {
-	Value        string
-	Key          string
-	Component    string
-	Namespace    string
-	CRName       string
-	DeployName   string
-	ServiceName  string
-	Selector     bool
-	NodeSelector bool
-	Annotation   bool
-	Label        bool
+	"github.com/spf13/cobra"
+	"knative.dev/kn-plugin-operator/pkg/command/common"
+)
+
+func setCRNameFromCommand(cmd *cobra.Command, component string, name *string) error {
+	targetComponent := common.ServingComponent
+	if strings.EqualFold(component, common.EventingComponent) {
+		targetComponent = common.EventingComponent
+	}
+	return common.SetComponentNameFromFlag(cmd.Flags(), targetComponent, name)
 }

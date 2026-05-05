@@ -33,6 +33,7 @@ type EnvVarFlags struct {
 	EnvValue      string
 	Component     string
 	Namespace     string
+	CRName        string
 	DeployName    string
 	ContainerName string
 }
@@ -51,6 +52,9 @@ func removeEnvVarCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateEnvVarsFlags(envVarFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, envVarFlags.Component, &envVarFlags.CRName); err != nil {
+				return err
+			}
 
 			err := removeEnvVars(envVarFlags, p)
 			if err != nil {
@@ -66,6 +70,7 @@ func removeEnvVarCommand(p *pkg.OperatorParams) *cobra.Command {
 	removeEnvVarsCmd.Flags().StringVar(&envVarFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	removeEnvVarsCmd.Flags().StringVarP(&envVarFlags.Component, "component", "c", "", "The flag to specify the component name")
 	removeEnvVarsCmd.Flags().StringVarP(&envVarFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	removeEnvVarsCmd.Flags().StringVar(&envVarFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 	removeEnvVarsCmd.Flags().StringVar(&envVarFlags.ContainerName, "container", "", "The name of the container")
 
 	return removeEnvVarsCmd
@@ -100,8 +105,12 @@ func removeEnvVars(envVarFlags EnvVarFlags, p *pkg.OperatorParams) error {
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(envVarFlags.Component, envVarFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	workloadOverrides, err := ksCR.GetDeployments(envVarFlags.Component, envVarFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeploymentsForName(envVarFlags.Component, envVarFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
@@ -109,7 +118,7 @@ func removeEnvVars(envVarFlags EnvVarFlags, p *pkg.OperatorParams) error {
 	workloadOverrides = removeEnvVarsFields(workloadOverrides, envVarFlags)
 
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(envVarFlags.Component, envVarFlags.Namespace, workloadOverrides)
+		return ksCR.UpdateDeploymentsForName(envVarFlags.Component, envVarFlags.Namespace, crName, workloadOverrides)
 	})
 
 	if err != nil {

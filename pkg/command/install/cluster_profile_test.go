@@ -113,6 +113,7 @@ func TestClusterProfileOverlayRenders(t *testing.T) {
 	flags := installCmdFlags{
 		Component:               common.ServingComponent,
 		Namespace:               "knative-serving",
+		CRName:                  "custom-serving",
 		Version:                 "1.18.0",
 		ClusterProfile:          "spoke",
 		ClusterProfileNamespace: "fleet-system",
@@ -136,7 +137,8 @@ spec:
 	}
 	if !strings.Contains(result, "clusterProfileRef:") ||
 		!strings.Contains(result, "name: spoke") ||
-		!strings.Contains(result, "namespace: fleet-system") {
+		!strings.Contains(result, "namespace: fleet-system") ||
+		!strings.Contains(result, "name: custom-serving") {
 		t.Fatalf("expected rendered cluster profile ref, got:\n%s", result)
 	}
 }

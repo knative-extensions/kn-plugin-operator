@@ -45,6 +45,9 @@ func newConfigmapsCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateCMsFlags(cmsCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, cmsCMDFlags.Component, &cmsCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureCMs(cmsCMDFlags, p)
 			if err != nil {
@@ -62,6 +65,7 @@ func newConfigmapsCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureCMsCmd.Flags().StringVar(&cmsCMDFlags.CMName, "cmName", "", "The flag to specify the configmap name")
 	configureCMsCmd.Flags().StringVarP(&cmsCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureCMsCmd.Flags().StringVarP(&cmsCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureCMsCmd.Flags().StringVar(&cmsCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureCMsCmd
 }
@@ -90,7 +94,11 @@ func configureCMs(cmsCMDFlags common.CMsFlags, p *pkg.OperatorParams) error {
 	if strings.EqualFold(cmsCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, cmsCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, cmsCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, cmsCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

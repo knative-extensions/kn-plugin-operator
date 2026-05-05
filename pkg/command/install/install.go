@@ -80,10 +80,12 @@ type installCmdFlags struct {
 	Component               string
 	IstioNamespace          string
 	Namespace               string
+	CRName                  string
 	KubeConfig              string
 	Version                 string
 	ClusterProfile          string
 	ClusterProfileNamespace string
+	CRNameExplicit          bool
 	Istio                   bool
 	Kourier                 bool
 	Contour                 bool
@@ -118,6 +120,10 @@ func (flags *installCmdFlags) fill_defaults() {
 		}
 	}
 
+	if flags.CRName == "" && flags.Component != "" {
+		flags.CRName = common.DefaultComponentName(flags.Component)
+	}
+
 	// Set the default ingress istio to true
 	if strings.EqualFold(flags.Component, common.ServingComponent) && !flags.Kourier && !flags.Contour && !flags.Istio {
 		flags.Istio = true
@@ -140,6 +146,7 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
   kn-operator install -c serving --namespace knative-serving`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
+			installFlags.CRNameExplicit = cmd.Flags().Changed(common.CRNameFlag)
 			// Fill in the default values for the empty fields
 			err := RunInstallationCommand(&installFlags, p)
 			if err != nil {
@@ -154,8 +161,9 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 			}
 
 			if hasClusterProfileFlags(&installFlags) && installFlags.Component != "" {
-				fmt.Fprintf(cmd.OutOrStdout(), "Knative %s of the '%s' version was created in the namespace '%s' for ClusterProfile '%s/%s'.\n",
-					component, installFlags.Version, installFlags.Namespace, installFlags.ClusterProfileNamespace, installFlags.ClusterProfile)
+				ref := common.ComponentRef{Component: installFlags.Component, Namespace: installFlags.Namespace, Name: installFlags.CRName}
+				fmt.Fprintf(cmd.OutOrStdout(), "Knative %s of the '%s' version was created as %s for ClusterProfile '%s/%s'.\n",
+					component, installFlags.Version, ref.String(), installFlags.ClusterProfileNamespace, installFlags.ClusterProfile)
 				return nil
 			}
 
@@ -168,6 +176,7 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	installCmd.Flags().StringVar(&installFlags.KubeConfig, "kubeconfig", "", "The kubeconfig of the Knative resources (default is KUBECONFIG from environment variable)")
 	installCmd.Flags().StringVarP(&installFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
 	installCmd.Flags().StringVarP(&installFlags.Component, "component", "c", "", "The name of the Knative Component to install")
+	installCmd.Flags().StringVar(&installFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource for remote component installation")
 	installCmd.Flags().StringVarP(&installFlags.Version, "version", "v", common.Latest, "The version of the the Knative Operator or the Knative component")
 	installCmd.Flags().StringVar(&installFlags.IstioNamespace, "istio-namespace", "", "The namespace of istio")
 	installCmd.Flags().StringVar(&installFlags.ClusterProfile, "cluster-profile", "", "The ClusterProfile name for remote component installation")
@@ -190,6 +199,10 @@ func RunInstallationCommand(installFlags *installCmdFlags, p *pkg.OperatorParams
 	}
 
 	if err := validateClusterProfileFlags(installFlags); err != nil {
+		return err
+	}
+
+	if err := validateInstallCRNameFlags(installFlags); err != nil {
 		return err
 	}
 
@@ -313,6 +326,21 @@ func validateClusterProfileFlags(flags *installCmdFlags) error {
 	return nil
 }
 
+func validateInstallCRNameFlags(flags *installCmdFlags) error {
+	if !flags.CRNameExplicit {
+		return nil
+	}
+	name, err := common.NormalizeExplicitComponentName(flags.Component, flags.CRName)
+	if err != nil {
+		return err
+	}
+	if !hasClusterProfileFlags(flags) {
+		return fmt.Errorf("--%s is valid only for remote component installs with --cluster-profile and --cluster-profile-namespace", common.CRNameFlag)
+	}
+	flags.CRName = name
+	return nil
+}
+
 func prepareComponentInstall(installFlags *installCmdFlags, deploy common.Deployment, p *pkg.OperatorParams) (string, error) {
 	remote, statusVersion, specVersion, err := detectRemoteComponentInstall(installFlags, p)
 	if err != nil {
@@ -329,7 +357,7 @@ func prepareComponentInstall(installFlags *installCmdFlags, deploy common.Deploy
 		return "", err
 	}
 	if statusVersion == "" && specVersion == "" {
-		_, statusVersion, specVersion, err = getExistingComponentCR(installFlags.Component, installFlags.Namespace, p)
+		_, statusVersion, specVersion, err = getExistingComponentCR(installFlags.Component, installFlags.Namespace, installFlags.CRName, p)
 		if err != nil {
 			return "", err
 		}
@@ -347,7 +375,7 @@ func detectRemoteComponentInstall(installFlags *installCmdFlags, p *pkg.Operator
 		return false, "", "", err
 	}
 
-	existingRef, statusVersion, specVersion, err := getExistingComponentCR(installFlags.Component, installFlags.Namespace, p)
+	existingRef, statusVersion, specVersion, err := getExistingComponentCR(installFlags.Component, installFlags.Namespace, installFlags.CRName, p)
 	if err != nil || existingRef == nil {
 		return false, "", "", err
 	}
@@ -377,14 +405,14 @@ func currentLocalComponentVersion(installFlags *installCmdFlags, deploy common.D
 	return version, nil
 }
 
-func getExistingComponentCR(component, namespace string, p *pkg.OperatorParams) (*base.ClusterProfileReference, string, string, error) {
+func getExistingComponentCR(component, namespace, name string, p *pkg.OperatorParams) (*base.ClusterProfileReference, string, string, error) {
 	operatorClient, err := p.NewOperatorClient()
 	if err != nil {
 		return nil, "", "", fmt.Errorf("cannot get source cluster kube config, please use --kubeconfig or export environment variable KUBECONFIG to set")
 	}
 
 	if strings.EqualFold(component, common.ServingComponent) {
-		ks, err := operatorClient.OperatorV1beta1().KnativeServings(namespace).Get(context.TODO(), common.KnativeServingName, metav1.GetOptions{})
+		ks, err := operatorClient.OperatorV1beta1().KnativeServings(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			return nil, "", "", nil
 		}
@@ -394,7 +422,7 @@ func getExistingComponentCR(component, namespace string, p *pkg.OperatorParams) 
 		return ks.Spec.ClusterProfileRef, ks.Status.Version, ks.Spec.Version, nil
 	}
 
-	ke, err := operatorClient.OperatorV1beta1().KnativeEventings(namespace).Get(context.TODO(), common.KnativeEventingName, metav1.GetOptions{})
+	ke, err := operatorClient.OperatorV1beta1().KnativeEventings(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil, "", "", nil
 	}
@@ -585,15 +613,23 @@ func versionWebhook(version string) bool {
 func getYamlValuesContent(installFlags *installCmdFlags) string {
 	content := ""
 	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
+		name := installFlags.CRName
+		if name == "" {
+			name = common.KnativeServingName
+		}
 		content = fmt.Sprintf("#@data/values\n---\nname: %s\nnamespace: %s\nversion: '%s'",
-			common.DefaultKnativeServingNamespace, installFlags.Namespace, installFlags.Version)
+			name, installFlags.Namespace, installFlags.Version)
 		if installFlags.IstioNamespace != common.DefaultIstioNamespace {
 			myslice := []string{content, fmt.Sprintf("local_gateway_value: knative-local-gateway.%s.svc.cluster.local", installFlags.IstioNamespace)}
 			content = strings.Join(myslice, "\n")
 		}
 	} else if strings.EqualFold(installFlags.Component, common.EventingComponent) {
+		name := installFlags.CRName
+		if name == "" {
+			name = common.KnativeEventingName
+		}
 		content = fmt.Sprintf("#@data/values\n---\nname: %s\nnamespace: %s\nversion: '%s'",
-			common.DefaultKnativeEventingNamespace, installFlags.Namespace, installFlags.Version)
+			name, installFlags.Namespace, installFlags.Version)
 	} else if installFlags.Component == "" {
 		content = fmt.Sprintf("#@data/values\n---\nnamespace: %s", installFlags.Namespace)
 	}
@@ -676,7 +712,7 @@ func installKnativeComponent(installFlags *installCmdFlags, p *pkg.OperatorParam
 	}
 
 	// Generate the CR template
-	yamlTemplateString, err := common.GenerateOperatorCRString(installFlags.Component, installFlags.Namespace, p)
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(installFlags.Component, installFlags.Namespace, installFlags.CRName, p)
 	if err != nil {
 		return err
 	}
@@ -739,12 +775,12 @@ func ensureRemoteKnativeComponentReady(installFlags *installCmdFlags, p *pkg.Ope
 
 	if strings.EqualFold(installFlags.Component, common.ServingComponent) {
 		_, err = WaitForRemoteKnativeServingState(operatorClient.OperatorV1beta1().KnativeServings(installFlags.Namespace),
-			common.KnativeServingName, installFlags.Version, IsRemoteKnativeServingReady)
+			installFlags.CRName, installFlags.Version, IsRemoteKnativeServingReady)
 		return err
 	}
 	if strings.EqualFold(installFlags.Component, common.EventingComponent) {
 		_, err = WaitForRemoteKnativeEventingState(operatorClient.OperatorV1beta1().KnativeEventings(installFlags.Namespace),
-			common.KnativeEventingName, installFlags.Version, IsRemoteKnativeEventingReady)
+			installFlags.CRName, installFlags.Version, IsRemoteKnativeEventingReady)
 		return err
 	}
 	return nil

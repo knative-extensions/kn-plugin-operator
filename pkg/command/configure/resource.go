@@ -38,6 +38,7 @@ type ResourcesFlags struct {
 	RequestMemory string
 	Component     string
 	Namespace     string
+	CRName        string
 	Container     string
 	DeployName    string
 }
@@ -54,6 +55,9 @@ func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
   kn operator configure resources --component eventing --deployName eventing-controller --container eventing-controller --requestMemory 200Mi --requestCPU 200m --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateResourcesFlags(resourcesCMDFlags); err != nil {
+				return err
+			}
+			if err := setCRNameFromCommand(cmd, resourcesCMDFlags.Component, &resourcesCMDFlags.CRName); err != nil {
 				return err
 			}
 
@@ -76,6 +80,7 @@ func newResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureResourcesCmd.Flags().StringVarP(&resourcesCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.Container, "container", "", "The flag to specify the container name")
 	configureResourcesCmd.Flags().StringVarP(&resourcesCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureResourcesCmd.Flags().StringVar(&resourcesCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureResourcesCmd
 }
@@ -123,7 +128,11 @@ func configureResources(resourcesCMDFlags ResourcesFlags, p *pkg.OperatorParams)
 	if strings.EqualFold(resourcesCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, resourcesCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, resourcesCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, resourcesCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

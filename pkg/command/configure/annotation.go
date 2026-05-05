@@ -47,6 +47,9 @@ func newAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateLabelsAnnotationsFlags(annotationCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, annotationCMDFlags.Component, &annotationCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureAnnotations(annotationCMDFlags, p)
 			if err != nil {
@@ -65,6 +68,7 @@ func newAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureLabelsCmd.Flags().StringVar(&annotationCMDFlags.ServiceName, "serviceName", "", "The flag to specify the service name")
 	configureLabelsCmd.Flags().StringVarP(&annotationCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureLabelsCmd.Flags().StringVarP(&annotationCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureLabelsCmd.Flags().StringVar(&annotationCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureLabelsCmd
 }
@@ -74,7 +78,11 @@ func configureAnnotations(annotationCMDFlags common.KeyValueFlags, p *pkg.Operat
 	if strings.EqualFold(annotationCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, annotationCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, annotationCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, annotationCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

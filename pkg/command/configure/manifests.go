@@ -37,6 +37,7 @@ type manifestsFlags struct {
 	OperatorNamespace string
 	Namespace         string
 	Component         string
+	CRName            string
 	Overwrite         bool
 	Accessible        bool
 }
@@ -55,6 +56,9 @@ func newManifestsCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateManifestsFlags(manifestsCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, manifestsCMDFlags.Component, &manifestsCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureManifests(manifestsCMDFlags, p)
 			if err != nil {
@@ -71,6 +75,7 @@ func newManifestsCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureManifestsCmd.Flags().StringVar(&manifestsCMDFlags.OperatorNamespace, "operatorNamespace", "default", "The flag to specify the configmap name")
 	configureManifestsCmd.Flags().StringVarP(&manifestsCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureManifestsCmd.Flags().StringVarP(&manifestsCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureManifestsCmd.Flags().StringVar(&manifestsCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 	configureManifestsCmd.Flags().BoolVar(&manifestsCMDFlags.Accessible, "accessible", false, "The flag to indicate wehther the link is accessible by Knative in the Kubernetes cluster")
 
 	return configureManifestsCmd
@@ -127,7 +132,11 @@ func configureManifests(manifestsCMDFlags manifestsFlags, p *pkg.OperatorParams)
 	if strings.EqualFold(manifestsCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, manifestsCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, manifestsCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, manifestsCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

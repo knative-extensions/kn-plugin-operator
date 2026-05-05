@@ -38,6 +38,7 @@ type TolerationsFlags struct {
 	Effect     string
 	Component  string
 	Namespace  string
+	CRName     string
 	DeployName string
 }
 
@@ -63,6 +64,9 @@ func newTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateTolerationsFlags(tolerationsCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, tolerationsCMDFlags.Component, &tolerationsCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureTolerations(tolerationsCMDFlags, p)
 			if err != nil {
@@ -82,6 +86,7 @@ func newTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	configureTolerationsCmd.Flags().StringVarP(&tolerationsCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureTolerationsCmd.Flags().StringVarP(&tolerationsCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureTolerationsCmd
 }
@@ -116,7 +121,11 @@ func configureTolerations(tolerationsCMDFlags TolerationsFlags, p *pkg.OperatorP
 	if strings.EqualFold(tolerationsCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, tolerationsCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, tolerationsCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, tolerationsCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

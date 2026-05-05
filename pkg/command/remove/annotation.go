@@ -43,6 +43,9 @@ func removeAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateLabelAnnotationsFlags(annotationCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, annotationCMDFlags.Component, &annotationCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := deleteAnnotations(annotationCMDFlags, p)
 			if err != nil {
@@ -60,6 +63,7 @@ func removeAnnotationCommand(p *pkg.OperatorParams) *cobra.Command {
 	removeAnnotationsCmd.Flags().StringVar(&annotationCMDFlags.ServiceName, "serviceName", "", "The flag to specify the service name")
 	removeAnnotationsCmd.Flags().StringVarP(&annotationCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	removeAnnotationsCmd.Flags().StringVarP(&annotationCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	removeAnnotationsCmd.Flags().StringVar(&annotationCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return removeAnnotationsCmd
 }
@@ -69,28 +73,32 @@ func deleteAnnotations(annotationCMDFlags common.KeyValueFlags, p *pkg.OperatorP
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(annotationCMDFlags.Component, annotationCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
 
 	if annotationCMDFlags.DeployName != "" {
-		wordloads, err := ksCR.GetDeployments(annotationCMDFlags.Component, annotationCMDFlags.Namespace)
+		wordloads, err := ksCR.GetDeploymentsForName(annotationCMDFlags.Component, annotationCMDFlags.Namespace, crName)
 		if err != nil {
 			return err
 		}
 
 		wordloads = removeAnnotationsDeployFields(wordloads, annotationCMDFlags)
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return ksCR.UpdateDeployments(annotationCMDFlags.Component, annotationCMDFlags.Namespace, wordloads)
+			return ksCR.UpdateDeploymentsForName(annotationCMDFlags.Component, annotationCMDFlags.Namespace, crName, wordloads)
 		}); err != nil {
 			return err
 		}
 	} else if annotationCMDFlags.ServiceName != "" {
-		serviceOverrides, err := ksCR.GetServices(annotationCMDFlags.Component, annotationCMDFlags.Namespace)
+		serviceOverrides, err := ksCR.GetServicesForName(annotationCMDFlags.Component, annotationCMDFlags.Namespace, crName)
 		if err != nil {
 			return err
 		}
 
 		serviceOverrides = removeAnnotationsServiceFields(serviceOverrides, annotationCMDFlags)
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return ksCR.UpdateServices(annotationCMDFlags.Component, annotationCMDFlags.Namespace, serviceOverrides)
+			return ksCR.UpdateServicesForName(annotationCMDFlags.Component, annotationCMDFlags.Namespace, crName, serviceOverrides)
 		}); err != nil {
 			return err
 		}

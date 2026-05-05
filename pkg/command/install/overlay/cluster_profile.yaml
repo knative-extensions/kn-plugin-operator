@@ -1,0 +1,13 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.or_op(overlay.subset({"kind": "KnativeServing"}), overlay.subset({"kind": "KnativeEventing"})), expects=1
+---
+#@overlay/match missing_ok=True
+spec:
+  #@overlay/match missing_ok=True
+  clusterProfileRef:
+    #@overlay/match missing_ok=True
+    name: #@ data.values.cluster_profile
+    #@overlay/match missing_ok=True
+    namespace: #@ data.values.cluster_profile_namespace

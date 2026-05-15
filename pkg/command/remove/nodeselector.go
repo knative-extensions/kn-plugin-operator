@@ -41,6 +41,9 @@ func removeNodeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateNodeSelectorFlags(nodeSelectorFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, nodeSelectorFlags.Component, &nodeSelectorFlags.CRName); err != nil {
+				return err
+			}
 
 			err := deleteNodeSelectors(nodeSelectorFlags, p)
 			if err != nil {
@@ -57,6 +60,7 @@ func removeNodeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 	removeNodeSelectorsCmd.Flags().StringVar(&nodeSelectorFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	removeNodeSelectorsCmd.Flags().StringVarP(&nodeSelectorFlags.Component, "component", "c", "", "The flag to specify the component name")
 	removeNodeSelectorsCmd.Flags().StringVarP(&nodeSelectorFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	removeNodeSelectorsCmd.Flags().StringVar(&nodeSelectorFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return removeNodeSelectorsCmd
 }
@@ -84,15 +88,19 @@ func deleteNodeSelectors(nodeSelectorFlags common.KeyValueFlags, p *pkg.Operator
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(nodeSelectorFlags.Component, nodeSelectorFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	workloadOverrides, err := ksCR.GetDeployments(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeploymentsForName(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
 
 	workloadOverrides = removeNodeSelectorsDeployFields(workloadOverrides, nodeSelectorFlags)
 	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace, workloadOverrides)
+		return ksCR.UpdateDeploymentsForName(nodeSelectorFlags.Component, nodeSelectorFlags.Namespace, crName, workloadOverrides)
 	}); err != nil {
 		return err
 	}

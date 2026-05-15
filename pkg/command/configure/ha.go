@@ -36,6 +36,7 @@ type HAFlags struct {
 	Replicas   string
 	Component  string
 	Namespace  string
+	CRName     string
 	DeployName string
 }
 
@@ -51,6 +52,9 @@ func newHACommand(p *pkg.OperatorParams) *cobra.Command {
   kn operator configure replicas --component eventing --deployName eventing-controller --replicas 3 --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateHAsFlags(haCMDFlags); err != nil {
+				return err
+			}
+			if err := setCRNameFromCommand(cmd, haCMDFlags.Component, &haCMDFlags.CRName); err != nil {
 				return err
 			}
 
@@ -69,6 +73,7 @@ func newHACommand(p *pkg.OperatorParams) *cobra.Command {
 	configureHAsCmd.Flags().StringVar(&haCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	configureHAsCmd.Flags().StringVarP(&haCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureHAsCmd.Flags().StringVarP(&haCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureHAsCmd.Flags().StringVar(&haCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureHAsCmd
 }
@@ -94,7 +99,11 @@ func configureHAs(haCMDFlags HAFlags, p *pkg.OperatorParams) error {
 	if strings.EqualFold(haCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, haCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, haCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, haCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

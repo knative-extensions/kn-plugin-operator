@@ -41,6 +41,9 @@ func removeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateSelectorFlags(selectorFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, selectorFlags.Component, &selectorFlags.CRName); err != nil {
+				return err
+			}
 
 			err := deleteSelectors(selectorFlags, p)
 			if err != nil {
@@ -57,6 +60,7 @@ func removeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 	removeNodeSelectorsCmd.Flags().StringVar(&selectorFlags.ServiceName, "serviceName", "", "The flag to specify the service name")
 	removeNodeSelectorsCmd.Flags().StringVarP(&selectorFlags.Component, "component", "c", "", "The flag to specify the component name")
 	removeNodeSelectorsCmd.Flags().StringVarP(&selectorFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	removeNodeSelectorsCmd.Flags().StringVar(&selectorFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return removeNodeSelectorsCmd
 }
@@ -84,15 +88,19 @@ func deleteSelectors(selectorFlags common.KeyValueFlags, p *pkg.OperatorParams) 
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(selectorFlags.Component, selectorFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	serviceOverrides, err := ksCR.GetServices(selectorFlags.Component, selectorFlags.Namespace)
+	serviceOverrides, err := ksCR.GetServicesForName(selectorFlags.Component, selectorFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
 
 	serviceOverrides = removeSelectorsServiceFields(serviceOverrides, selectorFlags)
 	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateServices(selectorFlags.Component, selectorFlags.Namespace, serviceOverrides)
+		return ksCR.UpdateServicesForName(selectorFlags.Component, selectorFlags.Namespace, crName, serviceOverrides)
 	}); err != nil {
 		return err
 	}

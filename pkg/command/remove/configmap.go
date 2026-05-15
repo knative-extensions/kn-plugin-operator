@@ -41,6 +41,9 @@ func removeConfigMapsCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateCMsFlags(cmsCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, cmsCMDFlags.Component, &cmsCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := removeCMs(cmsCMDFlags, p)
 			if err != nil {
@@ -57,6 +60,7 @@ func removeConfigMapsCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureCMsCmd.Flags().StringVar(&cmsCMDFlags.CMName, "cmName", "", "The flag to specify the configmap name")
 	configureCMsCmd.Flags().StringVarP(&cmsCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureCMsCmd.Flags().StringVarP(&cmsCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureCMsCmd.Flags().StringVar(&cmsCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureCMsCmd
 }
@@ -80,15 +84,19 @@ func removeCMs(cmsCMDFlags common.CMsFlags, p *pkg.OperatorParams) error {
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(cmsCMDFlags.Component, cmsCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	cmData, err := ksCR.GetConfigMaps(cmsCMDFlags.Component, cmsCMDFlags.Namespace)
+	cmData, err := ksCR.GetConfigMapsForName(cmsCMDFlags.Component, cmsCMDFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
 
 	cmData = removeCMsFields(cmData, cmsCMDFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateConfigMaps(cmsCMDFlags.Component, cmsCMDFlags.Namespace, cmData)
+		return ksCR.UpdateConfigMapsForName(cmsCMDFlags.Component, cmsCMDFlags.Namespace, crName, cmData)
 	})
 
 	if err != nil {

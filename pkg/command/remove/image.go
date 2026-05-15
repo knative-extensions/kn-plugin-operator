@@ -31,6 +31,7 @@ type ImageFlags struct {
 	ImageUrl   string
 	Component  string
 	Namespace  string
+	CRName     string
 	DeployName string
 	ImageKey   string
 }
@@ -49,6 +50,9 @@ func removeImageCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateImagesFlags(imageCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, imageCMDFlags.Component, &imageCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := removeImages(imageCMDFlags, p)
 			if err != nil {
@@ -64,6 +68,7 @@ func removeImageCommand(p *pkg.OperatorParams) *cobra.Command {
 	removeImagesCmd.Flags().StringVar(&imageCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	removeImagesCmd.Flags().StringVarP(&imageCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	removeImagesCmd.Flags().StringVarP(&imageCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	removeImagesCmd.Flags().StringVar(&imageCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return removeImagesCmd
 }
@@ -86,15 +91,19 @@ func removeImages(imageCMDFlags ImageFlags, p *pkg.OperatorParams) error {
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(imageCMDFlags.Component, imageCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	registry, err := ksCR.GetRegistry(imageCMDFlags.Component, imageCMDFlags.Namespace)
+	registry, err := ksCR.GetRegistryForName(imageCMDFlags.Component, imageCMDFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
 
 	registry = removeImagesFields(registry, imageCMDFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateRegistry(imageCMDFlags.Component, imageCMDFlags.Namespace, registry)
+		return ksCR.UpdateRegistryForName(imageCMDFlags.Component, imageCMDFlags.Namespace, crName, registry)
 	})
 
 	if err != nil {

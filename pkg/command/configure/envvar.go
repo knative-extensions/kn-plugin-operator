@@ -37,6 +37,7 @@ type EnvVarFlags struct {
 	EnvValue      string
 	Component     string
 	Namespace     string
+	CRName        string
 	DeployName    string
 	ContainerName string
 }
@@ -55,6 +56,9 @@ func newEnvVarCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateEnvVarsFlags(envVarFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, envVarFlags.Component, &envVarFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureEnvVars(envVarFlags, p)
 			if err != nil {
@@ -71,6 +75,7 @@ func newEnvVarCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureImagesCmd.Flags().StringVar(&envVarFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	configureImagesCmd.Flags().StringVarP(&envVarFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureImagesCmd.Flags().StringVarP(&envVarFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureImagesCmd.Flags().StringVar(&envVarFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 	configureImagesCmd.Flags().StringVar(&envVarFlags.ContainerName, "container", "", "The name of the container")
 
 	return configureImagesCmd
@@ -106,7 +111,11 @@ func configureEnvVars(envVarFlags EnvVarFlags, p *pkg.OperatorParams) error {
 	if strings.EqualFold(envVarFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, envVarFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, envVarFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, envVarFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

@@ -46,6 +46,9 @@ func newNodeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateNodeSelectorFlags(nodeSelectorCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, nodeSelectorCMDFlags.Component, &nodeSelectorCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureNodeSelectors(nodeSelectorCMDFlags, p)
 			if err != nil {
@@ -63,6 +66,7 @@ func newNodeSelectorCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureNodeSelectorsCmd.Flags().StringVar(&nodeSelectorCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	configureNodeSelectorsCmd.Flags().StringVarP(&nodeSelectorCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureNodeSelectorsCmd.Flags().StringVarP(&nodeSelectorCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureNodeSelectorsCmd.Flags().StringVar(&nodeSelectorCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureNodeSelectorsCmd
 }
@@ -82,7 +86,11 @@ func configureNodeSelectors(nodeSelectorCMDFlags common.KeyValueFlags, p *pkg.Op
 	if strings.EqualFold(nodeSelectorCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, nodeSelectorCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, nodeSelectorCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, nodeSelectorCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

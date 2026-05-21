@@ -8,13 +8,13 @@ require (
 	github.com/k14s/ytt v0.39.0
 	github.com/manifestival/client-go-client v0.6.0
 	github.com/spf13/cobra v1.10.2
-	golang.org/x/mod v0.35.0
-	k8s.io/api v0.35.4
-	k8s.io/apimachinery v0.35.4
-	k8s.io/client-go v0.35.4
+	golang.org/x/mod v0.36.0
+	k8s.io/api v0.35.5
+	k8s.io/apimachinery v0.35.5
+	k8s.io/client-go v0.35.5
 	knative.dev/hack v0.0.0-20260428014158-b2a37f1b6e7b
-	knative.dev/operator v0.49.1-0.20260514233031-35bdb0631c12
-	knative.dev/pkg v0.0.0-20260507212125-df317a52d112
+	knative.dev/operator v0.49.1-0.20260519022324-1faae92a1ed6
+	knative.dev/pkg v0.0.0-20260520153225-91e8142be85c
 )
 
 require (
@@ -67,11 +67,11 @@ require (
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/term v0.42.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect

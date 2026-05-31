@@ -12,9 +12,9 @@ require (
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
 	k8s.io/client-go v0.34.3
-	knative.dev/hack v0.0.0-20260120115810-bf6758cba446
-	knative.dev/operator v0.48.0
-	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a
+	knative.dev/hack v0.0.0-20260420222011-c985ed3cefe8
+	knative.dev/operator v0.48.2
+	knative.dev/pkg v0.0.0-20260531000707-c085a76e54cc
 )
 
 require (
@@ -62,7 +62,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/oauth2 v0.32.0 // indirect
+	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/term v0.39.0 // indirect
 	golang.org/x/text v0.33.0 // indirect

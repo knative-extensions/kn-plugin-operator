@@ -13,8 +13,8 @@ require (
 	k8s.io/apimachinery v0.35.5
 	k8s.io/client-go v0.35.5
 	knative.dev/hack v0.0.0-20260428014158-b2a37f1b6e7b
-	knative.dev/operator v0.49.1-0.20260527022545-097eae0649ee
-	knative.dev/pkg v0.0.0-20260528184932-0dbbb5a7d623
+	knative.dev/operator v0.49.1-0.20260601023030-8a8491326421
+	knative.dev/pkg v0.0.0-20260602142205-ac97e43f6622
 )
 
 require (
@@ -59,10 +59,10 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0 // indirect
-	go.opentelemetry.io/otel v1.43.0 // indirect
-	go.opentelemetry.io/otel/metric v1.43.0 // indirect
-	go.opentelemetry.io/otel/trace v1.43.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0 // indirect
+	go.opentelemetry.io/otel v1.44.0 // indirect
+	go.opentelemetry.io/otel/metric v1.44.0 // indirect
+	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect

@@ -30,6 +30,7 @@ type HAFlags struct {
 	Replicas   string
 	Component  string
 	Namespace  string
+	CRName     string
 	DeployName string
 }
 
@@ -47,6 +48,9 @@ func removeHACommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateHAsFlags(haCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, haCMDFlags.Component, &haCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := removeHAs(haCMDFlags, p)
 			if err != nil {
@@ -62,6 +66,7 @@ func removeHACommand(p *pkg.OperatorParams) *cobra.Command {
 	removeHAsCmd.Flags().StringVar(&haCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	removeHAsCmd.Flags().StringVarP(&haCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	removeHAsCmd.Flags().StringVarP(&haCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	removeHAsCmd.Flags().StringVar(&haCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return removeHAsCmd
 }
@@ -81,15 +86,19 @@ func removeHAs(haCMDFlags HAFlags, p *pkg.OperatorParams) error {
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(haCMDFlags.Component, haCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	commonSpec, err := ksCR.GetCommonSpec(haCMDFlags.Component, haCMDFlags.Namespace)
+	commonSpec, err := ksCR.GetCommonSpecForName(haCMDFlags.Component, haCMDFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
 
 	commonSpec = removeReplicasFields(commonSpec, haCMDFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateCommonSpec(haCMDFlags.Component, haCMDFlags.Namespace, commonSpec)
+		return ksCR.UpdateCommonSpecForName(haCMDFlags.Component, haCMDFlags.Namespace, crName, commonSpec)
 	})
 
 	if err != nil {

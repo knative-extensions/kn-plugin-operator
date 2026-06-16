@@ -43,6 +43,9 @@ func removeLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateLabelAnnotationsFlags(deploymentLabelCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, deploymentLabelCMDFlags.Component, &deploymentLabelCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := deleteLabels(deploymentLabelCMDFlags, p)
 			if err != nil {
@@ -60,6 +63,7 @@ func removeLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 	removeLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.ServiceName, "serviceName", "", "The flag to specify the service name")
 	removeLabelsCmd.Flags().StringVarP(&deploymentLabelCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	removeLabelsCmd.Flags().StringVarP(&deploymentLabelCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	removeLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return removeLabelsCmd
 }
@@ -91,28 +95,32 @@ func deleteLabels(labelCMDFlags common.KeyValueFlags, p *pkg.OperatorParams) err
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(labelCMDFlags.Component, labelCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
 
 	if labelCMDFlags.DeployName != "" {
-		workloadOverrides, err := ksCR.GetDeployments(labelCMDFlags.Component, labelCMDFlags.Namespace)
+		workloadOverrides, err := ksCR.GetDeploymentsForName(labelCMDFlags.Component, labelCMDFlags.Namespace, crName)
 		if err != nil {
 			return err
 		}
 
 		workloadOverrides = removeLabelsDeployFields(workloadOverrides, labelCMDFlags)
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return ksCR.UpdateDeployments(labelCMDFlags.Component, labelCMDFlags.Namespace, workloadOverrides)
+			return ksCR.UpdateDeploymentsForName(labelCMDFlags.Component, labelCMDFlags.Namespace, crName, workloadOverrides)
 		}); err != nil {
 			return err
 		}
 	} else if labelCMDFlags.ServiceName != "" {
-		serviceOverrides, err := ksCR.GetServices(labelCMDFlags.Component, labelCMDFlags.Namespace)
+		serviceOverrides, err := ksCR.GetServicesForName(labelCMDFlags.Component, labelCMDFlags.Namespace, crName)
 		if err != nil {
 			return err
 		}
 
 		serviceOverrides = removeLabelsServiceFields(serviceOverrides, labelCMDFlags)
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return ksCR.UpdateServices(labelCMDFlags.Component, labelCMDFlags.Namespace, serviceOverrides)
+			return ksCR.UpdateServicesForName(labelCMDFlags.Component, labelCMDFlags.Namespace, crName, serviceOverrides)
 		}); err != nil {
 			return err
 		}

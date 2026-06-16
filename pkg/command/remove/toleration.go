@@ -34,6 +34,7 @@ type TolerationsFlags struct {
 	Effect     string
 	Component  string
 	Namespace  string
+	CRName     string
 	DeployName string
 }
 
@@ -49,6 +50,9 @@ func removeTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
   kn operator remove tolerations --component eventing --deployName eventing-controller --key example-key --namespace knative-eventing`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateTolerationsFlags(tolerationsCMDFlags); err != nil {
+				return err
+			}
+			if err := setCRNameFromCommand(cmd, tolerationsCMDFlags.Component, &tolerationsCMDFlags.CRName); err != nil {
 				return err
 			}
 
@@ -67,6 +71,7 @@ func removeTolerationsCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	configureTolerationsCmd.Flags().StringVarP(&tolerationsCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureTolerationsCmd.Flags().StringVarP(&tolerationsCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureTolerationsCmd.Flags().StringVar(&tolerationsCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureTolerationsCmd
 }
@@ -90,15 +95,19 @@ func deleteTolerations(tolerationsCMDFlags TolerationsFlags, p *pkg.OperatorPara
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(tolerationsCMDFlags.Component, tolerationsCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	workloadOverrides, err := ksCR.GetDeployments(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeploymentsForName(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
 
 	workloadOverrides = removeTolerationsFields(workloadOverrides, tolerationsCMDFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace, workloadOverrides)
+		return ksCR.UpdateDeploymentsForName(tolerationsCMDFlags.Component, tolerationsCMDFlags.Namespace, crName, workloadOverrides)
 	})
 
 	if err != nil {

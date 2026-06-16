@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -31,6 +32,7 @@ type OperatorParams struct {
 	ClientConfig      clientcmd.ClientConfig
 	NewKubeClient     func() (kubernetes.Interface, error)
 	NewOperatorClient func() (*versioned.Clientset, error)
+	NewDynamicClient  func() (dynamic.Interface, error)
 }
 
 // Initialize generate the clientset for params
@@ -40,6 +42,9 @@ func (params *OperatorParams) Initialize() error {
 	}
 	if params.NewOperatorClient == nil {
 		params.NewOperatorClient = params.newOperatorClient
+	}
+	if params.NewDynamicClient == nil {
+		params.NewDynamicClient = params.newDynamicClient
 	}
 	return nil
 }
@@ -96,6 +101,16 @@ func (params *OperatorParams) newOperatorClient() (*versioned.Clientset, error) 
 	}
 
 	return versioned.NewForConfig(restConfig)
+}
+
+// newDynamicClient creates a dynamic clientset from kubernetes config
+func (params *OperatorParams) newDynamicClient() (dynamic.Interface, error) {
+	restConfig, err := params.RestConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	return dynamic.NewForConfig(restConfig)
 }
 
 // newKubeClient creates a kubenetes clientset from kubenetes config

@@ -22,6 +22,7 @@ type CMsFlags struct {
 	Component string
 	Namespace string
 	CMName    string
+	CRName    string
 }
 
 type KeyValueFlags struct {
@@ -29,6 +30,7 @@ type KeyValueFlags struct {
 	Key          string
 	Component    string
 	Namespace    string
+	CRName       string
 	DeployName   string
 	ServiceName  string
 	Selector     bool

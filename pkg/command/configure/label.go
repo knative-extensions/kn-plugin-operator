@@ -46,6 +46,9 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateLabelsAnnotationsFlags(deploymentLabelCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, deploymentLabelCMDFlags.Component, &deploymentLabelCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureLabels(deploymentLabelCMDFlags, p)
 			if err != nil {
@@ -64,6 +67,7 @@ func newDeploymentLabelCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.ServiceName, "serviceName", "", "The flag to specify the service name")
 	configureLabelsCmd.Flags().StringVarP(&deploymentLabelCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureLabelsCmd.Flags().StringVarP(&deploymentLabelCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureLabelsCmd.Flags().StringVar(&deploymentLabelCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureLabelsCmd
 }
@@ -102,7 +106,11 @@ func configureLabels(deploymentLabelCMDFlags common.KeyValueFlags, p *pkg.Operat
 	if strings.EqualFold(deploymentLabelCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, deploymentLabelCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, deploymentLabelCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, deploymentLabelCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

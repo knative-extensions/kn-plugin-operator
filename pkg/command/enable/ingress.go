@@ -33,6 +33,7 @@ type ingressFlags struct {
 	Kourier   bool
 	Contour   bool
 	Namespace string
+	CRName    string
 }
 
 var ingressCmdFlags ingressFlags
@@ -58,6 +59,9 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
 			if ingressCmdFlags.Namespace == "" {
 				ingressCmdFlags.Namespace = common.DefaultKnativeServingNamespace
 			}
+			if err := common.SetComponentNameFromFlag(cmd.Flags(), common.ServingComponent, &ingressCmdFlags.CRName); err != nil {
+				return err
+			}
 
 			err = enableIngress(ingressCmdFlags, p)
 			if err != nil {
@@ -82,6 +86,7 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
 	enableIngressCmd.Flags().BoolVar(&ingressCmdFlags.Kourier, "kourier", false, "The flag to enable the ingress kourier")
 	enableIngressCmd.Flags().BoolVar(&ingressCmdFlags.Contour, "contour", false, "The flag to enable the ingress contour")
 	enableIngressCmd.Flags().StringVarP(&ingressCmdFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	enableIngressCmd.Flags().StringVar(&ingressCmdFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving custom resource")
 
 	return enableIngressCmd
 }
@@ -112,7 +117,11 @@ func validateIngressFlags(ingressCMDFlags ingressFlags) error {
 
 func enableIngress(ingressCMDFlags ingressFlags, p *pkg.OperatorParams) error {
 	// Generate the CR template
-	yamlTemplateString, err := common.GenerateOperatorCRString(common.ServingComponent, ingressCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(common.ServingComponent, ingressCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(common.ServingComponent, ingressCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

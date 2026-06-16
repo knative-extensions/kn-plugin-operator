@@ -98,6 +98,7 @@ func TestFillDefaultsForInstallCmdFlags(t *testing.T) {
 			Component:      "serving",
 			IstioNamespace: common.DefaultIstioNamespace,
 			Namespace:      common.DefaultKnativeServingNamespace,
+			CRName:         common.KnativeServingName,
 			Version:        common.Latest,
 			Istio:          true,
 		},
@@ -109,6 +110,7 @@ func TestFillDefaultsForInstallCmdFlags(t *testing.T) {
 		expectedFlags: installCmdFlags{
 			Component: "eventing",
 			Namespace: common.DefaultKnativeEventingNamespace,
+			CRName:    common.KnativeEventingName,
 			Version:   common.Latest,
 		},
 	}} {

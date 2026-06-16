@@ -29,6 +29,7 @@ import (
 type ResourcesFlags struct {
 	Component  string
 	Namespace  string
+	CRName     string
 	Container  string
 	DeployName string
 }
@@ -51,6 +52,9 @@ func removeResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateResourcesFlags(resourcesCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, resourcesCMDFlags.Component, &resourcesCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := removeResources(resourcesCMDFlags, p)
 			if err != nil {
@@ -67,6 +71,7 @@ func removeResourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	deleteResourcesCmd.Flags().StringVarP(&resourcesCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	deleteResourcesCmd.Flags().StringVar(&resourcesCMDFlags.Container, "container", "", "The flag to specify the container name")
 	deleteResourcesCmd.Flags().StringVarP(&resourcesCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	deleteResourcesCmd.Flags().StringVar(&resourcesCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return deleteResourcesCmd
 }
@@ -90,15 +95,19 @@ func removeResources(resourcesCMDFlags ResourcesFlags, p *pkg.OperatorParams) er
 	if err != nil {
 		return err
 	}
+	crName, err := common.NormalizeComponentName(resourcesCMDFlags.Component, resourcesCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
 
-	workloadOverrides, err := ksCR.GetDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace)
+	workloadOverrides, err := ksCR.GetDeploymentsForName(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace, crName)
 	if err != nil {
 		return err
 	}
 
 	workloadOverrides = removeResourcesFields(workloadOverrides, resourcesCMDFlags)
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return ksCR.UpdateDeployments(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace, workloadOverrides)
+		return ksCR.UpdateDeploymentsForName(resourcesCMDFlags.Component, resourcesCMDFlags.Namespace, crName, workloadOverrides)
 	})
 
 	if err != nil {

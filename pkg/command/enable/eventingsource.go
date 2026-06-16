@@ -35,6 +35,7 @@ type eventingSourceFlags struct {
 	Rabbitmq  bool
 	Redis     bool
 	Namespace string
+	CRName    string
 }
 
 var eventingSourceCmdFlags eventingSourceFlags
@@ -50,6 +51,9 @@ func newEventingSourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if eventingSourceCmdFlags.Namespace == "" {
 				eventingSourceCmdFlags.Namespace = common.DefaultKnativeEventingNamespace
+			}
+			if err := common.SetComponentNameFromFlag(cmd.Flags(), common.EventingComponent, &eventingSourceCmdFlags.CRName); err != nil {
+				return err
 			}
 
 			err := enableEventingSource(eventingSourceCmdFlags, p)
@@ -70,13 +74,18 @@ func newEventingSourcesCommand(p *pkg.OperatorParams) *cobra.Command {
 	enableEventingSourceCmd.Flags().BoolVar(&eventingSourceCmdFlags.Redis, "redis", false, "The flag to enable the redis source")
 	enableEventingSourceCmd.Flags().BoolVar(&eventingSourceCmdFlags.Rabbitmq, "rabbitmq", false, "The flag to enable the rabbitmq source")
 	enableEventingSourceCmd.Flags().StringVarP(&eventingSourceCmdFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	enableEventingSourceCmd.Flags().StringVar(&eventingSourceCmdFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Eventing custom resource")
 
 	return enableEventingSourceCmd
 }
 
 func enableEventingSource(eventingSourceCmdFlags eventingSourceFlags, p *pkg.OperatorParams) error {
 	// Generate the CR template
-	yamlTemplateString, err := common.GenerateOperatorCRString(common.EventingComponent, eventingSourceCmdFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(common.EventingComponent, eventingSourceCmdFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(common.EventingComponent, eventingSourceCmdFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

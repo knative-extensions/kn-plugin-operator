@@ -36,6 +36,7 @@ type ImageFlags struct {
 	ImageUrl   string
 	Component  string
 	Namespace  string
+	CRName     string
 	DeployName string
 	ImageKey   string
 }
@@ -54,6 +55,9 @@ func newImageCommand(p *pkg.OperatorParams) *cobra.Command {
 			if err := validateImagesFlags(imageCMDFlags); err != nil {
 				return err
 			}
+			if err := setCRNameFromCommand(cmd, imageCMDFlags.Component, &imageCMDFlags.CRName); err != nil {
+				return err
+			}
 
 			err := configureImages(imageCMDFlags, p)
 			if err != nil {
@@ -70,6 +74,7 @@ func newImageCommand(p *pkg.OperatorParams) *cobra.Command {
 	configureImagesCmd.Flags().StringVar(&imageCMDFlags.DeployName, "deployName", "", "The flag to specify the deployment name")
 	configureImagesCmd.Flags().StringVarP(&imageCMDFlags.Component, "component", "c", "", "The flag to specify the component name")
 	configureImagesCmd.Flags().StringVarP(&imageCMDFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
+	configureImagesCmd.Flags().StringVar(&imageCMDFlags.CRName, common.CRNameFlag, "", "The name of the hub Knative Serving or Eventing custom resource")
 
 	return configureImagesCmd
 }
@@ -96,7 +101,11 @@ func configureImages(imageCMDFlags ImageFlags, p *pkg.OperatorParams) error {
 	if strings.EqualFold(imageCMDFlags.Component, common.EventingComponent) {
 		component = common.EventingComponent
 	}
-	yamlTemplateString, err := common.GenerateOperatorCRString(component, imageCMDFlags.Namespace, p)
+	crName, err := common.NormalizeComponentName(component, imageCMDFlags.CRName)
+	if err != nil {
+		return err
+	}
+	yamlTemplateString, err := common.GenerateOperatorCRStringForName(component, imageCMDFlags.Namespace, crName, p)
 	if err != nil {
 		return err
 	}

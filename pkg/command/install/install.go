@@ -68,6 +68,7 @@ type installCmdFlags struct {
 	Istio          bool
 	Kourier        bool
 	Contour        bool
+	GatewayAPI     bool
 }
 
 var (
@@ -100,10 +101,11 @@ func (flags *installCmdFlags) fill_defaults() {
 	}
 
 	// Set the default ingress istio to true
-	if strings.EqualFold(flags.Component, common.ServingComponent) && !flags.Kourier && !flags.Contour && !flags.Istio {
+	if strings.EqualFold(flags.Component, common.ServingComponent) && !flags.Kourier && !flags.Contour && !flags.Istio && !flags.GatewayAPI {
 		flags.Istio = true
 		flags.Kourier = false
 		flags.Contour = false
+		flags.GatewayAPI = false
 	}
 }
 
@@ -148,6 +150,7 @@ func NewInstallCommand(p *pkg.OperatorParams) *cobra.Command {
 	installCmd.Flags().BoolVar(&installFlags.Istio, "istio", false, "The flag to enable the ingress istio")
 	installCmd.Flags().BoolVar(&installFlags.Kourier, "kourier", false, "The flag to enable the ingress kourier")
 	installCmd.Flags().BoolVar(&installFlags.Contour, "contour", false, "The flag to enable the ingress contour")
+	installCmd.Flags().BoolVar(&installFlags.GatewayAPI, "gateway-api", false, "The flag to enable the ingress gateway-api")
 
 	return installCmd
 }
@@ -248,6 +251,10 @@ func validateIngressFlags(installFlags *installCmdFlags) error {
 	}
 
 	if installFlags.Contour {
+		count++
+	}
+
+	if installFlags.GatewayAPI {
 		count++
 	}
 
@@ -357,8 +364,12 @@ func getYamlValuesContent(installFlags *installCmdFlags) string {
 		ingressClass = "contour.ingress.networking.knative.dev"
 	}
 
-	content = fmt.Sprintf("%s\nkourier: %t\nistio: %t\ncontour: %t\ningressClass: %s",
-		content, installFlags.Kourier, installFlags.Istio, installFlags.Contour, ingressClass)
+	if installFlags.GatewayAPI {
+		ingressClass = "gateway-api.ingress.networking.knative.dev"
+	}
+
+	content = fmt.Sprintf("%s\nkourier: %t\nistio: %t\ncontour: %t\ngatewayAPI: %t\ningressClass: %s",
+		content, installFlags.Kourier, installFlags.Istio, installFlags.Contour, installFlags.GatewayAPI, ingressClass)
 
 	return content
 }

@@ -8,13 +8,13 @@ require (
 	github.com/k14s/ytt v0.39.0
 	github.com/manifestival/client-go-client v0.6.0
 	github.com/spf13/cobra v1.10.2
-	golang.org/x/mod v0.37.0
+	golang.org/x/mod v0.38.0
 	k8s.io/api v0.35.7
 	k8s.io/apimachinery v0.35.7
 	k8s.io/client-go v0.35.7
 	knative.dev/hack v0.0.0-20260428014158-b2a37f1b6e7b
-	knative.dev/operator v0.49.1-0.20260724141032-6d61c211d286
-	knative.dev/pkg v0.0.0-20260727095757-76601dd085d0
+	knative.dev/operator v0.49.1-0.20260728141302-b55841fe3ef4
+	knative.dev/pkg v0.0.0-20260727151759-521cb33b33dd
 )
 
 require (

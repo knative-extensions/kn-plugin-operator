@@ -29,10 +29,11 @@ import (
 var overlayContent string
 
 type ingressFlags struct {
-	Istio     bool
-	Kourier   bool
-	Contour   bool
-	Namespace string
+	Istio      bool
+	Kourier    bool
+	Contour    bool
+	GatewayAPI bool
+	Namespace  string
 }
 
 var ingressCmdFlags ingressFlags
@@ -48,7 +49,9 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
   # Enable the ingress kourier for Knative Serving
   kn-operator enable ingress --kourier --namespace knative-serving
   # Enable the ingress contour for Knative Serving
-  kn-operator enable ingress --contour --namespace knative-serving`,
+  kn-operator enable ingress --contour --namespace knative-serving
+  # Enable the ingress gateway-api for Knative Serving
+  kn-operator enable ingress --gateway-api --namespace knative-serving`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := validateIngressFlags(ingressCmdFlags)
 			if err != nil {
@@ -73,6 +76,10 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
 				ingress = "Contour"
 			}
 
+			if ingressCmdFlags.GatewayAPI {
+				ingress = "Gateway API"
+			}
+
 			fmt.Fprintf(cmd.OutOrStdout(), "The ingress %s was enabled in the namespace '%s'.\n", ingress, ingressCmdFlags.Namespace)
 			return nil
 		},
@@ -81,6 +88,7 @@ func newIngressCommand(p *pkg.OperatorParams) *cobra.Command {
 	enableIngressCmd.Flags().BoolVar(&ingressCmdFlags.Istio, "istio", false, "The flag to enable the ingress istio")
 	enableIngressCmd.Flags().BoolVar(&ingressCmdFlags.Kourier, "kourier", false, "The flag to enable the ingress kourier")
 	enableIngressCmd.Flags().BoolVar(&ingressCmdFlags.Contour, "contour", false, "The flag to enable the ingress contour")
+	enableIngressCmd.Flags().BoolVar(&ingressCmdFlags.GatewayAPI, "gateway-api", false, "The flag to enable the ingress gateway-api")
 	enableIngressCmd.Flags().StringVarP(&ingressCmdFlags.Namespace, "namespace", "n", "", "The namespace of the Knative Operator or the Knative component")
 
 	return enableIngressCmd
@@ -98,6 +106,10 @@ func validateIngressFlags(ingressCMDFlags ingressFlags) error {
 	}
 
 	if ingressCMDFlags.Contour {
+		count++
+	}
+
+	if ingressCMDFlags.GatewayAPI {
 		count++
 	}
 
@@ -135,8 +147,12 @@ func getYamlValuesContent(ingressCMDFlags ingressFlags) string {
 		ingressClass = "contour.ingress.networking.knative.dev"
 	}
 
-	content := fmt.Sprintf("#@data/values\n---\nnamespace: %s\nkourier: %t\nistio: %t\ncontour: %t\ningressClass: %s",
-		ingressCMDFlags.Namespace, ingressCMDFlags.Kourier, ingressCMDFlags.Istio, ingressCMDFlags.Contour, ingressClass)
+	if ingressCMDFlags.GatewayAPI {
+		ingressClass = "gateway-api.ingress.networking.knative.dev"
+	}
+
+	content := fmt.Sprintf("#@data/values\n---\nnamespace: %s\nkourier: %t\nistio: %t\ncontour: %t\ngatewayAPI: %t\ningressClass: %s",
+		ingressCMDFlags.Namespace, ingressCMDFlags.Kourier, ingressCMDFlags.Istio, ingressCMDFlags.Contour, ingressCMDFlags.GatewayAPI, ingressClass)
 
 	return content
 }

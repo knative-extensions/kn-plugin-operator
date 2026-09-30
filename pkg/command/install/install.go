@@ -715,10 +715,16 @@ func WaitForKnativeServingState(clients operatorv1beta1.KnativeServingInterface,
 
 // IsKnativeServingReady will check the status conditions of the KnativeServing and return true if the KnativeServing is ready.
 func IsKnativeServingReady(s *v1beta1.KnativeServing, version string, err error) (bool, error) {
-	if version == common.Latest || version == common.Nightly {
-		return s.Status.IsReady(), err
+	if err != nil {
+		return false, err
 	}
-	return s.Status.IsReady() && version == s.Status.Version, err
+	if s == nil || s.Status.ObservedGeneration < s.Generation {
+		return false, nil
+	}
+	if version == common.Latest || version == common.Nightly {
+		return s.Status.IsReady(), nil
+	}
+	return s.Status.IsReady() && version == s.Status.Version, nil
 }
 
 // WaitForKnativeEventingState polls the status of the KnativeEventing called name

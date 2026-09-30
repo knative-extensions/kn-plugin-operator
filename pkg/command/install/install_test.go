@@ -22,6 +22,7 @@ import (
 
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 	"knative.dev/kn-plugin-operator/pkg/command/testingUtil"
+	v1beta1 "knative.dev/operator/pkg/apis/operator/v1beta1"
 )
 
 func TestGetOperatorURL(t *testing.T) {
@@ -584,5 +585,39 @@ func TestGenerateVersionStages(t *testing.T) {
 			}
 			testingUtil.AssertDeepEqual(t, result, tt.expectedResult)
 		})
+	}
+}
+
+func TestIsKnativeServingReadyWaitsForObservedGeneration(t *testing.T) {
+	serving := &v1beta1.KnativeServing{}
+	serving.Generation = 2
+	serving.Status.ObservedGeneration = 1
+	serving.Status.Version = "1.23.0"
+	serving.Status.InitializeConditions()
+	serving.Status.MarkDependenciesInstalled()
+	serving.Status.MarkDeploymentsAvailable()
+	serving.Status.MarkInstallSucceeded()
+	serving.Status.MarkVersionMigrationEligible()
+	serving.Status.MarkTargetClusterResolved()
+
+	if !serving.Status.IsReady() {
+		t.Fatal("test setup: KnativeServing status should be ready")
+	}
+
+	ready, err := IsKnativeServingReady(serving, "1.23.0", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ready {
+		t.Fatal("KnativeServing should not be ready before the operator observes the new generation")
+	}
+
+	serving.Status.ObservedGeneration = serving.Generation
+	ready, err = IsKnativeServingReady(serving, "1.23.0", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ready {
+		t.Fatal("KnativeServing should be ready after the operator observes the new generation")
 	}
 }

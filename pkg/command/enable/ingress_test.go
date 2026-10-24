@@ -33,12 +33,28 @@ func TestValidateIngressFlags(t *testing.T) {
 		ingressCMDFlags: ingressFlags{Istio: true},
 		expectedError:   nil,
 	}, {
+		name:            "Only GatewayAPI enabled",
+		ingressCMDFlags: ingressFlags{GatewayAPI: true},
+		expectedError:   nil,
+	}, {
 		name:            "No ingress enabled",
-		ingressCMDFlags: ingressFlags{Istio: false, Kourier: false, Contour: false},
+		ingressCMDFlags: ingressFlags{Istio: false, Kourier: false, Contour: false, GatewayAPI: false},
 		expectedError:   fmt.Errorf("You need to enable at least one ingress for Knative Serving."),
 	}, {
 		name:            "Istio and Kourier enabled",
 		ingressCMDFlags: ingressFlags{Istio: true, Kourier: true},
+		expectedError:   fmt.Errorf("You can specify only one ingress for Knative Serving."),
+	}, {
+		name:            "GatewayAPI and Istio enabled",
+		ingressCMDFlags: ingressFlags{GatewayAPI: true, Istio: true},
+		expectedError:   fmt.Errorf("You can specify only one ingress for Knative Serving."),
+	}, {
+		name:            "GatewayAPI and Kourier enabled",
+		ingressCMDFlags: ingressFlags{GatewayAPI: true, Kourier: true},
+		expectedError:   fmt.Errorf("You can specify only one ingress for Knative Serving."),
+	}, {
+		name:            "GatewayAPI and Contour enabled",
+		ingressCMDFlags: ingressFlags{GatewayAPI: true, Contour: true},
 		expectedError:   fmt.Errorf("You can specify only one ingress for Knative Serving."),
 	}, {
 		name:            "Istio, Contour and Kourier enabled",
@@ -77,6 +93,7 @@ namespace: test-serving
 kourier: false
 istio: true
 contour: false
+gatewayAPI: false
 ingressClass: istio.ingress.networking.knative.dev`,
 	}, {
 		name: "Knative Serving with Kourier enabled",
@@ -90,6 +107,7 @@ namespace: test-serving
 kourier: true
 istio: false
 contour: false
+gatewayAPI: false
 ingressClass: kourier.ingress.networking.knative.dev`,
 	}, {
 		name: "Knative Serving with Contour enabled",
@@ -103,7 +121,22 @@ namespace: test-serving
 kourier: false
 istio: false
 contour: true
+gatewayAPI: false
 ingressClass: contour.ingress.networking.knative.dev`,
+	}, {
+		name: "Knative Serving with GatewayAPI enabled",
+		ingressCMDFlags: ingressFlags{
+			Namespace:  "test-serving",
+			GatewayAPI: true,
+		},
+		expectedResult: `#@data/values
+---
+namespace: test-serving
+kourier: false
+istio: false
+contour: false
+gatewayAPI: true
+ingressClass: gateway-api.ingress.networking.knative.dev`,
 	}} {
 		t.Run(tt.name, func(t *testing.T) {
 			result := getYamlValuesContent(tt.ingressCMDFlags)

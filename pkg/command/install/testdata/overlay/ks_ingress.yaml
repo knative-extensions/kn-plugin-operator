@@ -28,6 +28,10 @@ spec:
     contour:
       #@overlay/match missing_ok=True
       enabled: #@ data.values.contour
+    #@overlay/match missing_ok=True
+    gateway-api:
+      #@overlay/match missing_ok=True
+      enabled: #@ data.values.gatewayAPI
   #@overlay/match missing_ok=True
   config:
     #@overlay/match missing_ok=True

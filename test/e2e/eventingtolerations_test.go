@@ -24,22 +24,12 @@ import (
 
 	"knative.dev/kn-plugin-operator/pkg/command/configure"
 	"knative.dev/kn-plugin-operator/test/resources"
-	"knative.dev/operator/test"
 	"knative.dev/operator/test/client"
 )
 
 // TestEventingTolerationConfiguration verifies whether the operator plugin can configure the tolerations for Knative Eventing
 func TestEventingTolerationConfiguration(t *testing.T) {
 	clients := client.Setup(t)
-
-	names := test.ResourceNames{
-		KnativeServing:  "knative-serving",
-		KnativeEventing: "knative-eventing",
-		Namespace:       resources.EventingOperatorNamespace,
-	}
-
-	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
-	defer test.TearDown(clients, names)
 
 	for _, tt := range []struct {
 		name                     string

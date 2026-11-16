@@ -24,22 +24,12 @@ import (
 
 	"knative.dev/kn-plugin-operator/pkg/command/common"
 	"knative.dev/kn-plugin-operator/test/resources"
-	"knative.dev/operator/test"
 	"knative.dev/operator/test/client"
 )
 
 // TestEventingConfigMapConfiguration verifies whether the operator plugin can configure the ConfigMaps for Knative Eventing
 func TestEventingConfigMapConfiguration(t *testing.T) {
 	clients := client.Setup(t)
-
-	names := test.ResourceNames{
-		KnativeServing:  "knative-serving",
-		KnativeEventing: "knative-eventing",
-		Namespace:       resources.EventingOperatorNamespace,
-	}
-
-	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
-	defer test.TearDown(clients, names)
 
 	for _, tt := range []struct {
 		name               string

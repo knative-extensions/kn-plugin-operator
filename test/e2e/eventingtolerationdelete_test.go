@@ -25,22 +25,12 @@ import (
 	"knative.dev/kn-plugin-operator/pkg/command/remove"
 
 	"knative.dev/kn-plugin-operator/test/resources"
-	"knative.dev/operator/test"
 	"knative.dev/operator/test/client"
 )
 
 // TestEventingTolerationDeletion verifies whether the operator plugin can delete the toleration configurations for Knative Eventing
 func TestEventingTolerationDeletion(t *testing.T) {
 	clients := client.Setup(t)
-
-	names := test.ResourceNames{
-		KnativeServing:  "knative-serving",
-		KnativeEventing: "knative-eventing",
-		Namespace:       resources.EventingOperatorNamespace,
-	}
-
-	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
-	defer test.TearDown(clients, names)
 
 	expectedTolerationsFlags := remove.TolerationsFlags{
 		Component:  "eventing",

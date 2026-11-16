@@ -24,22 +24,12 @@ import (
 
 	"knative.dev/kn-plugin-operator/pkg/command/configure"
 	"knative.dev/kn-plugin-operator/test/resources"
-	"knative.dev/operator/test"
 	"knative.dev/operator/test/client"
 )
 
 // TestServingResourceConfiguration verifies whether the operator plugin can configure the resources for Knative Serving
 func TestServingResourceConfiguration(t *testing.T) {
 	clients := client.Setup(t)
-
-	names := test.ResourceNames{
-		KnativeServing:  "knative-serving",
-		KnativeEventing: "knative-eventing",
-		Namespace:       resources.ServingOperatorNamespace,
-	}
-
-	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
-	defer test.TearDown(clients, names)
 
 	expectedResourcesFlags := configure.ResourcesFlags{
 		LimitCPU:      "2048m",

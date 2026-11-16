@@ -23,10 +23,10 @@ readonly PREVIOUS_SERVING_RELEASE_VERSION="1.23"
 readonly PREVIOUS_EVENTING_RELEASE_VERSION="1.23"
 # The target serving/eventing release to upgrade, installed by the operator. It can be a release available under
 # kodata or an incoming new release. This value should be in the semantic format of major.minor.
-readonly TARGET_RELEASE_VERSION="latest"
+readonly TARGET_RELEASE_VERSION="1.24"
 # This is the branch name of knative repos, where we run the upgrade tests.
 # Default to empty for local runs (not in Prow).
-readonly KNATIVE_REPO_BRANCH="${PULL_BASE_REF}"
+readonly KNATIVE_REPO_BRANCH="release-1.24"
 # Namespaces used for tests
 # This environment variable TEST_NAMESPACE defines the namespace to install Knative Serving.
 export TEST_NAMESPACE="${TEST_NAMESPACE:-knative-operator-testing}"
@@ -45,7 +45,7 @@ export TIMEOUT_CI=30m
 : "${MC_PROVIDER_CONFIGMAP:=clusterprofile-provider-file}"
 : "${MC_PROVIDER_MOUNT_PATH:=/etc/cluster-inventory}"
 : "${MC_PROVIDER_PLUGIN_MOUNT_PATH:=/etc/cluster-inventory/plugin}"
-: "${MC_PROVIDER_PLUGIN_IMAGE:=registry.k8s.io/cluster-inventory-api/secretreader:v0.1.3}"
+: "${MC_PROVIDER_PLUGIN_IMAGE:=registry.k8s.io/cluster-inventory-api/secretreader:v0.2.0}"
 : "${MC_PROVIDER_NAME:=secretreader}"
 
 # Boolean used to indicate whether to generate serving YAML based on the latest code in the branch KNATIVE_SERVING_REPO_BRANCH.
@@ -415,10 +415,12 @@ function dump_spoke_state() {
     echo "=== kubectl get events -A ==="
     KUBECONFIG="${SPOKE_HOST_KUBECONFIG}" "${kc[@]}" get events -A --sort-by=.lastTimestamp || true
     echo
-    local spoke_ns="${TEST_NAMESPACE:-knative-operator-testing}"
-    echo "=== pod logs in namespace ${spoke_ns} ==="
-    KUBECONFIG="${SPOKE_HOST_KUBECONFIG}" "${kc[@]}" -n "${spoke_ns}" \
-      logs --all-containers=true --prefix --tail=200 -l "app" 2>/dev/null || true
+    local spoke_ns
+    for spoke_ns in knative-serving knative-eventing; do
+      echo "=== pod logs in namespace ${spoke_ns} ==="
+      KUBECONFIG="${SPOKE_HOST_KUBECONFIG}" "${kc[@]}" -n "${spoke_ns}" \
+        logs --all-containers=true --prefix --tail=200 -l "app" 2>/dev/null || true
+    done
   } > "${out}" 2>&1 || true
 }
 

@@ -24,22 +24,12 @@ import (
 
 	"knative.dev/kn-plugin-operator/pkg/command/configure"
 	"knative.dev/kn-plugin-operator/test/resources"
-	"knative.dev/operator/test"
 	"knative.dev/operator/test/client"
 )
 
 // TestEventingResourceConfiguration verifies whether the operator plugin can configure the resources for Knative Eventing
 func TestEventingResourceConfiguration(t *testing.T) {
 	clients := client.Setup(t)
-
-	names := test.ResourceNames{
-		KnativeServing:  "knative-eventing",
-		KnativeEventing: "knative-eventing",
-		Namespace:       resources.EventingOperatorNamespace,
-	}
-
-	test.CleanupOnInterrupt(func() { test.TearDown(clients, names) })
-	defer test.TearDown(clients, names)
 
 	expectedResourcesFlags := configure.ResourcesFlags{
 		LimitCPU:      "2048m",

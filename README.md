@@ -37,7 +37,7 @@ cp kn-operator ~/.config/kn/plugins
 ```
 
 > Note: The plugins directory defaults to `$base_dir/plugins` relative to your [kn config file](https://knative.dev/docs/client/configure-kn/) location.
->  
+>
 > On Windows, the default plugins directory is in `%APPDATA%\kn\plugins`
 
 Check if plugin is loaded
